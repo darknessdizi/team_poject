@@ -48,37 +48,45 @@ def add_photos(list_photos: list) -> list:
         attachment_list.append(f'photo{owner_id}_{media_id}')
     return attachment_list
 
-def create_buttons() -> VkKeyboard:
+def create_buttons(number: int) -> VkKeyboard:
 
     '''Создает цветные кнопки'''
 
     keyboard = VkKeyboard()
-    buttons = [i.capitalize() for i in dict_func]
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
                         VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
-    count = 0
-    for btn, btn_color in zip(buttons, buttons_colors):
-        if count == 2:
-            keyboard.add_line()
-        keyboard.add_button(btn, btn_color)
-        count += 1
+    if number == 1:
+        keyboard.add_button('Сбросить', buttons_colors[0])
+    elif number == 4:
+        buttons = [i.capitalize() for i in dict_func]
+        count = 0
+        for btn, btn_color in zip(buttons, buttons_colors):
+            if count == 2:
+                keyboard.add_line()
+            keyboard.add_button(btn, btn_color)
+            count += 1
     return keyboard
 
 
-def add_person_to_sql():
+def add_person_to_sql(*args, **kwargs):
     pass
 
 
-def next_person():
+def next_person(*args, **kwargs):
     pass
 
 
-def show_the_full_list():
+def show_the_full_list(*args, **kwargs):
     pass
     
 
-def add_to_blacklist():
+def add_to_blacklist(*args, **kwargs):
     pass
+
+
+def reset_filtr(*args, **kwargs):
+    count = 0
+    return count
 
 
 def add_data_to_the_dictionary(index: int, event: object, date: dict) -> dict:
@@ -115,9 +123,12 @@ def main():
         
             # Если оно имеет метку для меня(то есть бота)
             if event.to_me:
-            
+
+                request = event.text.lower().strip()
                 if start:
                     # Активирована команда старт (поиск людей)
+                    if request == 'сбросить':
+                        count = 0
                     filtr_dict, count = add_data_to_the_dictionary(count, event, filtr_dict)
                     if count < len(text):
                         write_msg(event.user_id, text[count])
@@ -127,13 +138,12 @@ def main():
                         start = False
                         count = 0
                         # Активируем цветные кнопки
-                        keyboard = create_buttons()
+                        keyboard = create_buttons(4)
                         write_msg(event.user_id, "Ок", keyboard)
                         # !!!!!!!!!!!!!! Для Маши - твой словарь здесь будет удален. Надо вызвать функцию поиска
                         filtr_dict = {}      
                 else:
                     # Логика обычного ответа
-                    request = event.text.lower().strip()
                     if request == "привет":
                         write_msg(event.user_id, "Хай")
                     elif request == "фото": # это чисто тест загрузки фоток !!!
@@ -142,7 +152,8 @@ def main():
                         attachment = add_photos(my_list)
                         send_photos(event.user_id, attachment)
                     elif request == "старт":
-                        write_msg(event.user_id, text[count])
+                        keyboard = create_buttons(1)
+                        write_msg(event.user_id, text[count], keyboard)
                         count += 1
                         start = True
                     elif request in dict_func:
