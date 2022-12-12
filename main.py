@@ -7,7 +7,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 def write_msg(user_id: str, message: str, keyboard=None) -> None:
 
-    '''Отправляет сообщения и создает кнопки'''
+    '''Отправляет сообщения и добавляет кнопки к сообщениям'''
 
     post = {
         'user_id': user_id, 
@@ -49,9 +49,11 @@ def add_photos(list_photos: list) -> list:
     return attachment_list
 
 def create_buttons():
+
+    '''Создает цветные кнопки'''
+    
     keyboard = VkKeyboard()
-    buttons = ['Добавить в избранное', 'Следующий', 'Показать весь список', 
-                'Добавить в черный список']
+    buttons = [i.capitalize() for i in dict_func]
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
                         VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
     count = 0
@@ -103,21 +105,8 @@ def main():
                 elif request == "start":
                     keyboard = create_buttons()
                     write_msg(event.user_id, "Ок", keyboard)
-                elif request == 'добавить в избранное':
-                    print("Здесь человек добавляется в базу данных")
-                    add_person_to_sql()
-                    write_msg(event.user_id, "Выполнено")
-                elif request == 'следующий':
-                    print("Здесь выдаются данные на следуюущего человека")
-                    next_person()
-                    write_msg(event.user_id, "Выполнено")
-                elif request == 'показать весь список':
-                    print("Здесь отправляется полный список избранных людей")
-                    show_the_full_list()
-                    write_msg(event.user_id, "Выполнено")
-                elif request == 'добавить в черный список':
-                    print("Человек заносится в черный список")
-                    add_to_blacklist()
+                elif request in dict_func:
+                    dict_func[request]()
                     write_msg(event.user_id, "Выполнено")
                 else:
                     write_msg(event.user_id, "Не поняла вашего ответа...")
@@ -128,6 +117,13 @@ vk = vk_api.VkApi(token=token_vk_community)
 
 # Работа с сообщениями
 longpoll = VkLongPoll(vk)
+
+dict_func = {
+    'добавить в избранное': add_person_to_sql,
+    'следующий': next_person,
+    'показать весь список': show_the_full_list,
+    'добавить в черный список': add_to_blacklist
+}
 
 
 if __name__ == '__main__':
