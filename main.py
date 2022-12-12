@@ -2,16 +2,33 @@ from token_vk import token_vk_community
 from random import randint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 
-def write_msg(user_id: str, message: str) -> None:
-    vk.method('messages.send', {
+def write_msg(user_id: str, message: str, keyboard=None) -> None:
+
+    '''Отправляет сообщения и создает кнопки'''
+
+    post = {
         'user_id': user_id, 
         'message': message, 
         'random_id': randint(0, 1000)
-        })
+    }
 
-def send_photo(user_id: str, attachment: list) -> None:
+    if keyboard != None:
+        post['keyboard'] = keyboard.get_keyboard()
+    else:
+        post = post
+        keyboard = VkKeyboard()
+        post['keyboard'] = keyboard.get_empty_keyboard()
+
+    vk.method('messages.send', post)
+
+
+def send_photos(user_id: str, attachment: list) -> None:
+
+    '''Отправляет фотографии пользователю'''
+
     for element in attachment:
         vk.method('messages.send', {
             'user_id': user_id, 
@@ -19,7 +36,11 @@ def send_photo(user_id: str, attachment: list) -> None:
             'random_id': randint(0, 1000)
             })
 
+
 def add_photos(list_photos: list) -> list:
+
+    '''Добавляет фотографии в список'''
+
     attachment_list = []
     uploader = vk_api.VkUpload(vk)
     for element in list_photos:
@@ -28,6 +49,10 @@ def add_photos(list_photos: list) -> list:
         owner_id = str(img[0]['owner_id'])
         attachment_list.append(f'photo{owner_id}_{media_id}')
     return attachment_list
+
+def create_buttons():
+    pass
+
 
 def main():
     # Основной цикл
@@ -42,17 +67,27 @@ def main():
                 # Сообщение от пользователя
                 request = event.text
                 
-                # Каменная логика ответа
+                # Логика ответа
                 if request == "привет":
                     write_msg(event.user_id, "Хай")
-                elif request == "пока":
-                    write_msg(event.user_id, "Пока((")
-                elif request == "как дела":
-                    write_msg(event.user_id, "не плохо")
                 elif request == "фото":
-                    my_list = ['test_photo\kot.jpg', 'test_photo\kot2.jpg', 'test_photo\kot3.jpg']
+                    my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", "test_photo\kot3.jpg"]
                     attachment = add_photos(my_list)
                     send_photo(event.user_id, attachment)
+                elif request == "find":
+                    keyboard = VkKeyboard()
+                    buttons = ['Добавить в избранное', 'Следующий', 'Показать весь список', 
+                                'Добавить в черный список']
+                    buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
+                                        VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
+                    count = 0
+                    for btn, btn_color in zip(buttons, buttons_colors):
+                        if count == 2:
+                            keyboard.add_line()
+                        keyboard.add_button(btn, btn_color)
+                        count += 1
+    
+                    write_msg(event.user_id, "Ок", keyboard)
                 else:
                     write_msg(event.user_id, "Не поняла вашего ответа...")
 
