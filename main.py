@@ -12,7 +12,7 @@ def write_msg(user_id: str, message: str, keyboard=None) -> None:
     post = {
         'user_id': user_id, 
         'message': message, 
-        'random_id': randint(0, 1000)
+        'random_id': randint(0, 100000)
     }
 
     if keyboard != None:
@@ -31,7 +31,7 @@ def send_photos(user_id: str, attachment: list) -> None:
         vk.method('messages.send', {
             'user_id': user_id, 
             'attachment': element,
-            'random_id': randint(0, 1000)
+            'random_id': randint(0, 100000)
             })
 
 
@@ -48,7 +48,7 @@ def add_photos(list_photos: list) -> list:
         attachment_list.append(f'photo{owner_id}_{media_id}')
     return attachment_list
 
-def create_buttons():
+def create_buttons() -> VkKeyboard:
 
     '''Создает цветные кнопки'''
 
@@ -81,11 +81,32 @@ def add_to_blacklist():
     pass
 
 
+def add_data_to_the_dictionary(index: int, event: object, date: dict) -> dict:
+
+    '''Добавляет данные полученные от пользователя в словарь'''
+
+    if index - 1 == 0:
+        if '-' in event.text:
+            text = event.text.replace(' ', '').split('-')
+        else:
+            text = event.text.strip()
+        for element in text:
+            if not element.isdigit():
+                index = index - 1
+                write_msg(event.user_id, "Не правильно указан возраст!!! Повторите ввод.")
+                return date, index
+    else:
+        text = event.text.lower().replace('.', '')
+    date.setdefault(categories_of_questions[index - 1], text)
+    return date, index
+
+
 def main():
 
     # Основной цикл
     count = 0
     start = False
+    filtr_dict = {}
 
     for event in longpoll.listen():
 
@@ -97,6 +118,7 @@ def main():
             
                 if start:
                     # Активирована команда старт (поиск людей)
+                    filtr_dict, count = add_data_to_the_dictionary(count, event, filtr_dict)
                     if count < len(text):
                         write_msg(event.user_id, text[count])
                         count += 1
@@ -104,12 +126,14 @@ def main():
                     else:
                         start = False
                         count = 0
+                        # Активируем цветные кнопки
                         keyboard = create_buttons()
-                        write_msg(event.user_id, "Ок", keyboard)      
+                        write_msg(event.user_id, "Ок", keyboard)
+                        # !!!!!!!!!!!!!! Для Маши - твой словарь здесь будет удален. Надо вызвать функцию поиска
+                        filtr_dict = {}      
                 else:
                     # Логика обычного ответа
                     request = event.text.lower().strip()
-                
                     if request == "привет":
                         write_msg(event.user_id, "Хай")
                     elif request == "фото": # это чисто тест загрузки фоток !!!
@@ -148,12 +172,7 @@ text = [
     "Укажите семейное положение искомых людей:"
 ]
 
-filtr_dict = {
-    'возраст': None,
-    'пол': None,
-    'город': None,
-    'семья': None
-}
+categories_of_questions = ['возраст', 'пол', 'город', 'семья'] 
 
 
 if __name__ == '__main__':
