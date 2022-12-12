@@ -51,7 +51,7 @@ def add_photos(list_photos: list) -> list:
 def create_buttons():
 
     '''Создает цветные кнопки'''
-    
+
     keyboard = VkKeyboard()
     buttons = [i.capitalize() for i in dict_func]
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
@@ -82,7 +82,11 @@ def add_to_blacklist():
 
 
 def main():
+
     # Основной цикл
+    count = 0
+    start = False
+
     for event in longpoll.listen():
 
         # Если пришло новое сообщение
@@ -91,25 +95,37 @@ def main():
             # Если оно имеет метку для меня(то есть бота)
             if event.to_me:
             
-                # Сообщение от пользователя
-                request = event.text.lower().strip()
-                
-                # Логика ответа
-                if request == "привет":
-                    write_msg(event.user_id, "Хай")
-                elif request == "фото":
-                    my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
-                                "test_photo\kot3.jpg"]
-                    attachment = add_photos(my_list)
-                    send_photos(event.user_id, attachment)
-                elif request == "start":
-                    keyboard = create_buttons()
-                    write_msg(event.user_id, "Ок", keyboard)
-                elif request in dict_func:
-                    dict_func[request]()
-                    write_msg(event.user_id, "Выполнено")
+                if start:
+                    # Активирована команда старт (поиск людей)
+                    if count < len(text):
+                        write_msg(event.user_id, text[count])
+                        count += 1
+                        continue
+                    else:
+                        start = False
+                        count = 0
+                        keyboard = create_buttons()
+                        write_msg(event.user_id, "Ок", keyboard)      
                 else:
-                    write_msg(event.user_id, "Не поняла вашего ответа...")
+                    # Логика обычного ответа
+                    request = event.text.lower().strip()
+                
+                    if request == "привет":
+                        write_msg(event.user_id, "Хай")
+                    elif request == "фото": # это чисто тест загрузки фоток !!!
+                        my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
+                                    "test_photo\kot3.jpg"]
+                        attachment = add_photos(my_list)
+                        send_photos(event.user_id, attachment)
+                    elif request == "старт":
+                        write_msg(event.user_id, text[count])
+                        count += 1
+                        start = True
+                    elif request in dict_func:
+                        dict_func[request]()
+                        write_msg(event.user_id, "Выполнено")
+                    else:
+                        write_msg(event.user_id, "Не поняла вашего ответа...")
 
 
 # Авторизуемся как сообщество
@@ -123,6 +139,20 @@ dict_func = {
     'следующий': next_person,
     'показать весь список': show_the_full_list,
     'добавить в черный список': add_to_blacklist
+}
+
+text = [
+    "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
+    "Укажите пол (муж или жен):",
+    "Укажте город:",
+    "Укажите семейное положение искомых людей:"
+]
+
+filtr_dict = {
+    'возраст': None,
+    'пол': None,
+    'город': None,
+    'семья': None
 }
 
 
