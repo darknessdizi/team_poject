@@ -19,8 +19,6 @@ def write_msg(user_id: str, message: str, keyboard=None) -> None:
         post['keyboard'] = keyboard.get_keyboard()
     else:
         post = post
-        keyboard = VkKeyboard()
-        post['keyboard'] = keyboard.get_empty_keyboard()
 
     vk.method('messages.send', post)
 
@@ -63,7 +61,22 @@ def create_buttons():
         keyboard.add_button(btn, btn_color)
         count += 1
     return keyboard
+
+
+def add_person_to_sql():
+    pass
+
+
+def next_person():
+    pass
+
+
+def show_the_full_list():
+    pass
     
+
+def add_to_blacklist():
+    pass
 
 
 def main():
@@ -77,7 +90,7 @@ def main():
             if event.to_me:
             
                 # Сообщение от пользователя
-                request = event.text
+                request = event.text.lower().strip()
                 
                 # Логика ответа
                 if request == "привет":
@@ -87,9 +100,25 @@ def main():
                                 "test_photo\kot3.jpg"]
                     attachment = add_photos(my_list)
                     send_photos(event.user_id, attachment)
-                elif request == "find":
+                elif request == "start":
                     keyboard = create_buttons()
                     write_msg(event.user_id, "Ок", keyboard)
+                elif request == 'добавить в избранное':
+                    print("Здесь человек добавляется в базу данных")
+                    add_person_to_sql()
+                    write_msg(event.user_id, "Выполнено")
+                elif request == 'следующий':
+                    print("Здесь выдаются данные на следуюущего человека")
+                    next_person()
+                    write_msg(event.user_id, "Выполнено")
+                elif request == 'показать весь список':
+                    print("Здесь отправляется полный список избранных людей")
+                    show_the_full_list()
+                    write_msg(event.user_id, "Выполнено")
+                elif request == 'добавить в черный список':
+                    print("Человек заносится в черный список")
+                    add_to_blacklist()
+                    write_msg(event.user_id, "Выполнено")
                 else:
                     write_msg(event.user_id, "Не поняла вашего ответа...")
 
