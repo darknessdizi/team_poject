@@ -51,7 +51,19 @@ def add_photos(list_photos: list) -> list:
     return attachment_list
 
 def create_buttons():
-    pass
+    keyboard = VkKeyboard()
+    buttons = ['Добавить в избранное', 'Следующий', 'Показать весь список', 
+                'Добавить в черный список']
+    buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
+                        VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
+    count = 0
+    for btn, btn_color in zip(buttons, buttons_colors):
+        if count == 2:
+            keyboard.add_line()
+        keyboard.add_button(btn, btn_color)
+        count += 1
+    return keyboard
+    
 
 
 def main():
@@ -71,22 +83,12 @@ def main():
                 if request == "привет":
                     write_msg(event.user_id, "Хай")
                 elif request == "фото":
-                    my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", "test_photo\kot3.jpg"]
+                    my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
+                                "test_photo\kot3.jpg"]
                     attachment = add_photos(my_list)
-                    send_photo(event.user_id, attachment)
+                    send_photos(event.user_id, attachment)
                 elif request == "find":
-                    keyboard = VkKeyboard()
-                    buttons = ['Добавить в избранное', 'Следующий', 'Показать весь список', 
-                                'Добавить в черный список']
-                    buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
-                                        VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
-                    count = 0
-                    for btn, btn_color in zip(buttons, buttons_colors):
-                        if count == 2:
-                            keyboard.add_line()
-                        keyboard.add_button(btn, btn_color)
-                        count += 1
-    
+                    keyboard = create_buttons()
                     write_msg(event.user_id, "Ок", keyboard)
                 else:
                     write_msg(event.user_id, "Не поняла вашего ответа...")
