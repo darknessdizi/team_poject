@@ -55,8 +55,10 @@ def create_buttons(number: int) -> VkKeyboard:
     keyboard = VkKeyboard()
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
                         VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
-    if number == 1:
+    if number == 2:
         keyboard.add_button('Сбросить', buttons_colors[0])
+        keyboard.add_line()
+        keyboard.add_button('Отменить', buttons_colors[-1])
     elif number == 4:
         buttons = [i.capitalize() for i in dict_func]
         count = 0
@@ -129,6 +131,11 @@ def main():
                     # Активирована команда старт (поиск людей)
                     if request == 'сбросить':
                         count = 0
+                    elif request == 'отменить':
+                        count = 0
+                        start = False
+                        write_msg(event.user_id, 'Ок')
+                        continue
                     filtr_dict, count = add_data_to_the_dictionary(count, event, filtr_dict)
                     if count < len(text):
                         write_msg(event.user_id, text[count])
@@ -152,7 +159,7 @@ def main():
                         attachment = add_photos(my_list)
                         send_photos(event.user_id, attachment)
                     elif request == "старт":
-                        keyboard = create_buttons(1)
+                        keyboard = create_buttons(2)
                         write_msg(event.user_id, text[count], keyboard)
                         count += 1
                         start = True
