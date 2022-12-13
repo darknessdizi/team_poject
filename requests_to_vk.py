@@ -28,8 +28,6 @@ class VK:
                   }
 
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
-        with open("data.json", "w", encoding='utf-8') as file:
-            json.dump(res.json(), file, ensure_ascii=False, indent=3)
         result = res.json().get('response').get('items')
         time_now = datetime.datetime.now()
         age_from = time_now - datetime.timedelta(days=365 * int(age_from))
@@ -59,8 +57,6 @@ class VK:
         }
         headers = self.get_headers()
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
-        with open("photo.json", "w") as file:
-            json.dump(res.json(), file, ensure_ascii=False, indent=3)
         photos_info_list = res.json().get('response').get('items')
         dict_likes = {'count': [], 'href': [], 'owner_id': ""}
         dict_likes_max = {'href': [], 'owner_id': ""}
