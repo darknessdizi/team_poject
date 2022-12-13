@@ -113,13 +113,68 @@ def add_data_to_the_dictionary(index: int, event: object, date: dict) -> dict:
     date.setdefault(categories_of_questions[index - 1], text)
     return date, index
 
+def event_handling_start(request, event, variables):
 
+    '''Обработка события СТАРТ. Бот задаёт вопросы и создает словарь'''
+
+    if request == 'сбросить':
+        variables['count'] = 0
+    elif request == 'отменить':
+        variables['count'] = 0
+        variables['start'] = False
+        write_msg(event.user_id, 'Ок')
+        variables['continue'] = True
+        return variables
+
+    variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(
+        variables['count'], event, variables['filtr_dict']
+    )
+    if variables['count'] < len(bot_questions):
+        keyboard = create_buttons(2)
+        write_msg(event.user_id, bot_questions[variables['count']], keyboard)
+        variables['count'] += 1
+        variables['continue'] = True
+        return variables
+    else:
+        variables['start'] = False
+        variables['count'] = 0
+        # Активируем цветные кнопки
+        keyboard = create_buttons(4)
+        write_msg(event.user_id, "Ок", keyboard)
+        # !!!!!!!!!!!!!! Для Маши - твой словарь здесь будет удален. Надо вызвать функцию поиска
+        variables['filtr_dict'] = {} 
+    return variables
+                    
+
+def processing_a_simple_message(request, event, variables):
+
+    '''Обработка событий простых сообщений и нажатия кнопок'''
+
+    if request == "привет":
+        write_msg(event.user_id, "Хай")
+    elif request == "фото": # это чисто тест загрузки фоток !!!
+        my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
+                    "test_photo\kot3.jpg"]
+        attachment = add_photos(my_list)
+        send_photos(event.user_id, attachment)
+    elif request == "старт":
+        keyboard = create_buttons(2)
+        write_msg(event.user_id, bot_questions[variables['count']], keyboard)
+        variables['count'] += 1
+        variables['start'] = True
+    elif request in dict_func:
+        dict_func[request]()
+        keyboard = create_buttons(4)
+        write_msg(event.user_id, "Выполнено", keyboard)
+    else:
+        write_msg(event.user_id, "Не поняла вашего ответа...")
+    return variables
+
+    
 def main():
 
     # Основной цикл
-    count = 0
-    start = False
-    filtr_dict = {}
+    variables = {'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}}
 
     for event in longpoll.listen():
 
@@ -130,50 +185,16 @@ def main():
             if event.to_me:
 
                 request = event.text.lower().strip()
-                if start:
+                if variables['start']:
                     # Активирована команда старт (поиск людей)
-                    if request == 'сбросить':
-                        count = 0
-                    elif request == 'отменить':
-                        count = 0
-                        start = False
-                        write_msg(event.user_id, 'Ок')
+                    variables = event_handling_start(request, event, variables)
+                    if variables['continue']:
+                        variables['continue'] = False
                         continue
-                    filtr_dict, count = add_data_to_the_dictionary(count, event, filtr_dict)
-                    if count < len(text):
-                        keyboard = create_buttons(2)
-                        write_msg(event.user_id, text[count], keyboard)
-                        count += 1
-                        continue
-                    else:
-                        start = False
-                        count = 0
-                        # Активируем цветные кнопки
-                        keyboard = create_buttons(4)
-                        write_msg(event.user_id, "Ок", keyboard)
-                        # !!!!!!!!!!!!!! Для Маши - твой словарь здесь будет удален. Надо вызвать функцию поиска
-                        filtr_dict = {}      
                 else:
                     # Логика обычного ответа
-                    if request == "привет":
-                        write_msg(event.user_id, "Хай")
-                    elif request == "фото": # это чисто тест загрузки фоток !!!
-                        my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
-                                    "test_photo\kot3.jpg"]
-                        attachment = add_photos(my_list)
-                        send_photos(event.user_id, attachment)
-                    elif request == "старт":
-                        keyboard = create_buttons(2)
-                        write_msg(event.user_id, text[count], keyboard)
-                        count += 1
-                        start = True
-                    elif request in dict_func:
-                        dict_func[request]()
-                        keyboard = create_buttons(4)
-                        write_msg(event.user_id, "Выполнено", keyboard)
-                    else:
-                        write_msg(event.user_id, "Не поняла вашего ответа...")
-
+                    variables = processing_a_simple_message(request, event, variables)
+                    
 
 # Авторизуемся как сообщество
 vk = vk_api.VkApi(token=token_vk_community)
@@ -188,7 +209,7 @@ dict_func = {
     'добавить в черный список': add_to_blacklist
 }
 
-text = [
+bot_questions = [
     "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
     "Укажите пол (муж или жен):",
     "Укажте город:",
