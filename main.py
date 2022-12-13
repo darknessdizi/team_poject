@@ -3,6 +3,8 @@ from random import randint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+import psycopg2
+import base
 
 
 def write_msg(user_id: str, message: str, keyboard=None) -> None:
@@ -220,6 +222,18 @@ categories_of_questions = ['возраст', 'пол', 'город', 'семья
 
 
 if __name__ == '__main__':
+
+    # создание соединения с базой данных
+    conn = psycopg2.connect(
+        database='team_project', user='postgres', password='1qaz2wsx'
+        )
+    
+    with conn.cursor() as cursor:
+        # создание таблиц для базы данных согласно заданию:
+        base.create_db(cursor)
+        conn.commit()
+
+    conn.close()
+
     main()
-            
             
