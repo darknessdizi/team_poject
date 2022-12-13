@@ -165,18 +165,34 @@ def processing_a_simple_message(request, event, variables):
         variables['count'] += 1
         variables['start'] = True
     elif request in dict_func:
-        dict_func[request]()
+        dict_func[request](**variables['sql'])
         keyboard = create_buttons(4)
         write_msg(event.user_id, "Выполнено", keyboard)
     else:
         write_msg(event.user_id, "Не поняла вашего ответа...")
     return variables
 
+
+def creating_an_sql_connection():
+    
+    '''Cоздание соединения с базой данных'''
+    
+    conn = psycopg2.connect(
+        database='team_project', user='postgres', password='1qaz2wsx'
+        )
+    
+    with conn.cursor() as cursor:
+        # создание таблиц для базы данных согласно заданию:
+        base.create_db(cursor)
+        conn.commit()
+
+    conn.close()
+
     
 def main():
 
     # Основной цикл
-    variables = {'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}}
+    variables = {'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}, 'sql': {}}
 
     for event in longpoll.listen():
 
@@ -222,18 +238,5 @@ categories_of_questions = ['возраст', 'пол', 'город', 'семья
 
 
 if __name__ == '__main__':
-
-    # создание соединения с базой данных
-    conn = psycopg2.connect(
-        database='team_project', user='postgres', password='1qaz2wsx'
-        )
-    
-    with conn.cursor() as cursor:
-        # создание таблиц для базы данных согласно заданию:
-        base.create_db(cursor)
-        conn.commit()
-
-    conn.close()
-
     main()
             
