@@ -19,6 +19,8 @@ def write_msg(user_id: str, message: str, keyboard=None) -> None:
         post['keyboard'] = keyboard.get_keyboard()
     else:
         post = post
+        keyboard = VkKeyboard()
+        post['keyboard'] = keyboard.get_empty_keyboard()
 
     vk.method('messages.send', post)
 
@@ -103,7 +105,8 @@ def add_data_to_the_dictionary(index: int, event: object, date: dict) -> dict:
         for element in text:
             if not element.isdigit():
                 index = index - 1
-                write_msg(event.user_id, "Не правильно указан возраст!!! Повторите ввод.")
+                keyboard = create_buttons(2)
+                write_msg(event.user_id, "Не правильно указан возраст!!! Повторите ввод.", keyboard)
                 return date, index
     else:
         text = event.text.lower().replace('.', '')
@@ -138,7 +141,8 @@ def main():
                         continue
                     filtr_dict, count = add_data_to_the_dictionary(count, event, filtr_dict)
                     if count < len(text):
-                        write_msg(event.user_id, text[count])
+                        keyboard = create_buttons(2)
+                        write_msg(event.user_id, text[count], keyboard)
                         count += 1
                         continue
                     else:
@@ -165,7 +169,8 @@ def main():
                         start = True
                     elif request in dict_func:
                         dict_func[request]()
-                        write_msg(event.user_id, "Выполнено")
+                        keyboard = create_buttons(4)
+                        write_msg(event.user_id, "Выполнено", keyboard)
                     else:
                         write_msg(event.user_id, "Не поняла вашего ответа...")
 
