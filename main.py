@@ -1,4 +1,3 @@
-from token_vk import token_vk_community
 from random import randint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
@@ -6,6 +5,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import psycopg2
 import base
 from login_sql import sql_authorization
+from token_vk import token_vk_community
 
 
 class PostgreSQL:
@@ -102,11 +102,6 @@ def add_to_blacklist(*args, **kwargs):
     pass
 
 
-def reset_filtr(*args, **kwargs):
-    count = 0
-    return count
-
-
 def add_data_to_the_dictionary(index: int, event: object, date: dict) -> dict:
 
     '''Добавляет данные полученные от пользователя в словарь'''
@@ -126,6 +121,7 @@ def add_data_to_the_dictionary(index: int, event: object, date: dict) -> dict:
         text = event.text.lower().replace('.', '')
     date.setdefault(categories_of_questions[index - 1], text)
     return date, index
+
 
 def event_handling_start(request, event, variables):
 
