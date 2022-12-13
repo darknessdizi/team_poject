@@ -5,6 +5,18 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import psycopg2
 import base
+from login_sql import sql_authorization
+
+
+class PostgreSQL:
+
+    def __init__(self, **kwargs):
+        self.connect = psycopg2.connect(
+            dbname=kwargs['dbname'],
+            user=kwargs['user'],
+            password=kwargs['password']
+        )
+        self.connect.autocommit = True
 
 
 def write_msg(user_id: str, message: str, keyboard=None) -> None:
@@ -172,27 +184,17 @@ def processing_a_simple_message(request, event, variables):
         write_msg(event.user_id, "Не поняла вашего ответа...")
     return variables
 
-
-def creating_an_sql_connection():
-    
-    '''Cоздание соединения с базой данных'''
-    
-    conn = psycopg2.connect(
-        database='team_project', user='postgres', password='1qaz2wsx'
-        )
-    
-    with conn.cursor() as cursor:
-        # создание таблиц для базы данных согласно заданию:
-        base.create_db(cursor)
-        conn.commit()
-
-    conn.close()
-
     
 def main():
 
     # Основной цикл
     variables = {'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}, 'sql': {}}
+
+    # Создание объекта для подключения к базе данных
+    sql_cursor = PostgreSQL(**sql_authorization)
+    # base.drop_table(sql_cursor.connect.cursor())
+    base.create_db(sql_cursor.connect.cursor())
+
 
     for event in longpoll.listen():
 

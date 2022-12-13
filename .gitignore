@@ -4,3 +4,4 @@ bot_VK.docx
 ~$bot_VK.docx
 token_vk.py
 __pycache__/
+login_sql.py

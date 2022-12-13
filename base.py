@@ -1,9 +1,9 @@
 
 def drop_table(cur):
     cur.execute("""
-        DROP TABLE ask_user;
-        DROP TABLE find_users;
         DROP TABLE photos;
+        DROP TABLE find_users;
+        DROP TABLE ask_user;       
     """)
 
     return 'Таблицы очищены'
@@ -11,7 +11,7 @@ def drop_table(cur):
 
 def create_db(cur):
     cur.execute('''
-        CREATE TABLE ask_user (
+        CREATE TABLE IF NOT EXISTS ask_user (
         user_id INTEGER UNIQUE PRIMARY KEY,
         user_name VARCHAR(40) NOT NULL,
         user_age VARCHAR(10) NOT NULL,
@@ -21,7 +21,7 @@ def create_db(cur):
     ''')
 
     cur.execute('''
-        CREATE TABLE find_users (
+        CREATE TABLE IF NOT EXISTS find_users (
         f_user_id INTEGER UNIQUE PRIMARY KEY,
         user_id INTEGER REFERENCES ask_user(user_id),
         f_user_name VARCHAR(40) NOT NULL,
@@ -32,7 +32,7 @@ def create_db(cur):
     ''')
 
     cur.execute('''
-        CREATE TABLE photos (
+        CREATE TABLE IF NOT EXISTS photos (
         id SERIAL PRIMARY KEY,
         f_user_ids INTEGER REFERENCES find_users(f_user_id),
         photo_str VARCHAR(40)
