@@ -4,6 +4,8 @@ import psycopg2
 import base
 from token_vk import token_vk_community, token_vk_user, sql_authorization
 import bot_vkontakte as bot
+from requests_to_vk import RequestsVk
+import os
 
 
 from datetime import date
@@ -16,7 +18,7 @@ def connection():
     # Работа с сообщениями
     longpoll = VkLongPoll(authorize)
 
-    user_session = vk_api.VkApi(token=token_vk_user) # ??????????????????????????????
+    user_session = vk_api.VkApi(token=token_vk_user)
     session = user_session.get_api()
     return longpoll, session, authorize
 
@@ -52,26 +54,23 @@ def main():
 
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
-            print('9', event.user_id)
             sender_id = event.user_id
 
             if not base.get_ask_user_data(cur, sender_id):
                 new_user_info = {}
                 print('в базе отсутствует')
-                user_info = session.account.getProfileInfo(user_id=sender_id) # необходимо менять !!!!!!!!!!!!!!!!!!
-                print(user_info)
-                new_user_info['age'] = calculate_age(user_info['bdate'])
+                response = RequestsVk(token_vk_user)
+                user_info = response.get_user(sender_id)               
+                user_info['age'] = calculate_age(user_info['age'])
                 if user_info['sex'] == 2:
-                    new_user_info['gender'] = 'Мужской'
+                    user_info['gender'] = 'Мужской'
                 elif user_info['sex'] == 1:
-                    new_user_info['gender'] = 'Женский'
+                    user_info['gender'] = 'Женский'
                 else:
-                    new_user_info['gender'] = 'Пол не указан'
-
-                new_user_info['user_name'] = f'{user_info["first_name"]} {user_info["last_name"]}'
-                if base.add_ask_user(cur, user_info['id'], new_user_info['user_name'],
-                                   new_user_info['age'], user_info['city']['title'],
-                                   new_user_info['gender']):
+                    user_info['gender'] = 'Пол не указан'
+                if base.add_ask_user(cur, sender_id, user_info['user_name'],
+                                   user_info['age'], user_info['city'],
+                                   user_info['gender']):
                     # sql_cursor.commit()
                     print('пользователь добавлен в базу')
                 else:
@@ -121,37 +120,6 @@ class PostgreSQL:
             password=kwargs['password']
         )
         self.connect.autocommit = True
-<<<<<<< HEAD
-                    
-
-# Авторизуемся как сообщество
-
-vk = vk_api.VkApi(token=token_vk_community)
-
-# Работа с сообщениями
-longpoll = VkLongPoll(vk)
-=======
->>>>>>> 4c2376bcc8fe7a3a0a9ed7e03b5a0175da3e687d
-
-
-dict_func = {
-    'добавить в избранное': add_person_to_sql,
-    'следующий': next_person,
-    'показать весь список': show_the_full_list,
-    'добавить в черный список': add_to_blacklist
-}
-
-bot_questions = [
-    "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
-    "Укажите пол (муж или жен):",
-    "Укажте город:",
-    "Укажите семейное положение искомых людей:"
-]
-
-categories_of_questions = ['возраст', 'пол', 'город', 'семья']
-
-
-
 
 
 if __name__ == '__main__':

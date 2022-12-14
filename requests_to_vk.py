@@ -1,16 +1,16 @@
 import json
 import requests
 from pprint import pprint
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import datetime
 import time
 
 
-load_dotenv(".env")
+# load_dotenv(".env")
 
 
-class VK:
+class RequestsVk:
     def __init__(self, access_token, version='5.131'):
         self.access_token = access_token
         self.version = version
