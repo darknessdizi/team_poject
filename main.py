@@ -1,22 +1,9 @@
-import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
 import base
-from token_vk import token_vk_community, token_vk_user, sql_authorization
 import bot_vkontakte as bot
+from token_vk import token_vk_user, sql_authorization
+from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
 from datetime import date
-
-
-def connection():
-    # Авторизуемся как сообщество
-    authorize = vk_api.VkApi(token=token_vk_community)
-
-    # Работа с сообщениями
-    longpoll = VkLongPoll(authorize)
-
-    user_session = vk_api.VkApi(token=token_vk_user)
-    session = user_session.get_api()
-    return longpoll, session, authorize
 
 
 def calculate_age(born):
@@ -25,7 +12,7 @@ def calculate_age(born):
     return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
 
 
-def data_conversion(db_source, cur):
+def data_conversion(db_source):
     '''Преобразует данные из базы данных для бота '''
     users = list()
     for item in db_source:
@@ -43,7 +30,7 @@ def main():
     sql_cursor = base.PostgreSQL(**sql_authorization)
     cur = sql_cursor.connect.cursor()
 
-    longpoll, session, vk = connection()
+    longpoll, vk = bot.connection()
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
@@ -52,25 +39,12 @@ def main():
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
             
-            if event.user_id in list_of_users:
-                for user in list_of_dicts:
-                    if event.user_id == user['id']:
-                        variables = user
-            else:
-                first_variables = {'id': None, 'fields': {
-                            'text': None,
-                            'count': 0, 
-                            'start': False, 
-                            'continue': False, 
-                            'filtr_dict': {}, 
-                            'sql': {}
-                            }
-                        }
-                first_variables['id'] = event.user_id
-                list_of_dicts.append(first_variables)
-                list_of_users.append(event.user_id)
-                variables = first_variables            
-
+            # проверка параметров каждого пользователя
+            result = bot.user_support(event, list_of_users, list_of_dicts)
+            variables = result[0]
+            list_of_users = result[1]
+            list_of_dicts = result[2]
+                        
             if not base.get_ask_user_data(cur, variables['id']):
                 print('в базе отсутствует')
                 response = RequestsVk(token_vk_user)
@@ -113,21 +87,16 @@ def main():
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
-                print('1 точка')
                 message_text = event.text.lower().strip()
                 if variables['fields']['start']:
-                    print('3 точка')
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
                     if variables['fields']['continue']:
-                        print('4 точка')
                         variables['fields']['continue'] = False
                         continue
                 else:
-                    print('2 точка')
                     # Логика обычного ответа
                     variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
-            print('5 точка')
 
 
 if __name__ == '__main__':

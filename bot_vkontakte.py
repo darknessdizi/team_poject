@@ -1,6 +1,48 @@
+import vk_api
 from vk_api import VkUpload
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from random import randint
+from token_vk import token_vk_community
+from vk_api.longpoll import VkLongPoll
+
+
+
+def connection():
+
+    # Авторизуемся как сообщество
+    authorize = vk_api.VkApi(token=token_vk_community)
+
+    # Работа с сообщениями
+    longpoll = VkLongPoll(authorize)
+
+    return longpoll, authorize
+
+
+def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tuple:
+
+    '''Отслеживает переменные каждого пользователя работающего с ботом'''
+
+    if event.user_id in list_of_users:
+        for user in list_of_dicts:
+            if event.user_id == user['id']:
+                variables = user
+                return variables, list_of_users, list_of_dicts
+    else:
+        first_variables = {'id': None, 'fields': {
+                        'text': None,
+                        'count': 0, 
+                        'start': False, 
+                        'continue': False, 
+                        'filtr_dict': {}, 
+                        'sql': {}
+                        }
+                    }
+        first_variables['id'] = event.user_id
+        list_of_dicts.append(first_variables)
+        list_of_users.append(event.user_id)
+        variables = first_variables 
+        
+    return variables, list_of_users, list_of_dicts
 
 
 def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None) -> None:
