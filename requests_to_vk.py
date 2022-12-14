@@ -48,14 +48,14 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, city, sex, age):
+    def get_users(self, city, sex, age, status=None):
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
         if "-" in age:
             age_from, age_to = age.split("-")
             params = {'fields': "first_name, last_name, bdate, sex",
                   'q': city,
-                  'count': 1000,
+                  'count': 2,
                   'offset': 1,
                   'age_from': age_from,
                   'age_to': age_to,
@@ -66,14 +66,15 @@ class RequestsVk:
             age = age.year
             params = {'fields': "first_name, bdate",
                       'q': city,
-                      'count': 1000,
+                      'count': 2,
                       'offset': 1,
                       'birth_year': age,
                       'sex': sex
                       }
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        # print(res)
         result = res.json().get('response').get('items')
-        with open('data.json', 'w') as file:
+        with open('data.json', 'w', encoding='utf-8') as file:
             json.dump(res.json(), file, ensure_ascii=False, indent=3)
         list_user, list_users = [], []
         for item in result:
@@ -123,14 +124,14 @@ class RequestsVk:
                     break
         return dict_likes_max
 
-    def users_info(self, city, sex, age):
+    def users_info(self, city, sex, age, status=None):
 
-        list_users = vk.get_users(city, sex, age)
+        list_users = self.get_users(city, sex, age)
         list_new = []
         for item in list_users:
             time.sleep(3)
             new_dict = {"link_photo": [], "user_name": "",  "user_link": ""}
-            dict1 = vk.get_users_photo(item[0])
+            dict1 = self.get_users_photo(item[0])
             if dict1.get("href") != []:
                 new_dict["link_photo"] = dict1.get("href")
                 new_dict["user_name"] = item[1] + item[2]
@@ -140,16 +141,17 @@ class RequestsVk:
 
 
 if __name__ == '__main__':
-    access_token = os.getenv("access_token")
-    #для теста
-    list_input = ['30-40', 1, "Сочи"]
-    age = list_input[0]
-    city = list_input[2]
-    sex = int(list_input[1])
-    vk = VK(access_token)
-    user_info = vk.get_user(user_id)
-    # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    pprint(vk.users_info(age, city, sex))
+    pass
+    # access_token = os.getenv("access_token")
+    # #для теста
+    # list_input = ['30-40', 1, "Сочи"]
+    # age = list_input[0]
+    # city = list_input[2]
+    # sex = int(list_input[1])
+    # vk = VK(access_token)
+    # # user_info = vk.get_user(user_id)
+    # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
+    # pprint(vk.users_info(age, city, sex))
 
 
 

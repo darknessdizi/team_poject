@@ -1,9 +1,11 @@
 import vk_api
-from vk_api import VkUpload
+import requests
+import os
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from random import randint
 from token_vk import token_vk_community
 from vk_api.longpoll import VkLongPoll
+
 
 
 
@@ -34,7 +36,8 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
                         'start': False, 
                         'continue': False, 
                         'filtr_dict': {}, 
-                        'sql': {}
+                        'sql': {},
+                        'start_request': False
                         }
                     }
         first_variables['id'] = event.user_id
@@ -79,15 +82,20 @@ def send_photos(object_vk_api: object, sender_id: str, attachment: list) -> None
 
 def add_photos(object_vk_api: object, list_photos: list) -> list:
 
-    '''Добавляет фотографии в список'''
+    '''Загружает и добавляет фотографии в список на обновление сообщения'''
 
     attachment_list = []
-    uploader = VkUpload(object_vk_api)
+    uploader = vk_api.VkUpload(object_vk_api)
     for element in list_photos:
-        img = uploader.photo_messages(element)
+        img = requests.get(element).content
+        name = element.partition('?')[0].split('/')[-1]
+        with open(f'test_photo\\{name}', 'wb') as f:
+            f.write(img)
+        img = uploader.photo_messages(f'test_photo\\{name}')
         media_id = str(img[0]['id'])
         owner_id = str(img[0]['owner_id'])
         attachment_list.append(f'photo{owner_id}_{media_id}')
+        os.remove(f'test_photo\\{name}')
     return attachment_list
 
 
@@ -174,6 +182,9 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['continue'] = True
+        # Флаг на запуск request запросов для фото
+        if variables['count'] == len(bot_questions):
+            variables['start_request'] = True 
         return variables
     else:
         variables['start'] = False
@@ -181,7 +192,6 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         # Активируем цветные кнопки
         keyboard = create_buttons(4)
         write_msg(object_vk_api, sender_id, "Ок", keyboard)
-        # !!!!!!!!!!!!!! Для Маши - твой словарь здесь будет удален. Надо вызвать функцию поиска
         variables['filtr_dict'] = {} 
     return variables
                     
@@ -193,13 +203,9 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     sender_id = variables['id']
     variables = variables['fields']
     if message_text == "привет":
-        # write_msg(object_vk_api, sender_id, "Хай")
         pass
     elif message_text == "фото": # это чисто тест загрузки фоток !!!
-        my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
-                    "test_photo\kot3.jpg"]
-        attachment = add_photos(object_vk_api, my_list)
-        send_photos(object_vk_api, sender_id, attachment)
+        pass
     elif message_text == "старт":
         keyboard = create_buttons(2)
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
@@ -223,12 +229,12 @@ dict_func = {
 
 bot_questions = [
     "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
-    "Укажите пол (муж или жен):",
+    "Укажите пол (муж -1 или жен - 2):",
     "Укажте город:",
-    "Укажите семейное положение искомых людей:"
+    "Семейное положение:"
 ]
 
-categories_of_questions = ['возраст', 'пол', 'город', 'статус'] 
+categories_of_questions = ['age', 'sex', 'city', 'status'] 
 
 
 if __name__ == '__main__':

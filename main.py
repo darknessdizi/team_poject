@@ -4,6 +4,7 @@ from token_vk import token_vk_user, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
 from datetime import date
+import pprint
 
 
 def calculate_age(born):
@@ -30,6 +31,9 @@ def main():
     sql_cursor = base.PostgreSQL(**sql_authorization)
     cur = sql_cursor.connect.cursor()
 
+    # Создание объекта для осуществления request запросов
+    response = RequestsVk(token_vk_user)
+
     longpoll, vk = bot.connection()
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
@@ -47,7 +51,6 @@ def main():
                         
             if not base.get_ask_user_data(cur, variables['id']):
                 print('в базе отсутствует')
-                response = RequestsVk(token_vk_user)
                 user_info = response.get_user(variables['id'])               
                 user_info['age'] = calculate_age(user_info['age'])
                 if user_info['sex'] == 2:
@@ -59,7 +62,6 @@ def main():
                 if base.add_ask_user(cur, variables['id'], user_info['user_name'],
                                    user_info['age'], user_info['city'],
                                    user_info['gender']):
-                    # sql_cursor.commit()
                     print('пользователь добавлен в базу')
                 else:
                     print('пользователь НЕ добавлен в базу')
@@ -89,6 +91,16 @@ def main():
             if event.to_me:
                 message_text = event.text.lower().strip()
                 if variables['fields']['start']:
+
+                    # Запрос на фотографии
+                    if variables['fields']['start_request']:
+                        print(variables['fields']['filtr_dict'])   # почему 3 элемента а не 4 ?????????????
+                        respone = response.users_info(**variables['fields']['filtr_dict'])
+                        # pprint.pprint(respone)          
+                        attachment = bot.add_photos(vk, respone[0]['link_photo'])
+                        bot.send_photos(vk, variables['id'], attachment)
+                        variables['fields']['start_request'] = False
+
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
                     if variables['fields']['continue']:
