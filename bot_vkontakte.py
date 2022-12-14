@@ -109,11 +109,12 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
     return date, index
 
 
-def event_handling_start(object_vk_api: object, sender_id: str, message_text: str, 
-                            event: object, variables: dict) -> dict:
+def event_handling_start(object_vk_api: object, message_text: str, variables: dict) -> dict:
 
     '''Обработка события СТАРТ. Бот задаёт вопросы и создает словарь'''
 
+    sender_id = variables['id']
+    variables = variables['fields']
     if message_text == 'сбросить':
         variables['count'] = 0
     elif message_text == 'отменить':
@@ -143,11 +144,12 @@ def event_handling_start(object_vk_api: object, sender_id: str, message_text: st
     return variables
                     
 
-def processing_a_simple_message(object_vk_api: object, sender_id: str, 
-                                    message_text: str, variables: dict) -> dict:
+def processing_a_simple_message(object_vk_api: object, message_text: str, variables: dict) -> dict:
 
     '''Обработка событий простых сообщений и нажатия кнопок'''
 
+    sender_id = variables['id']
+    variables = variables['fields']
     if message_text == "привет":
         # write_msg(object_vk_api, sender_id, "Хай")
         pass

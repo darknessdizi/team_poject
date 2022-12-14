@@ -118,7 +118,7 @@ def main():
                 if variables['fields']['start']:
                     print('3 точка')
                     # Активирована команда старт (поиск людей)
-                    variables['fields'] = bot.event_handling_start(vk, variables['id'], message_text, event, variables['fields'])
+                    variables['fields'] = bot.event_handling_start(vk, message_text, variables)
                     if variables['fields']['continue']:
                         print('4 точка')
                         variables['fields']['continue'] = False
@@ -126,7 +126,7 @@ def main():
                 else:
                     print('2 точка')
                     # Логика обычного ответа
-                    variables['fields'] = bot.processing_a_simple_message(vk, variables['id'], message_text, variables['fields'])
+                    variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
             print('5 точка')
 
 
