@@ -4,6 +4,8 @@ from pprint import pprint
 from dotenv import load_dotenv
 import os
 import datetime
+import time
+
 
 load_dotenv(".env")
 
@@ -17,32 +19,39 @@ class VK:
     def get_headers(self):
         return {'Content-Type': 'application/json', 'Authorization': f'OAuth {self.access_token}'}
 
-    def get_users(self, city, sex, age_from, age_to):
+    def get_users(self, city, sex, age):
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
-
-        params = {'fields': "city, bdate, sex",
+        if "-" in age:
+            age_from, age_to = age.split("-")
+            params = {'fields': "first_name, last_name, bdate, sex",
                   'q': city,
                   'count': 1000,
-                  'offset': 1
+                  'offset': 1,
+                  'age_from': age_from,
+                  'age_to': age_to,
+                  'sex': sex
                   }
-
+        else:
+            age = datetime.datetime.now() - datetime.timedelta(days=365 * int(age))
+            age = age.year
+            params = {'fields': "first_name, bdate",
+                      'q': city,
+                      'count': 1000,
+                      'offset': 1,
+                      'birth_year': age,
+                      'sex': sex
+                      }
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
         result = res.json().get('response').get('items')
-        time_now = datetime.datetime.now()
-        age_from = time_now - datetime.timedelta(days=365 * int(age_from))
-        age_to = time_now - datetime.timedelta(days=365 * int(age_to))
-        list_users = []
+        with open('data.json', 'w') as file:
+            json.dump(res.json(), file, ensure_ascii=False, indent=3)
+        list_user, list_users = [], []
         for item in result:
-            if item.get('sex') == sex:
-                if item.get('bdate') is not None and len(item.get('bdate')) == 8:
-                    age = datetime.datetime.strptime(item.get('bdate'), "%d.%m.%Y")
-                    list_user = []
-                    if age_from >= age >= age_to:
-                        list_user.append(item.get('id'))
-                        list_user.append(item.get('first_name'))
-                        list_user.append(item.get('last_name'))
-                        list_users.append(list_user)
+            list_user.append(item.get('id'))
+            list_user.append(item.get('first_name'))
+            list_user.append(item.get('last_name'))
+            list_users.append(list_user)
         return list_users
 
     def get_users_photo(self, user_id):
@@ -57,6 +66,8 @@ class VK:
         }
         headers = self.get_headers()
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        with open('photo.json', 'w') as file:
+            json.dump(res.json(), file, ensure_ascii=False, indent=3)
         photos_info_list = res.json().get('response').get('items')
         dict_likes = {'count': [], 'href': [], 'owner_id': ""}
         dict_likes_max = {'href': [], 'owner_id': ""}
@@ -84,7 +95,8 @@ class VK:
         return dict_likes_max
 
     def users_info(self):
-        list_users = vk.get_users(city, sex, age_from, age_to)
+
+        list_users = vk.get_users(city, sex, age)
         list_new = []
         for item in list_users:
             new_dict = {"href": [], "first_name": "", "last_name": "", "user_link": ""}
@@ -101,11 +113,10 @@ class VK:
 if __name__ == '__main__':
     access_token = os.getenv("access_token")
     #для теста
-    list_input = [25, 30, 1, "Москва"]
-    city = list_input[3]
-    sex = int(list_input[2])
-    age_from = int(list_input[0])
-    age_to = int(list_input[1])
+    list_input = ['30', 1, "Краснодар"]
+    age = list_input[0]
+    city = list_input[2]
+    sex = int(list_input[1])
     vk = VK(access_token)
     # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
     pprint(vk.users_info())
