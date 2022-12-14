@@ -2,8 +2,7 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import psycopg2
 import base
-from login_sql import sql_authorization
-from token_vk import token_vk_community, token_vk_user
+from token_vk import token_vk_community, token_vk_user, sql_authorization
 import bot_vkontakte as bot
 
 
@@ -53,12 +52,13 @@ def main():
 
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
+            print('9', event.user_id)
             sender_id = event.user_id
 
             if not base.get_ask_user_data(cur, sender_id):
                 new_user_info = {}
                 print('в базе отсутствует')
-                user_info = session.account.getProfileInfo(user_id=sender_id)
+                user_info = session.account.getProfileInfo(user_id=sender_id) # необходимо менять !!!!!!!!!!!!!!!!!!
                 print(user_info)
                 new_user_info['age'] = calculate_age(user_info['bdate'])
                 if user_info['sex'] == 2:
