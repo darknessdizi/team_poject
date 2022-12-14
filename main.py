@@ -213,6 +213,7 @@ def main():
                     
 
 # Авторизуемся как сообщество
+
 vk = vk_api.VkApi(token=token_vk_community)
 
 # Работа с сообщениями
@@ -232,7 +233,9 @@ bot_questions = [
     "Укажите семейное положение искомых людей:"
 ]
 
-categories_of_questions = ['возраст', 'пол', 'город', 'семья'] 
+categories_of_questions = ['возраст', 'пол', 'город', 'семья']
+
+
 
 
 if __name__ == '__main__':

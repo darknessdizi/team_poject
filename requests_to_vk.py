@@ -99,6 +99,7 @@ class VK:
         list_users = vk.get_users(city, sex, age)
         list_new = []
         for item in list_users:
+            time.sleep(3)
             new_dict = {"href": [], "first_name": "", "last_name": "", "user_link": ""}
             dict1 = vk.get_users_photo(item[0])
             if dict1.get("href") != []:
