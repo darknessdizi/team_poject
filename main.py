@@ -56,7 +56,7 @@ vk = vk_api.VkApi(token=token_vk_community)
 # Работа с сообщениями
 longpoll = VkLongPoll(vk)
 
-<<<<<<< HEAD
+
 dict_func = {
     'добавить в избранное': add_person_to_sql,
     'следующий': next_person,
@@ -75,8 +75,7 @@ categories_of_questions = ['возраст', 'пол', 'город', 'семья
 
 
 
-=======
->>>>>>> cfe6233377bda5e1489fed05c544b3d5fb25404c
+
 
 if __name__ == '__main__':
     main()

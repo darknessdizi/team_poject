@@ -100,12 +100,11 @@ class VK:
         list_new = []
         for item in list_users:
             time.sleep(3)
-            new_dict = {"href": [], "first_name": "", "last_name": "", "user_link": ""}
+            new_dict = {"link_photo": [], "user_name": "",  "user_link": ""}
             dict1 = vk.get_users_photo(item[0])
             if dict1.get("href") != []:
-                new_dict["href"] = dict1.get("href")
-                new_dict["first_name"] = item[1]
-                new_dict["last_name"] = item[2]
+                new_dict["link_photo"] = dict1.get("href")
+                new_dict["user_name"] = item[1] + item[2]
                 new_dict["user_link"] = "https://vk.com/id" + str(item[0])
                 list_new.append(new_dict)
         return list_new
@@ -114,7 +113,7 @@ class VK:
 if __name__ == '__main__':
     access_token = os.getenv("access_token")
     #для теста
-    list_input = ['30', 1, "Краснодар"]
+    list_input = ['30-40', 1, "Сочи"]
     age = list_input[0]
     city = list_input[2]
     sex = int(list_input[1])
