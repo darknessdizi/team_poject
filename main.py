@@ -121,6 +121,37 @@ class PostgreSQL:
             password=kwargs['password']
         )
         self.connect.autocommit = True
+<<<<<<< HEAD
+                    
+
+# Авторизуемся как сообщество
+
+vk = vk_api.VkApi(token=token_vk_community)
+
+# Работа с сообщениями
+longpoll = VkLongPoll(vk)
+=======
+>>>>>>> 4c2376bcc8fe7a3a0a9ed7e03b5a0175da3e687d
+
+
+dict_func = {
+    'добавить в избранное': add_person_to_sql,
+    'следующий': next_person,
+    'показать весь список': show_the_full_list,
+    'добавить в черный список': add_to_blacklist
+}
+
+bot_questions = [
+    "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
+    "Укажите пол (муж или жен):",
+    "Укажте город:",
+    "Укажите семейное положение искомых людей:"
+]
+
+categories_of_questions = ['возраст', 'пол', 'город', 'семья']
+
+
+
 
 
 if __name__ == '__main__':
