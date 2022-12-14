@@ -125,7 +125,7 @@ def add_favourites(cur, iterator, flag):
 def get_favourites(cur, user_id):
     '''Выгружаем из базы данных список избранных'''
     cur.execute('''
-        SELECT f_user_id, f_first_name, f_last_name, user_url FROM find_users
+        SELECT f_user_id, f_user_name, user_url FROM find_users
         WHERE user_id = %s AND favourites = %s;
     ''', (user_id, 1))
     return cur.fetchall()

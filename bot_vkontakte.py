@@ -146,7 +146,8 @@ def processing_a_simple_message(object_vk_api: object, request, event, variables
     '''Обработка событий простых сообщений и нажатия кнопок'''
 
     if request == "привет":
-        write_msg(object_vk_api, event.user_id, "Хай")
+        # write_msg(object_vk_api, event.user_id, "Хай")
+        pass
     elif request == "фото": # это чисто тест загрузки фоток !!!
         my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
                     "test_photo\kot3.jpg"]
