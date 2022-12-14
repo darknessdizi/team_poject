@@ -3,14 +3,14 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from random import randint
 
 
-def write_msg(object_vk_api: object, user_id: str, message: str, keyboard=None) -> None:
+def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None) -> None:
 
     '''Отправляет сообщения и добавляет кнопки к сообщениям'''
 
     post = {
-        'user_id': user_id, 
+        'user_id': sender_id, 
         'message': message, 
-        'random_id': randint(0, 100000)
+        'random_id': randint(0, 10 ** 7)
     }
 
     if keyboard != None:
@@ -23,15 +23,15 @@ def write_msg(object_vk_api: object, user_id: str, message: str, keyboard=None) 
     object_vk_api.method('messages.send', post)
 
 
-def send_photos(object_vk_api: object, user_id: str, attachment: list) -> None:
+def send_photos(object_vk_api: object, sender_id: str, attachment: list) -> None:
 
     '''Отправляет фотографии пользователю'''
 
     for element in attachment:
         object_vk_api.method('messages.send', {
-            'user_id': user_id, 
+            'user_id': sender_id, 
             'attachment': element,
-            'random_id': randint(0, 100000)
+            'random_id': randint(0, 10 ** 7)
             })
 
 
@@ -87,46 +87,48 @@ def add_to_blacklist(*args, **kwargs):
     pass
 
 
-def add_data_to_the_dictionary(object_vk_api: object, index: int, event: object, date: dict) -> dict:
+def add_data_to_the_dictionary(object_vk_api: object, index: int, 
+                                sender_id: str, message_text: str, date: dict) -> dict:
 
     '''Добавляет данные полученные от пользователя в словарь'''
 
     if index - 1 == 0:
-        if '-' in event.text:
-            text = event.text.replace(' ', '').split('-')
+        if '-' in message_text:
+            text = message_text.replace(' ', '').split('-')
         else:
-            text = event.text.strip()
+            text = message_text.strip()
         for element in text:
             if not element.isdigit():
                 index = index - 1
                 keyboard = create_buttons(2)
-                write_msg(object_vk_api, event.user_id, "Не правильно указан возраст!!! Повторите ввод.", keyboard)
+                write_msg(object_vk_api, sender_id, "Не правильно указан возраст!!! Повторите ввод.", keyboard)
                 return date, index
     else:
-        text = event.text.lower().replace('.', '')
+        text = message_text.lower().replace('.', '')
     date.setdefault(categories_of_questions[index - 1], text)
     return date, index
 
 
-def event_handling_start(object_vk_api: object, request, event, variables) -> dict:
+def event_handling_start(object_vk_api: object, sender_id: str, message_text: str, 
+                            event: object, variables: dict) -> dict:
 
     '''Обработка события СТАРТ. Бот задаёт вопросы и создает словарь'''
 
-    if request == 'сбросить':
+    if message_text == 'сбросить':
         variables['count'] = 0
-    elif request == 'отменить':
+    elif message_text == 'отменить':
         variables['count'] = 0
         variables['start'] = False
-        write_msg(object_vk_api, event.user_id, 'Ок')
+        write_msg(object_vk_api, sender_id, 'Ок')
         variables['continue'] = True
         return variables
 
     variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(
-        object_vk_api, variables['count'], event, variables['filtr_dict']
+        object_vk_api, variables['count'], sender_id, message_text, variables['filtr_dict']
     )
     if variables['count'] < len(bot_questions):
         keyboard = create_buttons(2)
-        write_msg(object_vk_api, event.user_id, bot_questions[variables['count']], keyboard)
+        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['continue'] = True
         return variables
@@ -135,35 +137,36 @@ def event_handling_start(object_vk_api: object, request, event, variables) -> di
         variables['count'] = 0
         # Активируем цветные кнопки
         keyboard = create_buttons(4)
-        write_msg(object_vk_api, event.user_id, "Ок", keyboard)
+        write_msg(object_vk_api, sender_id, "Ок", keyboard)
         # !!!!!!!!!!!!!! Для Маши - твой словарь здесь будет удален. Надо вызвать функцию поиска
         variables['filtr_dict'] = {} 
     return variables
                     
 
-def processing_a_simple_message(object_vk_api: object, request, event, variables) -> dict:
+def processing_a_simple_message(object_vk_api: object, sender_id: str, 
+                                    message_text: str, variables: dict) -> dict:
 
     '''Обработка событий простых сообщений и нажатия кнопок'''
 
-    if request == "привет":
-        # write_msg(object_vk_api, event.user_id, "Хай")
+    if message_text == "привет":
+        # write_msg(object_vk_api, sender_id, "Хай")
         pass
-    elif request == "фото": # это чисто тест загрузки фоток !!!
+    elif message_text == "фото": # это чисто тест загрузки фоток !!!
         my_list = ["test_photo\kot.jpg", "test_photo\kot2.jpg", 
                     "test_photo\kot3.jpg"]
         attachment = add_photos(object_vk_api, my_list)
-        send_photos(object_vk_api, event.user_id, attachment)
-    elif request == "старт":
+        send_photos(object_vk_api, sender_id, attachment)
+    elif message_text == "старт":
         keyboard = create_buttons(2)
-        write_msg(object_vk_api, event.user_id, bot_questions[variables['count']], keyboard)
+        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['start'] = True
-    elif request in dict_func:
-        dict_func[request](**variables['sql'])
+    elif message_text in dict_func:
+        dict_func[message_text](**variables['sql'])
         keyboard = create_buttons(4)
-        write_msg(object_vk_api, event.user_id, "Выполнено", keyboard)
+        write_msg(object_vk_api, sender_id, "Выполнено", keyboard)
     else:
-        write_msg(object_vk_api, event.user_id, "Не поняла вашего ответа...")
+        write_msg(object_vk_api, sender_id, "Не поняла вашего ответа...")
     return variables
 
 

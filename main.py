@@ -1,13 +1,9 @@
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
-import psycopg2
 import base
 from token_vk import token_vk_community, token_vk_user, sql_authorization
 import bot_vkontakte as bot
 from requests_to_vk import RequestsVk
-import os
-
-
 from datetime import date
 
 
@@ -40,10 +36,11 @@ def data_conversion(db_source, cur):
 def main():
 
     # Основной цикл
-    variables = {'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}, 'sql': {}}
+    list_of_users = []
+    list_of_dicts = []
 
     # Создание объекта для подключения к базе данных
-    sql_cursor = PostgreSQL(**sql_authorization)
+    sql_cursor = base.PostgreSQL(**sql_authorization)
     cur = sql_cursor.connect.cursor()
 
     longpoll, session, vk = connection()
@@ -54,13 +51,30 @@ def main():
 
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
-            sender_id = event.user_id
+            
+            if event.user_id in list_of_users:
+                for user in list_of_dicts:
+                    if event.user_id == user['id']:
+                        variables = user
+            else:
+                first_variables = {'id': None, 'fields': {
+                            'text': None,
+                            'count': 0, 
+                            'start': False, 
+                            'continue': False, 
+                            'filtr_dict': {}, 
+                            'sql': {}
+                            }
+                        }
+                first_variables['id'] = event.user_id
+                list_of_dicts.append(first_variables)
+                list_of_users.append(event.user_id)
+                variables = first_variables            
 
-            if not base.get_ask_user_data(cur, sender_id):
-                new_user_info = {}
+            if not base.get_ask_user_data(cur, variables['id']):
                 print('в базе отсутствует')
                 response = RequestsVk(token_vk_user)
-                user_info = response.get_user(sender_id)               
+                user_info = response.get_user(variables['id'])               
                 user_info['age'] = calculate_age(user_info['age'])
                 if user_info['sex'] == 2:
                     user_info['gender'] = 'Мужской'
@@ -68,7 +82,7 @@ def main():
                     user_info['gender'] = 'Женский'
                 else:
                     user_info['gender'] = 'Пол не указан'
-                if base.add_ask_user(cur, sender_id, user_info['user_name'],
+                if base.add_ask_user(cur, variables['id'], user_info['user_name'],
                                    user_info['age'], user_info['city'],
                                    user_info['gender']):
                     # sql_cursor.commit()
@@ -77,49 +91,43 @@ def main():
                     print('пользователь НЕ добавлен в базу')
 
             if event.text.lower().strip() == "привет":
-                ask_user = base.get_ask_user_data(cur, sender_id)
+                ask_user = base.get_ask_user_data(cur, variables['id'])
                 print(f'Пользователь = {ask_user}')
 
-                ask_user = base.get_ask_user_data(cur, sender_id)
-                bot.write_msg(vk, sender_id, f"Здравствуйте, {ask_user[1]}!\n"
+                ask_user = base.get_ask_user_data(cur, variables['id'])
+                bot.write_msg(vk, variables['id'], f"Здравствуйте, {ask_user[1]}!\n"
                                                     f"Ваши параметры:\nГород: {ask_user[3]}\n"
                                                     f"Пол: {ask_user[4]}\nВозраст: {ask_user[2]}\n"
                                                     f"(Введите: старт\фото\список)")
 
             elif event.text.lower().strip() in ['список']:
-                if base.get_favourites(cur, sender_id):
-                    db_source = base.get_favourites(cur, sender_id)
+                if base.get_favourites(cur, variables['id']):
+                    db_source = base.get_favourites(cur, variables['id'])
                     favourites = data_conversion(db_source, cur)
                     for item in favourites:
-                        bot.write_msg(vk, sender_id, f"{item['name']}\n{item['url']}")
-                    bot.write_msg(vk, sender_id, "Просмотреть данные")
+                        bot.write_msg(vk, variables['id'], f"{item['name']}\n{item['url']}")
+                    bot.write_msg(vk, variables['id'], "Просмотреть данные")
                 else:
-                    bot.write_msg(vk, sender_id, f"Список избранных пуст")
+                    bot.write_msg(vk, variables['id'], f"Список избранных пуст")
                     continue
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
-                request = event.text.lower().strip()
-                if variables['start']:
+                print('1 точка')
+                message_text = event.text.lower().strip()
+                if variables['fields']['start']:
+                    print('3 точка')
                     # Активирована команда старт (поиск людей)
-                    variables = bot.event_handling_start(vk, request, event, variables)
-                    if variables['continue']:
-                        variables['continue'] = False
+                    variables['fields'] = bot.event_handling_start(vk, variables['id'], message_text, event, variables['fields'])
+                    if variables['fields']['continue']:
+                        print('4 точка')
+                        variables['fields']['continue'] = False
                         continue
                 else:
+                    print('2 точка')
                     # Логика обычного ответа
-                    variables = bot.processing_a_simple_message(vk, request, event, variables)
-
-
-class PostgreSQL:
-
-    def __init__(self, **kwargs):
-        self.connect = psycopg2.connect(
-            dbname=kwargs['dbname'],
-            user=kwargs['user'],
-            password=kwargs['password']
-        )
-        self.connect.autocommit = True
+                    variables['fields'] = bot.processing_a_simple_message(vk, variables['id'], message_text, variables['fields'])
+            print('5 точка')
 
 
 if __name__ == '__main__':
