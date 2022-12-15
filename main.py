@@ -1,6 +1,5 @@
 import base
 import bot_vkontakte as bot
-import vk_api
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
@@ -86,7 +85,7 @@ def main():
                 bot.write_msg(vk, variables['id'], f"Здравствуйте, {ask_user[1]}!\n"
                                                     f"Ваши параметры:\nГород: {ask_user[3]}\n"
                                                     f"Пол: {ask_user[4]}\nВозраст: {ask_user[2]}\n"
-                                                    f"(Введите: старт\фото\список)")
+                                                    f"(Введите: старт\фото\список) \U0001F60E")
 
             elif event.text.lower().strip() in ['Список избранных']:
                 if base.get_favourites(cur, variables['id']):
@@ -145,20 +144,18 @@ def main():
                 message_text = event.text.lower().strip()
                 if variables['fields']['start']:
 
-                    # Запрос на фотографии
-                    if variables['fields']['start_request']:
-                        print(variables['fields']['filtr_dict'])   # почему 3 элемента а не 4 ?????????????
-                        respone = response.users_info(**variables['fields']['filtr_dict'])
-                        # pprint.pprint(respone)          
-                        attachment = bot.add_photos(vk, respone[0]['link_photo'])
-                        bot.send_photos(vk, variables['id'], attachment)
-                        variables['fields']['start_request'] = False
-
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
                     if variables['fields']['continue']:
                         variables['fields']['continue'] = False
                         continue
+                    else:
+                        # Запросы на фото для пользователя
+                        respone = response.users_info(**variables['fields']['filtr_dict'])
+                        # pprint.pprint(respone)          
+                        attachment = bot.add_photos(vk, respone[0]['link_photo'])
+                        bot.send_photos(vk, variables['id'], attachment)
+                        variables['fields']['filtr_dict'] = {}
                 else:
                     # Логика обычного ответа
                     variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)

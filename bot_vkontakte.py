@@ -156,7 +156,15 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
                 keyboard = create_buttons(2)
                 write_msg(object_vk_api, sender_id, "Не правильно указан возраст!!! Повторите ввод.", keyboard)
                 return date, index
-    else:
+    # elif index - 1 == 1:
+    #     if not message_text.strip() in ('1', '2'):
+    #         index = index - 1
+    #         keyboard = create_buttons(2)
+    #         write_msg(object_vk_api, sender_id, "Не правильно указан пол человека!!! Повторите ввод.", keyboard)
+    #         return date, index
+    #     else:
+    #         text = message_text.strip()
+    else:    
         text = message_text.lower().replace('.', '')
     date.setdefault(categories_of_questions[index - 1], text)
     return date, index
@@ -185,17 +193,13 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['continue'] = True
-        # Флаг на запуск request запросов для фото
-        if variables['count'] == len(bot_questions):
-            variables['start_request'] = True 
         return variables
     else:
         variables['start'] = False
         variables['count'] = 0
         # Активируем цветные кнопки
         keyboard = create_buttons(4)
-        write_msg(object_vk_api, sender_id, "Ок", keyboard)
-        variables['filtr_dict'] = {} 
+        write_msg(object_vk_api, sender_id, "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard) 
     return variables
                     
 
@@ -207,7 +211,7 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     variables = variables['fields']
     if message_text == "привет":
         pass
-    elif message_text == "фото": # это чисто тест загрузки фоток !!!
+    elif message_text == "фото": 
         pass
     elif message_text == "старт":
         keyboard = create_buttons(2)
@@ -217,9 +221,9 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     elif message_text in dict_func:
         dict_func[message_text](**variables['sql'])
         keyboard = create_buttons(4)
-        write_msg(object_vk_api, sender_id, "Выполнено", keyboard)
+        write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)
     else:
-        write_msg(object_vk_api, sender_id, "Не поняла вашего ответа...")
+        write_msg(object_vk_api, sender_id, "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A")
     return variables
 
 
@@ -231,13 +235,13 @@ dict_func = {
 }
 
 bot_questions = [
-    "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
-    "Укажите пол (муж -1 или жен - 2):",
-    "Укажте город:",
-    "Семейное положение:"
+    "Укажите возраст людей по образцу\nПример: 25 или 20-30 \U0001F609",
+    "Укажите пол (муж -1 \U0001F57A или жен - 2 \U0001F483):",
+    "Укажите город: \U0001F3E1"
+    #"Семейное положение: \U0001F48F"
 ]
 
-categories_of_questions = ['age', 'sex', 'city', 'status'] 
+categories_of_questions = ['age', 'sex', 'city'] #, 'status'] 
 
 
 if __name__ == '__main__':

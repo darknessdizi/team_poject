@@ -55,7 +55,7 @@ class RequestsVk:
             age_from, age_to = age.split("-")
             params = {'fields': "first_name, last_name, bdate, sex",
                   'q': city,
-                  'count': 2,
+                  'count': 1,
                   'offset': 1,
                   'age_from': age_from,
                   'age_to': age_to,
@@ -129,7 +129,7 @@ class RequestsVk:
         list_users = self.get_users(city, sex, age)
         list_new = []
         for item in list_users:
-            time.sleep(3)
+            # time.sleep(3)
             new_dict = {"link_photo": [], "user_name": "",  "user_link": ""}
             dict1 = self.get_users_photo(item[0])
             if dict1.get("href") != []:
