@@ -3,7 +3,7 @@ import requests
 import os
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from random import randint
-from token_vk import token_vk_community
+from token_vk import token_vk_community, token_vk
 from vk_api.longpoll import VkLongPoll
 
 
@@ -17,7 +17,10 @@ def connection():
     # Работа с сообщениями
     longpoll = VkLongPoll(authorize)
 
-    return longpoll, authorize
+    user_session = vk_api.VkApi(token=token_vk)
+    session = user_session.get_api()
+
+    return longpoll, session, authorize
 
 
 def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tuple:

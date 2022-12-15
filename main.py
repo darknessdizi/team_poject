@@ -1,10 +1,12 @@
 import base
 import bot_vkontakte as bot
-from token_vk import token_vk_user, sql_authorization
+import vk_api
+from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
 from datetime import date
 import pprint
+from VKinder import VKinder
 
 
 def calculate_age(born):
@@ -21,6 +23,16 @@ def data_conversion(db_source):
     return users
 
 
+def add_to_database(cur, sender_id, result):
+    '''Пишет полученные данные из поиска в базу данных'''
+    for i_user in result:
+        if not base.check_find_user(cur, i_user['id']):
+            if base.add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
+                for item in i_user['attachment']:
+                    base.add_find_users_photos(cur, i_user['id'], item)
+    return True
+
+
 def main():
 
     # Основной цикл
@@ -32,14 +44,14 @@ def main():
     cur = sql_cursor.connect.cursor()
 
     # Создание объекта для осуществления request запросов
-    response = RequestsVk(token_vk_user)
+    response = RequestsVk(token_vk)
 
-    longpoll, vk = bot.connection()
+    longpoll, session, vk = bot.connection()
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
-
+        
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
             
@@ -76,7 +88,7 @@ def main():
                                                     f"Пол: {ask_user[4]}\nВозраст: {ask_user[2]}\n"
                                                     f"(Введите: старт\фото\список)")
 
-            elif event.text.lower().strip() in ['список']:
+            elif event.text.lower().strip() in ['Список избранных']:
                 if base.get_favourites(cur, variables['id']):
                     db_source = base.get_favourites(cur, variables['id'])
                     favourites = data_conversion(db_source, cur)
@@ -86,6 +98,47 @@ def main():
                 else:
                     bot.write_msg(vk, variables['id'], f"Список избранных пуст")
                     continue
+
+            # elif event.text.lower().strip() in ['поиск']:
+            #     if base.get_favourites(cur, sender_id):
+            #         bot.write_msg(vk, sender_id, f"Поиск...")
+
+            #         v_kinder = VKinder(longpoll, session)
+            #         result = v_kinder.find_user(ask_user)
+
+            #         if add_to_database(cur, ask_user[0], result):
+            #             print('Добавлено в базу')
+            #             # sql_cursor.commit()
+            #             bot.write_msg(vk, sender_id, "Данные записаны в базу")
+            #         else:
+            #             print('Ошибка')
+            #     else:
+            #         bot.write_msg(vk, sender_id, "Смотреть данные")
+
+            # elif event.text.lower().strip() in ['Смотреть данные']:
+
+            #     if base.check_find_user(cur, ask_user[0]):
+            #         counter = add_to_database(cur, sender_id, result)
+            #     else:
+            #         print('Данных нет')
+            #         bot.write_msg(vk, sender_id, "Данных нет. Выполнить поиск")
+
+            # elif event.text.lower().strip() in ['Добавить в список избранных']:
+
+            #     if base.add_favourites(cur, counter - 1, 1):
+            #         # sql_cursor.commit()
+            #         print('Добавлено в избранное')
+            #         bot.write_msg(vk, sender_id, "Добавлен в список избранных")
+
+            # elif event.text.lower().strip() in ['Добавить в черный список']:
+
+            #     if base.add_favourites(cur, counter - 1, 2):
+            #         # sql_cursor.commit()
+            #         print('Добавлено в чёрный список')
+            #         bot.write_msg(vk, sender_id, "Добавлен в чёрный список")
+
+            # else:
+            #     bot.write_msg(vk, sender_id, "Ошибка")
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
