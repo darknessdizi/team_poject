@@ -121,7 +121,7 @@ class PostgreSQL:
             password=kwargs['password']
         )
         self.connect.autocommit = True
-<<<<<<< HEAD
+
                     
 
 # Авторизуемся как сообщество
@@ -130,8 +130,7 @@ vk = vk_api.VkApi(token=token_vk_community)
 
 # Работа с сообщениями
 longpoll = VkLongPoll(vk)
-=======
->>>>>>> 4c2376bcc8fe7a3a0a9ed7e03b5a0175da3e687d
+
 
 
 dict_func = {
