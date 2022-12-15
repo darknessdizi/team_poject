@@ -119,6 +119,7 @@ class RequestsVk:
 
 
 if __name__ == '__main__':
+    pass
 
     # #для теста
     # access_token = token_vk.access_token
