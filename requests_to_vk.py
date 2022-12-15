@@ -1,15 +1,20 @@
 import json
 import requests
 from pprint import pprint
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import datetime
 import time
 
+<<<<<<< HEAD
 load_dotenv(".env")
+=======
+
+# load_dotenv(".env")
+>>>>>>> f22183e74d5fd35631997ede3a558a4ca8e32549
 
 
-class VK:
+class RequestsVk:
     def __init__(self, access_token, version='5.131'):
         self.access_token = access_token
         self.version = version
@@ -50,13 +55,18 @@ class VK:
         user_info['age'] = age
         return user_info
 
+<<<<<<< HEAD
     def get_users(self, city, sex, age):
         """ Получаем список пользователей"""
+=======
+    def get_users(self, city, sex, age, status=None):
+>>>>>>> f22183e74d5fd35631997ede3a558a4ca8e32549
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
         if "-" in age:
             age_from, age_to = age.split("-")
             params = {'fields': "first_name, last_name, bdate, sex",
+<<<<<<< HEAD
                       'q': city,
                       'count': 1000,
                       'offset': 1,
@@ -64,18 +74,33 @@ class VK:
                       'age_to': age_to,
                       'sex': sex
                       }
+=======
+                  'q': city,
+                  'count': 2,
+                  'offset': 1,
+                  'age_from': age_from,
+                  'age_to': age_to,
+                  'sex': sex
+                  }
+>>>>>>> f22183e74d5fd35631997ede3a558a4ca8e32549
         else:
             age = datetime.datetime.now() - datetime.timedelta(days=365 * int(age))
             age = age.year
             params = {'fields': "first_name, last_name, bdate, sex",
                       'q': city,
+<<<<<<< HEAD
                       'count': 100,
+=======
+                      'count': 2,
+>>>>>>> f22183e74d5fd35631997ede3a558a4ca8e32549
                       'offset': 1,
                       'birth_year': age,
                       'sex': sex
                       }
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        # print(res)
         result = res.json().get('response').get('items')
+<<<<<<< HEAD
         with open('data.json', 'w') as file:
             json.dump(result, file, ensure_ascii=False, indent=3)
         return result
@@ -83,6 +108,19 @@ class VK:
     def get_user_photo(self, user_id):
         """ метод возвращает словарь вида {'href': [], 'owner_id': ""}
         с ссылками на фото пользователя """
+=======
+        with open('data.json', 'w', encoding='utf-8') as file:
+            json.dump(res.json(), file, ensure_ascii=False, indent=3)
+        list_user, list_users = [], []
+        for item in result:
+            list_user.append(item.get('id'))
+            list_user.append(item.get('first_name'))
+            list_user.append(item.get('last_name'))
+            list_users.append(list_user)
+        return list_users
+
+    def get_users_photo(self, user_id):
+>>>>>>> f22183e74d5fd35631997ede3a558a4ca8e32549
         url = "https://api.vk.com/method/photos.get"
         params = {
             'owner_id': user_id,
@@ -121,6 +159,7 @@ class VK:
                         dict_likes.get('count').pop(index)
                         dict_likes_max['href'].append(dict_likes.get('href').pop(index))
 
+<<<<<<< HEAD
         return dict_likes_max
 
     # def getAll_user_photo(self, user_id):
@@ -203,6 +242,37 @@ if __name__ == '__main__':
                 print(f"список фото пользователя:{result}")
                 list.append(result)
     pprint(list)
+=======
+    def users_info(self, city, sex, age, status=None):
+
+        list_users = self.get_users(city, sex, age)
+        list_new = []
+        for item in list_users:
+            time.sleep(3)
+            new_dict = {"link_photo": [], "user_name": "",  "user_link": ""}
+            dict1 = self.get_users_photo(item[0])
+            if dict1.get("href") != []:
+                new_dict["link_photo"] = dict1.get("href")
+                new_dict["user_name"] = item[1] + item[2]
+                new_dict["user_link"] = "https://vk.com/id" + str(item[0])
+                list_new.append(new_dict)
+        return list_new
+
+
+if __name__ == '__main__':
+    pass
+    # access_token = os.getenv("access_token")
+    # #для теста
+    # list_input = ['30-40', 1, "Сочи"]
+    # age = list_input[0]
+    # city = list_input[2]
+    # sex = int(list_input[1])
+    # vk = VK(access_token)
+    # # user_info = vk.get_user(user_id)
+    # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
+    # pprint(vk.users_info(age, city, sex))
+
+>>>>>>> f22183e74d5fd35631997ede3a558a4ca8e32549
 
 
 

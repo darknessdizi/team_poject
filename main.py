@@ -1,25 +1,12 @@
-import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
-import psycopg2
 import base
-from login_sql import sql_authorization
-from token_vk import token_vk_community, token_vk_user
 import bot_vkontakte as bot
-
-
+import vk_api
+from token_vk import token_vk, sql_authorization
+from vk_api.longpoll import VkEventType
+from requests_to_vk import RequestsVk
 from datetime import date
-
-
-def connection():
-    # Авторизуемся как сообщество
-    authorize = vk_api.VkApi(token=token_vk_community)
-
-    # Работа с сообщениями
-    longpoll = VkLongPoll(authorize)
-
-    user_session = vk_api.VkApi(token=token_vk_user) # ??????????????????????????????
-    session = user_session.get_api()
-    return longpoll, session, authorize
+import pprint
+from VKinder import VKinder
 
 
 def calculate_age(born):
@@ -28,7 +15,7 @@ def calculate_age(born):
     return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
 
 
-def data_conversion(db_source, cur):
+def data_conversion(db_source):
     '''Преобразует данные из базы данных для бота '''
     users = list()
     for item in db_source:
@@ -36,80 +23,88 @@ def data_conversion(db_source, cur):
     return users
 
 
+def add_to_database(cur, sender_id, result):
+    '''Пишет полученные данные из поиска в базу данных'''
+    for i_user in result:
+        if not base.check_find_user(cur, i_user['id']):
+            if base.add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
+                for item in i_user['attachment']:
+                    base.add_find_users_photos(cur, i_user['id'], item)
+    return True
+
+
 def main():
 
     # Основной цикл
-    variables = {'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}, 'sql': {}}
+    list_of_users = []
+    list_of_dicts = []
 
     # Создание объекта для подключения к базе данных
-    sql_cursor = PostgreSQL(**sql_authorization)
+    sql_cursor = base.PostgreSQL(**sql_authorization)
     cur = sql_cursor.connect.cursor()
 
-    longpoll, session, vk = connection()
+    # Создание объекта для осуществления request запросов
+    response = RequestsVk(token_vk)
+
+    longpoll, session, vk = bot.connection()
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
-
+        
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
-            sender_id = event.user_id
-
-            if not base.get_ask_user_data(cur, sender_id):
-                new_user_info = {}
+            
+            # проверка параметров каждого пользователя
+            result = bot.user_support(event, list_of_users, list_of_dicts)
+            variables = result[0]
+            list_of_users = result[1]
+            list_of_dicts = result[2]
+                        
+            if not base.get_ask_user_data(cur, variables['id']):
                 print('в базе отсутствует')
-                user_info = session.account.getProfileInfo(user_id=sender_id)
-                print(user_info)
-                new_user_info['age'] = calculate_age(user_info['bdate'])
+                user_info = response.get_user(variables['id'])               
+                user_info['age'] = calculate_age(user_info['age'])
                 if user_info['sex'] == 2:
-                    new_user_info['gender'] = 'Мужской'
+                    user_info['gender'] = 'Мужской'
                 elif user_info['sex'] == 1:
-                    new_user_info['gender'] = 'Женский'
+                    user_info['gender'] = 'Женский'
                 else:
-                    new_user_info['gender'] = 'Пол не указан'
-
-                new_user_info['user_name'] = f'{user_info["first_name"]} {user_info["last_name"]}'
-                if base.add_ask_user(cur, user_info['id'], new_user_info['user_name'],
-                                   new_user_info['age'], user_info['city']['title'],
-                                   new_user_info['gender']):
-                    # sql_cursor.commit()
+                    user_info['gender'] = 'Пол не указан'
+                if base.add_ask_user(cur, variables['id'], user_info['user_name'],
+                                   user_info['age'], user_info['city'],
+                                   user_info['gender']):
                     print('пользователь добавлен в базу')
                 else:
                     print('пользователь НЕ добавлен в базу')
 
             if event.text.lower().strip() == "привет":
-                ask_user = base.get_ask_user_data(cur, sender_id)
+                ask_user = base.get_ask_user_data(cur, variables['id'])
                 print(f'Пользователь = {ask_user}')
 
-                ask_user = base.get_ask_user_data(cur, sender_id)
-                bot.write_msg(vk, sender_id, f"Здравствуйте, {ask_user[1]}!\n"
+                ask_user = base.get_ask_user_data(cur, variables['id'])
+                bot.write_msg(vk, variables['id'], f"Здравствуйте, {ask_user[1]}!\n"
                                                     f"Ваши параметры:\nГород: {ask_user[3]}\n"
                                                     f"Пол: {ask_user[4]}\nВозраст: {ask_user[2]}\n"
                                                     f"(Введите: старт\фото\список)")
 
-            elif event.text.lower().strip() in ['список']:
-                if base.get_favourites(cur, sender_id):
-                    db_source = base.get_favourites(cur, sender_id)
+            elif event.text.lower().strip() in ['Список избранных']:
+                if base.get_favourites(cur, variables['id']):
+                    db_source = base.get_favourites(cur, variables['id'])
                     favourites = data_conversion(db_source, cur)
                     for item in favourites:
-                        bot.write_msg(vk, sender_id, f"{item['name']}\n{item['url']}")
-                    bot.write_msg(vk, sender_id, "Просмотреть данные")
+                        bot.write_msg(vk, variables['id'], f"{item['name']}\n{item['url']}")
+                    bot.write_msg(vk, variables['id'], "Просмотреть данные")
                 else:
-                    bot.write_msg(vk, sender_id, f"Список избранных пуст")
+                    bot.write_msg(vk, variables['id'], f"Список избранных пуст")
                     continue
 
-            # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
-            if event.to_me:
-                request = event.text.lower().strip()
-                if variables['start']:
-                    # Активирована команда старт (поиск людей)
-                    variables = bot.event_handling_start(vk, request, event, variables)
-                    if variables['continue']:
-                        variables['continue'] = False
-                        continue
-                else:
-                    # Логика обычного ответа
-                    variables = bot.processing_a_simple_message(vk, request, event, variables)
+            elif event.text.lower().strip() in ['поиск']:
+                if base.get_favourites(cur, variables['id']):
+                    bot.write_msg(vk, variables['id'], f"Поиск...")
+
+                    v_kinder = VKinder(longpoll, session)
+                    result = v_kinder.find_user(ask_user)
 
 
 class PostgreSQL:
@@ -126,31 +121,69 @@ class PostgreSQL:
 
 # Авторизуемся как сообщество
 
-vk = vk_api.VkApi(token=token_vk_community)
+                    if add_to_database(cur, ask_user[0], result):
+                        print('Добавлено в базу')
+                        # sql_cursor.commit()
+                        bot.write_msg(vk, variables['id'], "Данные записаны в базу")
+                    else:
+                        print('Ошибка')
+                else:
+                    bot.write_msg(vk, variables['id'], "Смотреть данные")
+
+
+            elif event.text.lower().strip() in ['Смотреть данные']:
+
 
 # Работа с сообщениями
 longpoll = VkLongPoll(vk)
 
 
-
-dict_func = {
-    'добавить в избранное': add_person_to_sql,
-    'следующий': next_person,
-    'показать весь список': show_the_full_list,
-    'добавить в черный список': add_to_blacklist
-}
-
-bot_questions = [
-    "Укажите возраст людей по образцу\nПример: 25 или 20-30 ",
-    "Укажите пол (муж или жен):",
-    "Укажте город:",
-    "Укажите семейное положение искомых людей:"
-]
-
-categories_of_questions = ['возраст', 'пол', 'город', 'семья']
+                if base.check_find_user(cur, ask_user[0]):
+                    counter = add_to_database(cur, variables['id'], result)
+                else:
+                    print('Данных нет')
+                    bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
 
+            elif event.text.lower().strip() in ['Добавить в список избранных']:
 
+                if base.add_favourites(cur, counter - 1, 1):
+                    # sql_cursor.commit()
+                    print('Добавлено в избранное')
+                    bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
+
+            elif event.text.lower().strip() in ['Добавить в черный список']:
+
+                if base.add_favourites(cur, counter - 1, 2):
+                    # sql_cursor.commit()
+                    print('Добавлено в чёрный список')
+                    bot.write_msg(vk, variables['id'], "Добавлен в чёрный список")
+
+            # else:
+            #     bot.write_msg(vk, variables['id'], "Ошибка")
+
+            # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
+            if event.to_me:
+                message_text = event.text.lower().strip()
+                if variables['fields']['start']:
+
+                    # Запрос на фотографии
+                    if variables['fields']['start_request']:
+                        print(variables['fields']['filtr_dict'])   # почему 3 элемента а не 4 ?????????????
+                        respone = response.users_info(**variables['fields']['filtr_dict'])
+                        # pprint.pprint(respone)          
+                        attachment = bot.add_photos(vk, respone[0]['link_photo'])
+                        bot.send_photos(vk, variables['id'], attachment)
+                        variables['fields']['start_request'] = False
+
+                    # Активирована команда старт (поиск людей)
+                    variables['fields'] = bot.event_handling_start(vk, message_text, variables)
+                    if variables['fields']['continue']:
+                        variables['fields']['continue'] = False
+                        continue
+                else:
+                    # Логика обычного ответа
+                    variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
 
 
 if __name__ == '__main__':
