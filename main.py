@@ -99,46 +99,46 @@ def main():
                     bot.write_msg(vk, variables['id'], f"Список избранных пуст")
                     continue
 
-            # elif event.text.lower().strip() in ['поиск']:
-            #     if base.get_favourites(cur, sender_id):
-            #         bot.write_msg(vk, sender_id, f"Поиск...")
+            elif event.text.lower().strip() in ['поиск']:
+                if base.get_favourites(cur, variables['id']):
+                    bot.write_msg(vk, variables['id'], f"Поиск...")
 
-            #         v_kinder = VKinder(longpoll, session)
-            #         result = v_kinder.find_user(ask_user)
+                    v_kinder = VKinder(longpoll, session)
+                    result = v_kinder.find_user(ask_user)
 
-            #         if add_to_database(cur, ask_user[0], result):
-            #             print('Добавлено в базу')
-            #             # sql_cursor.commit()
-            #             bot.write_msg(vk, sender_id, "Данные записаны в базу")
-            #         else:
-            #             print('Ошибка')
-            #     else:
-            #         bot.write_msg(vk, sender_id, "Смотреть данные")
+                    if add_to_database(cur, ask_user[0], result):
+                        print('Добавлено в базу')
+                        # sql_cursor.commit()
+                        bot.write_msg(vk, variables['id'], "Данные записаны в базу")
+                    else:
+                        print('Ошибка')
+                else:
+                    bot.write_msg(vk, variables['id'], "Смотреть данные")
 
-            # elif event.text.lower().strip() in ['Смотреть данные']:
+            elif event.text.lower().strip() in ['Смотреть данные']:
 
-            #     if base.check_find_user(cur, ask_user[0]):
-            #         counter = add_to_database(cur, sender_id, result)
-            #     else:
-            #         print('Данных нет')
-            #         bot.write_msg(vk, sender_id, "Данных нет. Выполнить поиск")
+                if base.check_find_user(cur, ask_user[0]):
+                    counter = add_to_database(cur, variables['id'], result)
+                else:
+                    print('Данных нет')
+                    bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
-            # elif event.text.lower().strip() in ['Добавить в список избранных']:
+            elif event.text.lower().strip() in ['Добавить в список избранных']:
 
-            #     if base.add_favourites(cur, counter - 1, 1):
-            #         # sql_cursor.commit()
-            #         print('Добавлено в избранное')
-            #         bot.write_msg(vk, sender_id, "Добавлен в список избранных")
+                if base.add_favourites(cur, counter - 1, 1):
+                    # sql_cursor.commit()
+                    print('Добавлено в избранное')
+                    bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
 
-            # elif event.text.lower().strip() in ['Добавить в черный список']:
+            elif event.text.lower().strip() in ['Добавить в черный список']:
 
-            #     if base.add_favourites(cur, counter - 1, 2):
-            #         # sql_cursor.commit()
-            #         print('Добавлено в чёрный список')
-            #         bot.write_msg(vk, sender_id, "Добавлен в чёрный список")
+                if base.add_favourites(cur, counter - 1, 2):
+                    # sql_cursor.commit()
+                    print('Добавлено в чёрный список')
+                    bot.write_msg(vk, variables['id'], "Добавлен в чёрный список")
 
             # else:
-            #     bot.write_msg(vk, sender_id, "Ошибка")
+            #     bot.write_msg(vk, variables['id'], "Ошибка")
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
