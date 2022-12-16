@@ -26,10 +26,11 @@ class RequestsVk:
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
         pprint(res.json())
         user_info = {"city": "", "age": "", "user_name": "", "sex": ""}
-        first_name = res.json().get('response')[0].get("first_name")
-        last_name = res.json().get('response')[0].get("last_name")
-        name = first_name + " " + last_name
-        user_info['user_name'] = name
+        user_name = res.json().get('response')[0].get("user_name")
+        # first_name = res.json().get('response')[0].get("first_name")
+        # last_name = res.json().get('response')[0].get("last_name")
+        #name = first_name + " " + last_name
+        user_info['user_name'] = user_name
         if res.json().get('response')[0].get("city"):
             city = res.json().get('response')[0].get("city").get("title")
         else: city = ""
@@ -65,7 +66,8 @@ class RequestsVk:
         else:
             age = datetime.datetime.now() - datetime.timedelta(days=365 * int(age))
             age = age.year
-            params = {'fields': "first_name, bdate",
+            #params = {'fields': "first_name, bdate",
+            params = {'fields': "user_name, bdate",
                       'q': city,
                       'count': 3,
                       'offset': 1,
@@ -81,8 +83,9 @@ class RequestsVk:
         for item in result:
             list_user = []
             list_user.append(item.get('id'))
-            list_user.append(item.get('first_name'))
-            list_user.append(item.get('last_name'))
+            list_user.append(item.get('user_name'))
+            # list_user.append(item.get('first_name'))
+            # list_user.append(item.get('last_name'))
             list_users.append(list_user)
         return list_users
 
@@ -155,7 +158,7 @@ if __name__ == '__main__':
     # sex = int(list_input[1])
     # vk = VK(access_token)
     # # user_info = vk.get_user(user_id)
-    # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
+    # # возвращает список словарей пользователей вида {"href": [], "user_name": "", "user_link": ""}
     # pprint(vk.users_info(age, city, sex))
 
 
