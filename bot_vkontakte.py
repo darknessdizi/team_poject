@@ -210,8 +210,6 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     variables = variables['fields']
     if message_text == "привет":
         pass
-    elif message_text == "фото": 
-        pass
     elif message_text == "старт":
         keyboard = create_buttons(2)
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
