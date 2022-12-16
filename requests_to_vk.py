@@ -55,7 +55,7 @@ class RequestsVk:
             age_from, age_to = age.split("-")
             params = {'fields': "first_name, last_name, bdate, sex",
                       'q': city,
-                      'count': 50,
+                      'count': 1000,
                       'offset': 1,
                       'age_from': age_from,
                       'age_to': age_to,
@@ -66,7 +66,7 @@ class RequestsVk:
             age = age.year
             params = {'fields': "first_name, last_name, bdate, sex",
                       'q': city,
-                      'count': 2,
+                      'count': 1000,
                       'offset': 1,
                       'birth_year': age,
                       'sex': sex
@@ -125,13 +125,13 @@ if __name__ == '__main__':
     pass
 
     # #для теста
-    access_token = token_vk.access_token
+    access_token = token_vk.token_vk
     list_input = ['30-40', 1, "Сочи"]
     age = list_input[0]
     city = list_input[2]
     sex = int(list_input[1])
     vk = RequestsVk(access_token)
-    # # user_info = vk.get_user(user_id)
+    user_info = vk.get_user('710698165')
     #pprint(vk.get_users(city=city, sex=sex, age=age, ask_user='740464439', status=None))
     pprint(vk.get_users_photo('710698165'))
     # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
