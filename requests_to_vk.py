@@ -1,13 +1,9 @@
 import json
 import requests
 from pprint import pprint
-# from dotenv import load_dotenv
 import os
 import datetime
 import time
-
-
-# load_dotenv(".env")
 
 
 class RequestsVk:

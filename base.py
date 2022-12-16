@@ -143,3 +143,23 @@ def get_favourites(cur, user_id):
     ''', (user_id, 1))
     return cur.fetchall()
 
+
+def add_blacklist(cur, iterator, flag):
+    '''добавляем в черный список'''
+    cur.execute('''
+        UPDATE find_users SET blacklist = %s WHERE iterator = %s;
+    ''', (flag, iterator))
+    cur.execute('''
+        SELECT blacklist FROM find_users
+        WHERE iterator = %s;
+    ''', (iterator,))
+    return cur.fetchone()
+
+
+def get_blacklist(cur, user_id):
+    '''Выгружаем из базы данных черный список'''
+    cur.execute('''
+        SELECT f_user_id, f_user_name, user_url FROM find_users
+        WHERE user_id = %s AND blacklist = %s;
+    ''', (user_id, 1))
+    return cur.fetchall()

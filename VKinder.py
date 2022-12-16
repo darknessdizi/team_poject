@@ -6,17 +6,17 @@ class VKinder:
 
     def _search(self, user_param):
         '''первоначальный поиск'''
-        if user_param[6] == 'Мужской':
+        if user_param[4] == 'Мужской':
             sex = 1
-        elif user_param[6] == 'Женский':
+        elif user_param[4] == 'Женский':
             sex = 2
         else:
             sex = 0
 
         result = self.session.users.search(count=1000, blacklisted_by_me=0, fields=['photo_id', 'sex', 'bdate', 'city',
                                                                                   'is_closed'],
-                                           city=user_param[5], sex=sex,
-                                           age_from=user_param[3], age_to=user_param[3], has_photo=1,)['items']
+                                           city=user_param[3], sex=sex,
+                                           age_from=user_param[3], age_to=user_param[2], has_photo=1,)['items']
         print('Выполнен первоначальный поиск')
         return result
 
@@ -40,7 +40,7 @@ class VKinder:
             if not black_user['is_closed']:
                 print('. ', end="")
                 attachment = self._find_photo(black_user['id'])
-                find_users.append({'user_name': black_user['user_name'],
+                find_users.append({'user_name': f"{black_user['first_name']} {black_user['first_name']}" ,
                                    'url': f"https://vk.com/id{black_user['id']}",
                                    'attachment': attachment, 'id': black_user['id']})
 

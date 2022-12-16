@@ -7,8 +7,6 @@ from token_vk import token_vk_community, token_vk
 from vk_api.longpoll import VkLongPoll
 
 
-
-
 def connection():
 
     # Авторизуемся как сообщество
@@ -156,14 +154,14 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
                 keyboard = create_buttons(2)
                 write_msg(object_vk_api, sender_id, "Не правильно указан возраст!!! Повторите ввод.", keyboard)
                 return date, index
-    # elif index - 1 == 1:
-    #     if not message_text.strip() in ('1', '2'):
-    #         index = index - 1
-    #         keyboard = create_buttons(2)
-    #         write_msg(object_vk_api, sender_id, "Не правильно указан пол человека!!! Повторите ввод.", keyboard)
-    #         return date, index
-    #     else:
-    #         text = message_text.strip()
+    elif index - 1 == 1:
+        if not message_text.strip() in ('1', '2'):
+            index = index - 1
+            keyboard = create_buttons(2)
+            write_msg(object_vk_api, sender_id, "Не правильно указан пол человека!!! Повторите ввод.", keyboard)
+            return date, index
+        else:
+            text = message_text.strip()
     else:    
         text = message_text.lower().replace('.', '')
     date.setdefault(categories_of_questions[index - 1], text)
