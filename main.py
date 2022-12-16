@@ -1,3 +1,7 @@
+import json
+
+import psycopg2
+
 import base
 import bot_vkontakte as bot
 import vk_api
@@ -170,7 +174,36 @@ longpoll = VkLongPoll(vk)
                     # Запрос на фотографии
                     if variables['fields']['start_request']:
                         print(variables['fields']['filtr_dict'])   # почему 3 элемента а не 4 ?????????????
-                        respone = response.users_info(**variables['fields']['filtr_dict'])
+
+                        #respone = response.users_info(**variables['fields']['filtr_dict'])
+                        # ищем пользователей по параметрам и записываем в "data.json"
+                        response.get_users(city=ask_user[3],
+                                            sex=ask_user[4],
+                                            age=ask_user[2],
+                                            ask_user=ask_user[0],
+                                            status=None)
+                        # помещаем json в переменную для дальнейшей работой с ними
+                        with open(f"data.json_{ask_user[0]}", "r") as f:
+                            json_data = json.load(f)
+
+                while variables['fields']['start_request'] = True:
+                        try:
+                             element = json_data.pop(-1)
+                            # запрашиваем у вк наличие 3-х фото с профиля
+                            photos = response.get_users_photo(element.get('id'))
+                            if photos is None:
+                                while photos is None:
+                                    element = json_data.pop(-1)
+                                    photos = response.get_users_photo(element.get('id'))
+                            list_link_photo = photos.get("href")
+                            attachment = bot.add_photos(vk, list_link_photo)
+                            bot.send_photos(vk, variables['id'], attachment)
+                            if ##если пользователь отказывается дальше запрашивать фото
+                                variables['fields']['start_request'] == False
+                        except StopIteration:
+                            break
+
+
                         # pprint.pprint(respone)          
                         attachment = bot.add_photos(vk, respone[0]['link_photo'])
                         bot.send_photos(vk, variables['id'], attachment)

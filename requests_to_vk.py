@@ -47,7 +47,7 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, city=None, sex=None, age=None, status=None):
+    def get_users(self, city=None, sex=None, age=None, ask_user=None, status=None):
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
@@ -75,13 +75,16 @@ class RequestsVk:
 
         result = res.json().get('response').get('items')
 
-        with open('data.json', 'w') as file:
+        with open(f"data.json_{ask_user}", 'w') as file:
             json.dump(result, file, ensure_ascii=False, indent=3)
         return result
 
     def get_users_photo(self, user_id):
-        """ метод возвращает словарь вида {'href': [], 'owner_id': ""}
-           с ссылками на фото пользователя """
+
+        """ метод возвращает словарь вида {'href': [], 'owner_id': "", "user_link": ""}
+           с ссылками на фото пользователя.
+           При отсутствии фото в профиле пользователя или их количестве < 3 возвращает None"""
+
         url = "https://api.vk.com/method/photos.get"
         params = {
             'owner_id': user_id,
@@ -122,14 +125,14 @@ if __name__ == '__main__':
     pass
 
     # #для теста
-    # access_token = token_vk.access_token
-    # list_input = ['30-40', 1, "Сочи"]
-    # age = list_input[0]
-    # city = list_input[2]
-    # sex = int(list_input[1])
-    # vk = RequestsVk(access_token)
+    access_token = token_vk.access_token
+    list_input = ['30-40', 1, "Сочи"]
+    age = list_input[0]
+    city = list_input[2]
+    sex = int(list_input[1])
+    vk = RequestsVk(access_token)
     # # user_info = vk.get_user(user_id)
-    # pprint(vk.get_users(city=city, sex=sex, age=age, status=None))
-    #pprint(vk.get_users_photo('710698165'))
+    #pprint(vk.get_users(city=city, sex=sex, age=age, ask_user='740464439', status=None))
+    pprint(vk.get_users_photo('710698165'))
     # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
     # pprint(vk.users_info(age, city, sex))
