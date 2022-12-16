@@ -186,7 +186,7 @@ longpoll = VkLongPoll(vk)
                         with open(f"data.json_{ask_user[0]}", "r") as f:
                             json_data = json.load(f)
 
-                while variables['fields']['start_request'] = True:
+                    while variables['fields']['start_request'] = True:
                         try:
                              element = json_data.pop(-1)
                             # запрашиваем у вк наличие 3-х фото с профиля
