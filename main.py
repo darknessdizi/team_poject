@@ -4,6 +4,7 @@ import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
+from VKinder import VKinder
 import pprint
 
 
@@ -15,7 +16,7 @@ def main():
     list_of_dicts = []
 
     # Создание объекта для подключения к базе данных
-    sql_cursor = base.PostgreSQL(**sql_authorization)
+    sql_cursor = VKinder.PostgreSQL(**sql_authorization)
     cur = sql_cursor.connect.cursor()
 
     # Создание объекта для осуществления request запросов
@@ -36,42 +37,42 @@ def main():
             list_of_users = result[1]
             list_of_dicts = result[2]
                         
-            base.checking_the_user_in_the_database(cur, variables['id'], response)
+            VKinder.checking_the_user_in_the_database(cur, variables['id'], response)
 
-            if event.text.lower().strip() == 'привет':
-                ask_user = base.the_command_to_greet(cur, variables['id'], vk)
+            if event.text.lower().strip() == 'Привет':
+                ask_user = VKinder.the_command_to_greet(cur, variables['id'], vk)
 
-            elif event.text.lower().strip() in ['список']:
-                if base.checking_the_favorites_list(cur, variables['id'], vk):
+            elif event.text.lower().strip() in ['Список']:
+                if VKinder.checking_the_favorites_list(cur, variables['id'], vk):
                     continue
 
             elif event.text.lower().strip() in ['поиск']:
-                base.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
+                VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
 
             elif event.text.lower().strip() in ['Смотреть данные']:
 
-                if base.check_find_user(cur, ask_user[0]):
-                    counter = base.add_to_database(cur, variables['id'], result)
+                if VKinder.check_find_user(cur, ask_user[0]):
+                    counter = VKinder.add_to_database(cur, variables['id'], result)
                 else:
                     print('Данных нет')
                     bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
             elif event.text.lower().strip() in ['Добавить в список избранных']:
 
-                if base.add_favourites(cur, counter - 1, 1):
-                    # sql_cursor.commit()
+                if VKinder.add_favourites(cur, counter - 1, 1):
+
                     print('Добавлено в избранное')
                     bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
 
             elif event.text.lower().strip() in ['Добавить в черный список']:
 
-                if base.add_favourites(cur, counter - 1, 2):
-                    # sql_cursor.commit()
+                if VKinder.add_favourites(cur, counter - 1, 2):
+
                     print('Добавлено в чёрный список')
                     bot.write_msg(vk, variables['id'], "Добавлен в чёрный список")
 
-            # else:
-            #     bot.write_msg(vk, variables['id'], "Ошибка")
+        else:
+            bot.write_msg(vk, variables['id'], "Ошибка")
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:

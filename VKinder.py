@@ -1,6 +1,20 @@
 import base
 import bot_vkontakte as bot
 from datetime import date
+import psycopg2
+
+
+class PostgreSQL:
+
+    def __init__(self, **kwargs):
+        self.connect = psycopg2.connect(
+            dbname=kwargs['dbname'],
+            user=kwargs['user'],
+            password=kwargs['password']
+        )
+        self.connect.autocommit = True
+
+
 
 class VKinder:
 

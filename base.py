@@ -1,19 +1,3 @@
-import psycopg2
-from datetime import date
-import bot_vkontakte as bot
-from VKinder import VKinder
-
-
-class PostgreSQL:
-
-    def __init__(self, **kwargs):
-        self.connect = psycopg2.connect(
-            dbname=kwargs['dbname'],
-            user=kwargs['user'],
-            password=kwargs['password']
-        )
-        self.connect.autocommit = True
-
 
 def drop_table(cur):
     cur.execute("""

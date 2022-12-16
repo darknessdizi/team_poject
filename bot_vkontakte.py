@@ -57,10 +57,10 @@ def create_keyboard(response):
     if response in ['Привет', 'привет', 'Поиск', 'поиск']:
         keyboard.add_button('Заполнить базу')
         keyboard.add_line()
-        keyboard.add_button('Просмотреть список избранных',
+        keyboard.add_button('Список',
                             color=VkKeyboardColor.POSITIVE)
         keyboard.add_line()
-        keyboard.add_button('Просмотреть данные пользователей',
+        keyboard.add_button('Смотреть данные',
                             color=VkKeyboardColor.POSITIVE)
         keyboard.add_line()
         keyboard.add_button('Закончить')
@@ -82,8 +82,10 @@ def create_keyboard(response):
 
     elif response in ['Начать поиск', 'Просмотреть данные пользователей', 'Вернуться к поиску',
                        'Добавить в список избранных', 'Добавить в черный список', 'Продолжить поиск']:
-        keyboard.add_button('Добавить в список избранных', color=VkKeyboardColor.POSITIVE)
-        keyboard.add_button('Добавить в черный список', color=VkKeyboardColor.NEGATIVE)
+        keyboard.add_button('Добавить в список избранных',
+                            color=VkKeyboardColor.POSITIVE)
+        keyboard.add_button('Добавить в черный список',
+                            color=VkKeyboardColor.NEGATIVE)
         keyboard.add_line()
         keyboard.add_button('Продолжить поиск')
         keyboard.add_line()
