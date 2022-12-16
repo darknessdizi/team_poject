@@ -4,15 +4,8 @@ import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
-from datetime import date
 import pprint
 from VKinder import VKinder
-
-
-def calculate_age(born):
-    born = born.split(".")
-    today = date.today()
-    return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
 
 
 def data_conversion(db_source):
@@ -21,16 +14,6 @@ def data_conversion(db_source):
     for item in db_source:
         users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
     return users
-
-
-def add_to_database(cur, sender_id, result):
-    '''Пишет полученные данные из поиска в базу данных'''
-    for i_user in result:
-        if not base.check_find_user(cur, i_user['id']):
-            if base.add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
-                for item in i_user['attachment']:
-                    base.add_find_users_photos(cur, i_user['id'], item)
-    return True
 
 
 def main():
@@ -55,28 +38,13 @@ def main():
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
             
-            # проверка параметров каждого пользователя
+            # Выставляем параметры для пользователя написавшего сообщение
             result = bot.user_support(event, list_of_users, list_of_dicts)
             variables = result[0]
             list_of_users = result[1]
             list_of_dicts = result[2]
                         
-            if not base.get_ask_user_data(cur, variables['id']):
-                print('в базе отсутствует')
-                user_info = response.get_user(variables['id'])               
-                user_info['age'] = calculate_age(user_info['age'])
-                if user_info['sex'] == 2:
-                    user_info['gender'] = 'Мужской'
-                elif user_info['sex'] == 1:
-                    user_info['gender'] = 'Женский'
-                else:
-                    user_info['gender'] = 'Пол не указан'
-                if base.add_ask_user(cur, variables['id'], user_info['user_name'],
-                                   user_info['age'], user_info['city'],
-                                   user_info['gender']):
-                    print('пользователь добавлен в базу')
-                else:
-                    print('пользователь НЕ добавлен в базу')
+            base.checking_the_user_in_the_database(cur, variables['id'], response)
 
             if event.text.lower().strip() == "привет":
                 ask_user = base.get_ask_user_data(cur, variables['id'])
@@ -106,7 +74,7 @@ def main():
                     v_kinder = VKinder(longpoll, session)
                     result = v_kinder.find_user(ask_user)
 
-                    if add_to_database(cur, ask_user[0], result):
+                    if base.add_to_database(cur, ask_user[0], result):
                         print('Добавлено в базу')
                         # sql_cursor.commit()
                         bot.write_msg(vk, variables['id'], "Данные записаны в базу")
@@ -118,7 +86,7 @@ def main():
             elif event.text.lower().strip() in ['Смотреть данные']:
 
                 if base.check_find_user(cur, ask_user[0]):
-                    counter = add_to_database(cur, variables['id'], result)
+                    counter = base.add_to_database(cur, variables['id'], result)
                 else:
                     print('Данных нет')
                     bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")

@@ -1,4 +1,5 @@
 import psycopg2
+from datetime import date
 
 
 class PostgreSQL:
@@ -163,3 +164,38 @@ def get_blacklist(cur, user_id):
         WHERE user_id = %s AND blacklist = %s;
     ''', (user_id, 1))
     return cur.fetchall()
+
+
+def calculate_age(born):
+    born = born.split(".")
+    today = date.today()
+    return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
+
+
+def add_to_database(cur, sender_id, result):
+    '''Пишет полученные данные из поиска в базу данных'''
+    for i_user in result:
+        if not base.check_find_user(cur, i_user['id']):
+            if add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
+                for item in i_user['attachment']:
+                    add_find_users_photos(cur, i_user['id'], item)
+    return True
+
+
+def checking_the_user_in_the_database(cur, sender_id, response):
+    if not get_ask_user_data(cur, sender_id):
+        print('в базе отсутствует')
+        user_info = response.get_user(sender_id)               
+        user_info['age'] = calculate_age(user_info['age'])
+        if user_info['sex'] == 2:
+            user_info['gender'] = 'Мужской'
+        elif user_info['sex'] == 1:
+            user_info['gender'] = 'Женский'
+        else:
+            user_info['gender'] = 'Пол не указан'
+        if add_ask_user(cur, sender_id, user_info['user_name'],
+                                user_info['age'], user_info['city'],
+                                user_info['gender']):
+            print('пользователь добавлен в базу')
+        else:
+            print('пользователь НЕ добавлен в базу')
