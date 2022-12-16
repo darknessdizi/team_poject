@@ -49,6 +49,73 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
     return variables, list_of_users, list_of_dicts
 
 
+def create_keyboard(response):
+
+    """Создание клавиатуры"""
+
+    keyboard = VkKeyboard(one_time=True)
+    if response in ['Привет', 'привет', 'Поиск', 'поиск']:
+        keyboard.add_button('Заполнить базу')
+        keyboard.add_line()
+        keyboard.add_button('Просмотреть список избранных',
+                            color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
+        keyboard.add_button('Просмотреть данные пользователей',
+                            color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
+        keyboard.add_button('Закончить')
+
+    elif response in ['Заполнить базу']:
+        keyboard.add_button('Просмотреть список избранных',
+                            color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
+        keyboard.add_button('Просмотреть данные пользователей',
+                            color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
+        keyboard.add_button('Закончить')
+
+    elif response in ['Просмотреть список избранных']:
+        keyboard.add_button('Просмотреть данные пользователей',
+                            color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
+        keyboard.add_button('Закончить')
+
+    elif response in ['Начать поиск', 'Просмотреть данные пользователей', 'Вернуться к поиску',
+                       'Добавить в список избранных', 'Добавить в черный список', 'Продолжить поиск']:
+        keyboard.add_button('Добавить в список избранных', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_button('Добавить в черный список', color=VkKeyboardColor.NEGATIVE)
+        keyboard.add_line()
+        keyboard.add_button('Продолжить поиск')
+        keyboard.add_line()
+        keyboard.add_button('Закончить')
+
+    elif response in ['Получить фото', 'Написать']:
+        keyboard.add_button('Вернуться к поиску')
+        keyboard.add_line()
+        keyboard.add_button('Закончить')
+
+    elif response in ['Получить фото', 'Написать']:
+        keyboard.add_button('Получить фото', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_button('Написать', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
+        keyboard.add_button('Вернуться к поиску')
+
+    elif response == 'Закончить':
+        keyboard.add_button('Пока')
+        keyboard.add_line()
+        keyboard.add_button('Вернуться к поиску')
+
+    elif response == 'Пока':
+        keyboard.add_button('Привет')
+
+    else:
+        keyboard.add_button('Начать поиск', color=VkKeyboardColor.POSITIVE)
+
+    keyboard = keyboard.get_keyboard()
+    return keyboard
+
+
+
 def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None) -> None:
 
     '''Отправляет сообщения и добавляет кнопки к сообщениям'''
@@ -100,26 +167,26 @@ def add_photos(object_vk_api: object, list_photos: list) -> list:
     return attachment_list
 
 
-def create_buttons(number: int) -> VkKeyboard:
-
-    '''Создает цветные кнопки'''
-
-    keyboard = VkKeyboard()
-    buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE, 
-                        VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
-    if number == 2:
-        keyboard.add_button('Сбросить', buttons_colors[0])
-        keyboard.add_line()
-        keyboard.add_button('Отменить', buttons_colors[-1])
-    elif number == 4:
-        buttons = [i.capitalize() for i in dict_func]
-        count = 0
-        for btn, btn_color in zip(buttons, buttons_colors):
-            if count == 2:
-                keyboard.add_line()
-            keyboard.add_button(btn, btn_color)
-            count += 1
-    return keyboard
+# def create_buttons(number: int) -> VkKeyboard:
+#
+#     '''Создает цветные кнопки'''
+#
+#     keyboard = VkKeyboard()
+#     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE,
+#                         VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
+#     if number == 2:
+#         keyboard.add_button('Сбросить', buttons_colors[0])
+#         keyboard.add_line()
+#         keyboard.add_button('Отменить', buttons_colors[-1])
+#     elif number == 4:
+#         buttons = [i.capitalize() for i in dict_func]
+#         count = 0
+#         for btn, btn_color in zip(buttons, buttons_colors):
+#             if count == 2:
+#                 keyboard.add_line()
+#             keyboard.add_button(btn, btn_color)
+#             count += 1
+#     return keyboard
 
 
 def add_person_to_sql(*args, **kwargs):
@@ -138,7 +205,7 @@ def add_to_blacklist(*args, **kwargs):
     pass
 
 
-def add_data_to_the_dictionary(object_vk_api: object, index: int, 
+def add_data_to_the_dictionary(object_vk_api: object, index: int,
                                 sender_id: str, message_text: str, date: dict) -> dict:
 
     '''Добавляет данные полученные от пользователя в словарь'''
@@ -162,7 +229,7 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
             return date, index
         else:
             text = message_text.strip()
-    else:    
+    else:
         text = message_text.lower().replace('.', '')
     date.setdefault(categories_of_questions[index - 1], text)
     return date, index
@@ -198,32 +265,32 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         variables['count'] = 0
         # Активируем цветные кнопки
         keyboard = create_buttons(4)
-        write_msg(object_vk_api, sender_id, "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard) 
+        write_msg(object_vk_api, sender_id, "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
     return variables
-                    
 
-def processing_a_simple_message(object_vk_api: object, message_text: str, variables: dict) -> dict:
-
-    '''Обработка событий простых сообщений и нажатия кнопок'''
-
-    sender_id = variables['id']
-    variables = variables['fields']
-    if message_text == "привет":
-        pass
-    elif message_text == "фото": 
-        pass
-    elif message_text == "старт":
-        keyboard = create_buttons(2)
-        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
-        variables['count'] += 1
-        variables['start'] = True
-    elif message_text in dict_func:
-        dict_func[message_text](**variables['sql'])
-        keyboard = create_buttons(4)
-        write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)
-    else:
-        write_msg(object_vk_api, sender_id, "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A")
-    return variables
+#
+# def processing_a_simple_message(object_vk_api: object, message_text: str, variables: dict) -> dict:
+#
+#     '''Обработка событий простых сообщений и нажатия кнопок'''
+#
+#     sender_id = variables['id']
+#     variables = variables['fields']
+#     if message_text == "привет":
+#         pass
+#     elif message_text == "фото":
+#         pass
+#     elif message_text == "старт":
+#         keyboard = create_buttons(2)
+#         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
+#         variables['count'] += 1
+#         variables['start'] = True
+#     elif message_text in dict_func:
+#         dict_func[message_text](**variables['sql'])
+#         keyboard = create_buttons(4)
+#         write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)
+#     else:
+#         write_msg(object_vk_api, sender_id, "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A")
+#     return variables
 
 
 dict_func = {
