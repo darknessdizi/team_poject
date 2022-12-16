@@ -16,7 +16,9 @@ class RequestsVk:
         return {'Content-Type': 'application/json', 'Authorization': f'OAuth {self.access_token}'}
 
     def get_user(self, user_id):
-        """ возвращает инф-ию о пользователе"""
+
+        '''Возвращает инф-ию о пользователе'''
+
         url = "https://api.vk.com/method/users.get"
         headers = self.get_headers()
         params = {"user_ids": user_id,
@@ -45,6 +47,9 @@ class RequestsVk:
         return user_info
 
     def get_users(self, city, sex, age, status=None):
+
+        '''Возвращает список пользователей с номером id и их именами'''
+
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
         if "-" in age:
@@ -62,7 +67,7 @@ class RequestsVk:
             age = age.year
             params = {'fields': "first_name, bdate",
                       'q': city,
-                      'count': 2,
+                      'count': 3,
                       'offset': 1,
                       'birth_year': age,
                       'sex': sex
@@ -72,8 +77,9 @@ class RequestsVk:
         result = res.json().get('response').get('items')
         with open('data.json', 'w', encoding='utf-8') as file:
             json.dump(res.json(), file, ensure_ascii=False, indent=3)
-        list_user, list_users = [], []
+        list_users = []
         for item in result:
+            list_user = []
             list_user.append(item.get('id'))
             list_user.append(item.get('first_name'))
             list_user.append(item.get('last_name'))
@@ -121,6 +127,9 @@ class RequestsVk:
         return dict_likes_max
 
     def users_info(self, city, sex, age, status=None):
+
+        '''Возвращает список словарей с именами, ссылками на профиль 
+        и ссылками на их 3 фото'''
 
         list_users = self.get_users(city, sex, age)
         list_new = []

@@ -187,6 +187,7 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         object_vk_api, variables['count'], sender_id, message_text, variables['filtr_dict']
     )
     if variables['count'] < len(bot_questions):
+        # бот продолжает задавать вопросы
         keyboard = create_buttons(2)
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1

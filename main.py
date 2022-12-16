@@ -1,4 +1,5 @@
 import base
+import json
 import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
@@ -152,9 +153,13 @@ def main():
                     else:
                         # Запросы на фото для пользователя
                         respone = response.users_info(**variables['fields']['filtr_dict'])
-                        # pprint.pprint(respone)          
+                        # print(respone)
+                        # with open('respone.json', 'w', encoding='utf-8') as file:
+                        #     json.dump(respone, file, ensure_ascii=False, indent=3)      
                         attachment = bot.add_photos(vk, respone[0]['link_photo'])
                         bot.send_photos(vk, variables['id'], attachment)
+                        attachment = bot.add_photos(vk, respone[1]['link_photo'])
+                        bot.send_photos(vk, variables['id'], attachment) # тест на загрузку двух найденных профилей
                         variables['fields']['filtr_dict'] = {}
                 else:
                     # Логика обычного ответа
