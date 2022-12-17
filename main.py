@@ -47,13 +47,15 @@ def main():
 
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
+                    print(variables['fields']['filtr_dict'])
                     if variables['fields']['continue']:
                         variables['fields']['continue'] = False
                         continue
                     else:
                         # Запросы на фото для пользователя
                         number = 0
-                        respone = response.users_info(**variables['fields']['filtr_dict']) 
+                        respone = response.users_info(**variables['fields']['filtr_dict'])
+
                         if len(respone) == 0:
                             bot.write_msg(vk, variables['id'], "Простите, людей не найдено")
                             variables['fields']['filtr_dict'] = {}
@@ -91,12 +93,14 @@ def main():
                             print('Данных нет')
                             bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
-                    elif message_text in ['добавить в список избранных']:
+                    elif message_text in ['добавить в избранное']:
 
-                        if VKinder.add_favourites(cur, counter - 1, 1):  # здесь ошибка type object 'VKinder' has no attribute 'add_favourites'
+                        print('Зашли на событие')
 
-                            print('Добавлено в избранное')
-                            bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
+                        base.add_favourites(cur, variables['id'], **variables['fields']['filtr_dict'])  
+
+                        print('Добавлено в избранное')
+                        # bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
 
                     elif message_text in ['добавить в черный список']:
 

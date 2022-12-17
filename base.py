@@ -110,6 +110,17 @@ def add_find_users_photos(cur, f_user_id, photo_str):
     return cur.fetchone()
 
 
+# def add_favourites(cur, iterator, flag):
+#     '''добавляем в список избранных'''
+#     cur.execute('''
+#         UPDATE find_users SET favourites = %s WHERE iterator = %s;
+#     ''', (flag, iterator))
+#     cur.execute('''
+#         SELECT favourites FROM find_users
+#         WHERE iterator = %s;
+#     ''', (iterator,))
+#     return cur.fetchone()
+
 def add_favourites(cur, iterator, flag):
     '''добавляем в список избранных'''
     cur.execute('''

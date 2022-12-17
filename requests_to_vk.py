@@ -131,6 +131,7 @@ class RequestsVk:
         и ссылками на их 3 фото'''
 
         list_users = self.get_users(city, sex, age)
+        print(list_users)
         list_new = []
         for item in list_users:
             # time.sleep(3)
