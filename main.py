@@ -4,8 +4,7 @@ import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
-from VKinder import VKinder
-from VKinder import PostgreSQL
+from VKinder import VKinder, PostgreSQL
 import pprint
 
 def main():
@@ -23,6 +22,8 @@ def main():
 
     longpoll, session, vk = bot.connection()
 
+    small = VKinder(longpoll, session)
+
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
@@ -37,42 +38,9 @@ def main():
             list_of_users = result[1]
             list_of_dicts = result[2]
 
-            vk.checking_the_user_in_the_database(cur, variables['id'], response)
+            small.checking_the_user_in_the_database(cur, variables['id'], response)
 
-            if event.text.lower().strip() == 'привет':
-                ask_user = VKinder.the_command_to_greet(cur, variables['id'], vk)
-
-            elif event.text.lower().strip() in ['Список']:
-                if VKinder.checking_the_favorites_list(cur, variables['id'], vk):
-                    continue
-
-            elif event.text.lower().strip() in ['поиск']:
-                VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
-
-            elif event.text.lower().strip() in ['Смотреть данные']:
-
-                if VKinder.check_find_user(cur, ask_user[0]):
-                    counter = VKinder.add_to_database(cur, variables['id'], result)
-                else:
-                    print('Данных нет')
-                    bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
-
-            elif event.text.lower().strip() in ['Добавить в список избранных']:
-
-                if VKinder.add_favourites(cur, counter - 1, 1):
-
-                    print('Добавлено в избранное')
-                    bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
-
-            elif event.text.lower().strip() in ['Добавить в черный список']:
-
-                if VKinder.add_favourites(cur, counter - 1, 2):
-
-                    print('Добавлено в чёрный список')
-                    bot.write_msg(vk, variables['id'], "Добавлен в чёрный список")
-
-            else: #сдвинула таб
-                bot.write_msg(vk, variables['id'], "Ошибка")
+            print('point 1')
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
@@ -121,6 +89,39 @@ def main():
                         variables['fields']['filtr_dict'] = {}
                 else:
                     # Логика обычного ответа
+                    if message_text == 'привет':
+                        ask_user = VKinder.the_command_to_greet(cur, variables['id'], vk)
+                        print('point 2')
+                    
+                    elif message_text in ['список']:
+                        if VKinder.checking_the_favorites_list(cur, variables['id'], vk):
+                            continue
+
+                    elif message_text in ['поиск']:
+                        VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
+
+                    elif message_text in ['смотреть данные']:
+
+                        if VKinder.check_find_user(cur, ask_user[0]):   # здесь ошибка type object 'VKinder' has no attribute 'check_find_user'
+                            counter = VKinder.add_to_database(cur, variables['id'], result)
+                        else:
+                            print('Данных нет')
+                            bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
+
+                    elif message_text in ['добавить в список избранных']:
+
+                        if VKinder.add_favourites(cur, counter - 1, 1):  # здесь ошибка type object 'VKinder' has no attribute 'add_favourites'
+
+                            print('Добавлено в избранное')
+                            bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
+
+                    elif message_text in ['добавить в черный список']:
+
+                        if VKinder.add_favourites(cur, counter - 1, 2):  # здесь ошибка type object 'VKinder' has no attribute 'add_favourites'
+
+                            print('Добавлено в чёрный список')
+                            bot.write_msg(vk, variables['id'], "Добавлен в чёрный список")
+
                     variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
 
 
