@@ -56,9 +56,9 @@ class RequestsVk:
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
-        if "-" in age:
-            age_from, age_to = age.split("-")
-            params = {'fields': "first_name, last_name, bdate, sex",
+        #if "-" in age:
+        age_from, age_to = age#age.split("-")
+        params = {'fields': "first_name, last_name, bdate, sex",
                       'q': city,
                       'count': 20,
                       'offset': 1,
@@ -66,17 +66,17 @@ class RequestsVk:
                       'age_to': age_to,
                       'sex': sex
                       }
-        else:
-            age = datetime.datetime.now() - datetime.timedelta(days=365 * int(age))
-            age = age.year
-            # params = {'fields': "first_name, bdate",
-            params = {'fields': "user_name, bdate",
-                      'q': city,
-                      'count': 20,
-                      'offset': 1,
-                      'birth_year': age,
-                      'sex': sex
-                      }
+        # else:
+        #     age = datetime.datetime.now() - datetime.timedelta(days=365 * int(age))
+        #     age = age.year
+        #     # params = {'fields': "first_name, bdate",
+        #     params = {'fields': "user_name, bdate",
+        #               'q': city,
+        #               'count': 20,
+        #               'offset': 1,
+        #               'birth_year': age,
+        #               'sex': sex
+        #               }
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
 
         result = res.json().get('response').get('items')
