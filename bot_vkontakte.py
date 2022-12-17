@@ -38,7 +38,8 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
                         'continue': False, 
                         'filtr_dict': {}, 
                         'sql': {},
-                        'start_request': False
+                        'start_request': False,
+                        'number': 0
                         }
                     }
         first_variables['id'] = event.user_id
@@ -302,7 +303,7 @@ dict_func = {
 
 bot_questions = [
     "Укажите возраст людей по образцу\nПример: 25 или 20-30 \U0001F609",
-    "Укажите пол (муж -1 \U0001F57A или жен - 2 \U0001F483):",
+    "Укажите пол (жен - 1 \U0001F483 или муж - 2 \U0001F57A ):",
     "Укажите город: \U0001F3E1"
     #"Семейное положение: \U0001F48F"
 ]

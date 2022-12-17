@@ -73,7 +73,6 @@ class RequestsVk:
                       'sex': sex
                       }
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
-        # print(res)
         result = res.json().get('response').get('items')
         with open('data.json', 'w', encoding='utf-8') as file:
             json.dump(res.json(), file, ensure_ascii=False, indent=3)
