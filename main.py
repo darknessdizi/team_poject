@@ -53,46 +53,52 @@ def main():
                         variables['fields']['continue'] = False
                         continue
                     else:
-
                         # Запросы на фото для пользователя
-                        print(variables['fields']['filtr_dict'])
-                        list_of_users = response.get_users(**variables['fields']['filtr_dict'])
-
-                        kursor = 0
-                        len_list = len(list_of_users)
-                        #  если пользователь запрашивает еще фото
-                        message_text = event.text
-                        #while message_text == 'еще':
-                        photos, kursor = response.get_photo_from_iterator(list_of_users[kursor:], len_list, kursor)
-                        print(photos)
-
-                            #### здесь отправляем фото и предлагаем сохранить  в избранное
-                        attachment = bot.add_photos(vk, photos.get('href'))
-                        message = f"{photos.get('user_name')}\n {photos.get('user_link')}"
-                        bot.write_msg(vk, variables['id'], message)
-                            # отправка фото
+                        respone = response.users_info(**variables['fields']['filtr_dict'])    
+                        attachment = bot.add_photos(vk, respone[0]['link_photo'])
                         bot.send_photos(vk, variables['id'], attachment)
-                            # отправка сообщения с сылкой на профилем и именем
-                        message = f"{photos.get('user_name')}\n {photos.get('user_link')}"
-                        bot.write_msg(vk, variables['id'], message)
-
-                            # if photos is None:
-                            #     continue
-                            # print(photos)
-                            # kursor += 1
-                            # # запрашиваем будет ли еще смотреть
-                            # bot.write_msg(vk, variables['id'], "Еще фото?")
-                            # message_text = event.text # или нажата кнопка еще
-                            #
-                            # if kursor == len(list_of_users) - 1:
-                            #     print('поиск завершен')
-                            #     break
-                            # if message_text == 'нет':
-                            #     break
-
-                        #attachment = bot.add_photos(vk, respone[1].['link_photo'])
-                        #bot.send_photos(vk, variables['id'], attachment) # тест на загрузку двух найденных профилей
                         variables['fields']['filtr_dict'] = {}
+
+
+                        # # Запросы на фото для пользователя
+                        # print(variables['fields']['filtr_dict'])
+                        # list_of_users = response.get_users(**variables['fields']['filtr_dict'])
+
+                        # kursor = 0
+                        # len_list = len(list_of_users)
+                        # #  если пользователь запрашивает еще фото
+                        # message_text = event.text
+                        # #while message_text == 'еще':
+                        # photos, kursor = response.get_photo_from_iterator(list_of_users[kursor:], len_list, kursor)
+                        # print(photos)
+
+                        #     #### здесь отправляем фото и предлагаем сохранить  в избранное
+                        # attachment = bot.add_photos(vk, photos.get('href'))
+                        # message = f"{photos.get('user_name')}\n {photos.get('user_link')}"
+                        # bot.write_msg(vk, variables['id'], message)
+                        #     # отправка фото
+                        # bot.send_photos(vk, variables['id'], attachment)
+                        #     # отправка сообщения с сылкой на профилем и именем
+                        # message = f"{photos.get('user_name')}\n {photos.get('user_link')}"
+                        # bot.write_msg(vk, variables['id'], message)
+
+                        #     # if photos is None:
+                        #     #     continue
+                        #     # print(photos)
+                        #     # kursor += 1
+                        #     # # запрашиваем будет ли еще смотреть
+                        #     # bot.write_msg(vk, variables['id'], "Еще фото?")
+                        #     # message_text = event.text # или нажата кнопка еще
+                        #     #
+                        #     # if kursor == len(list_of_users) - 1:
+                        #     #     print('поиск завершен')
+                        #     #     break
+                        #     # if message_text == 'нет':
+                        #     #     break
+
+                        # #attachment = bot.add_photos(vk, respone[1].['link_photo'])
+                        # #bot.send_photos(vk, variables['id'], attachment) # тест на загрузку двух найденных профилей
+                        # variables['fields']['filtr_dict'] = {}
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':

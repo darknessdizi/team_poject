@@ -131,7 +131,7 @@ class VKinder:
             users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
         return users
 
-    def checking_the_favorites_list(cur, sender_id: str, object_vk_api: object):
+    def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
         if base.get_favourites(cur, sender_id):
             db_source = base.get_favourites(cur, sender_id)
             favourites = base.data_conversion(db_source)
