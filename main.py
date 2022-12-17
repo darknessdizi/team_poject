@@ -23,7 +23,6 @@ def main():
 
     longpoll, session, vk = bot.connection()
 
-    vk = VKinder(longpoll, session)
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
