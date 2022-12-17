@@ -33,7 +33,7 @@ class VKinder:
         else:
             sex = 0
 
-        result = self.session.users.search(count=1000, blacklisted_by_me=0, fields=['photo_id', 'sex', 'bdate', 'city',
+        result = self.session.users.search(count=1000, blacklisted_by_me=0, fields=['photo_id', 'name', 'age', 'sex', 'city',
                                                                                   'is_closed'],
                                            city=user_param[3], sex=sex,
                                            age_from=user_param[3], age_to=user_param[2], has_photo=1,)['items']
@@ -43,6 +43,7 @@ class VKinder:
 
 
     def _find_photo(self, user_id):
+
         '''подбираем фото'''
         get_photo = self.session.photos.get(owner_id=user_id, album_id='profile', extended=1, photo_sizes=1)['items']
         photo_list = sorted(get_photo, key=lambda k: k['likes']['count'], reverse=True)
@@ -61,19 +62,20 @@ class VKinder:
         search_users_dict = self._search(user_param)
         find_users = list()
         print("Ищем фото, формируем данные")
-        for black_user in search_users_dict:
-            if not black_user['is_closed']:
+        for user in search_users_dict:
+            if not user['is_closed']:
                 print('. ', end="")
-                attachment = self._find_photo(black_user['id'])
-                find_users.append({'user_name': f"{black_user['first_name']} {black_user['first_name']}" ,
-                                   'url': f"https://vk.com/id{black_user['id']}",
-                                   'attachment': attachment, 'id': black_user['id']})
+                attachment = self._find_photo(user['id'])
+                find_users.append({'user_name': f"{user['user_name']} " ,
+                                   'url': f"https://vk.com/id{user['id']}",
+                                   'attachment': attachment, 'id': user['id']})
 
         print("\nПоиск фото окончен, данные сформированы")
         return find_users
 
 
     def calculate_age(self, born):  ### добавила self
+
         born = born.split(".")
         today = date.today()
         return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
@@ -123,11 +125,11 @@ class VKinder:
                                                 f"(Введите: старт\список) \U0001F60E")
         return ask_user
 
-    def data_conversion(db_source):
+    def data_conversion(sender_id, cur):
 
         '''Преобразует данные из базы данных для бота '''
         users = list()
-        for item in db_source:
+        for item in sender_id:
             users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
         return users
 
