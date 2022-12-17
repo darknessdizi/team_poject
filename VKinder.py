@@ -109,7 +109,7 @@ class VKinder:
             else:
                 print('пользователь НЕ добавлен в базу')
 
-    def the_command_to_greet(cur, sender_id: str, object_vk_api: object):
+    def the_command_to_greet(self, cur, sender_id: str, object_vk_api: object):
 
         '''Функция отвечает на приветствие пользователя'''
 

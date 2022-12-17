@@ -23,13 +23,15 @@ def main():
 
     longpoll, session, vk = bot.connection()
 
+    small = VKinder(longpoll, session)
+
     print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
 
         # Если пришло новое сообщение
-        if event.type == VkEventType.MESSAGE_NEW:
+        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
             
             # Выставляем параметры для пользователя написавшего сообщение
             result = bot.user_support(event, list_of_users, list_of_dicts)
@@ -37,12 +39,12 @@ def main():
             list_of_users = result[1]
             list_of_dicts = result[2]
 
-            vk.checking_the_user_in_the_database(cur, variables['id'], response)
+            small.checking_the_user_in_the_database(cur, variables['id'], response)  # убрала cur
 
             if event.text.lower().strip() == 'привет':
-                ask_user = VKinder.the_command_to_greet(cur, variables['id'], vk)
+                ask_user = small.the_command_to_greet(cur, variables['id'], vk) # убрала cur
 
-            elif event.text.lower().strip() in ['Список']:
+            elif event.text.lower().strip() in ['список']:
                 if VKinder.checking_the_favorites_list(cur, variables['id'], vk):
                     continue
 

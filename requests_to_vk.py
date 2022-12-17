@@ -144,7 +144,7 @@ class RequestsVk:
                 id = item[0]
                 print(id)
                 time.sleep(2.5)
-                photos = vk.get_users_photo(str(id))
+                photos = self.get_users_photo(str(id))
                 # смещение по индексу списка
                 kursor += 1
                 if photos is not None:
