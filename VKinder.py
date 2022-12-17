@@ -83,7 +83,7 @@ class VKinder:
 
         '''Пишет полученные данные из поиска в базу данных'''
         for i_user in result:
-            if not base.check_find_user(cur, i_user['id']):
+            if not base.add_find_users(cur, i_user['id']):
                 if base.add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
                     for item in i_user['attachment']:
                         base.add_find_users_photos(cur, i_user['id'], item)
@@ -134,7 +134,7 @@ class VKinder:
     def checking_the_favorites_list(cur, sender_id: str, object_vk_api: object):
         if base.get_favourites(cur, sender_id):
             db_source = base.get_favourites(cur, sender_id)
-            favourites = base.data_conversion(db_source)
+            favourites = base.get_favourites(db_source)
             for item in favourites:
                 bot.write_msg(object_vk_api, sender_id, f"{item['name']}\n{item['url']}")
                 bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
@@ -150,7 +150,7 @@ class VKinder:
             v_kinder = VKinder(longpoll, session)
             result = v_kinder.find_user(ask_user)
 
-            if base.add_to_database(cur, ask_user[0], result):
+            if base.add_find_users(cur, ask_user[0], result):
                 print('Добавлено в базу')
                 bot.write_msg(object_vk_api, sender_id, "Данные записаны в базу")
             else:
