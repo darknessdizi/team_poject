@@ -1,9 +1,8 @@
 import json
 import requests
 from pprint import pprint
-import os
-import datetime
 import time
+import token_vk
 
 
 class RequestsVk:
@@ -46,117 +45,133 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, city, sex, age, status=None):
+    def get_users(self, input_params):
 
         '''Возвращает список пользователей с номером id и их именами'''
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
-        if "-" in age:
-            age_from, age_to = age.split("-")
-            params = {'fields': "first_name, last_name, bdate, sex",
-                  'q': city,
-                  'count': 5,
-                  'offset': 1,
+        city = input_params.get('city')
+        city_id = self.get_city_id(city)
+
+        if city_id is None:
+            print("город не найден. уточните название города")
+            return None
+
+        sex = input_params.get('sex')
+        age = input_params.get('age')
+        age_from, age_to = age
+        age_from = int(age_from)
+        age_to = int(age_to)
+        params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city",
+                  'q': "",
+                  'count': 10,
+
                   'age_from': age_from,
                   'age_to': age_to,
-                  'sex': sex
+                  'sex': sex,
+                  'city': city_id
                   }
-        else:
-            age = datetime.datetime.now() - datetime.timedelta(days=365 * int(age))
-            age = age.year
-            params = {'fields': "first_name, bdate",
-                      'q': city,
-                      'count': 5,
-                      'offset': 1,
-                      'birth_year': age,
-                      'sex': sex
-                      }
+
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
         result = res.json().get('response').get('items')
         with open('data.json', 'w', encoding='utf-8') as file:
             json.dump(res.json(), file, ensure_ascii=False, indent=3)
+
         list_users = []
         for item in result:
             list_user = []
-            list_user.append(item.get('id'))
-            list_user.append(item.get('first_name'))
-            list_user.append(item.get('last_name'))
-            list_users.append(list_user)
+            if item.get('blacklisted') == 0 and item.get('is_closed') is False :
+                list_user.append(item.get('id'))
+                user_name = f"{item.get('first_name')} {item.get('last_name')}"
+                list_user.append(user_name)
+                list_users.append(list_user)
         return list_users
 
     def get_users_photo(self, user_id):
+
+        """ возвращает 3 фото пользователя с макс. количеством лайков.
+        Фото берутся со страницы пользователя и стены"""
+
         url = "https://api.vk.com/method/photos.get"
-        params = {
+        params1 = {
             'owner_id': user_id,
-            'album_id': 'profile',
+            'album_id': -7,
             'extended': 1,
             'photo_sizes': 1,
-            'offset': 1,
+
+            'count': 30
+        }
+        params2 = {
+            'owner_id': user_id,
+            'album_id': -6,
+            'extended': 1,
+            'photo_sizes': 1,
+
             'count': 30
         }
         headers = self.get_headers()
-        res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        res1 = requests.get(url=url, params={**self.params, **params1}, headers=headers)
+        res2 = requests.get(url=url, params={**self.params, **params2}, headers=headers)
+
         with open('photo.json', 'w') as file:
-            json.dump(res.json(), file, ensure_ascii=False, indent=3)
-        photos_info_list = res.json().get('response').get('items')
+             json.dump(res1.json(), file, ensure_ascii=False, indent=3)
+             json.dump(res2.json(), file, ensure_ascii=False, indent=3)
+        photos_info1 = res1.json().get('response').get('items')
+        photos_info2 = res2.json().get('response').get('items')
+        # берем фото из запроса по фото с профиля и по  фото со стены
+        photos_info = photos_info1 + photos_info2
+
+        if len(photos_info) < 3 or photos_info is None:
+            return None
+
         dict_likes = {'count': [], 'href': [], 'owner_id': ""}
         dict_likes_max = {'href': [], 'owner_id': ""}
-        if len(photos_info_list) != 0:
-            for photo in photos_info_list:
-                dict_likes['count'].append(photo.get('likes').get('count'))
-                dict_likes['href'].append(photo.get('sizes')[-1].get('url'))
-                dict_likes['owner_id'] = photo.get('owner_id')
 
-        if dict_likes.get('owner_id') != '':
-            while True:
-                if dict_likes.get('count') != []:
-                    max_like = max(dict_likes.get('count'))
-                    index = dict_likes.get('count').index(max_like)
-                else:
-                    index = 0
-                href = dict_likes.get('href')
-                if href != []:
-                    dict_likes.get('count').pop(index)
-                    max_href = href.pop(index)
-                    dict_likes_max['href'].append(max_href)
-                    dict_likes_max['owner_id'] = dict_likes.get('owner_id')
-                if len(dict_likes_max.get('href')) == 3 or len(dict_likes.get('href')) == 0:
-                    break
+        for photo in photos_info:
+            dict_likes['count'].append(photo.get('likes').get('count'))
+            dict_likes['href'].append(photo.get('sizes')[-1].get('url'))
+            dict_likes['owner_id'] = str(photo.get('owner_id'))
+
+
+        while len(dict_likes_max.get("href")) < 3:
+
+            max_like = max(dict_likes.get('count'))
+            index = dict_likes.get('count').index(max_like)
+
+            dict_likes.get('count').pop(index)
+            dict_likes_max['href'].append(dict_likes.get('href').pop(index))
+
         return dict_likes_max
 
-    def users_info(self, city, sex, age, status=None):
-
-        '''Возвращает список словарей с именами, ссылками на профиль 
-        и ссылками на их 3 фото'''
-
-        list_users = self.get_users(city, sex, age)
-        list_new = []
-        for item in list_users:
-            # time.sleep(3)
-            new_dict = {"link_photo": [], "user_name": "",  "user_link": ""}
-            dict1 = self.get_users_photo(item[0])
-            if dict1.get("href") != []:
-                new_dict["link_photo"] = dict1.get("href")
-                new_dict["user_name"] = item[1] + ' ' + item[2]
-                new_dict["user_link"] = "https://vk.com/id" + str(item[0])
-                list_new.append(new_dict)
-        return list_new
+    def get_city_id(self, city):
+        url = "https://api.vk.com/method/database.getCities"
+        headers = self.get_headers()
+        params = {
+            'q': city,
+            'count': 1
+        }
+        res = requests.get(url=url,  params={**self.params, **params}, headers=headers)
+        city_id = res.json().get('response').get('items')[0].get('id')
+        return city_id
 
 
 if __name__ == '__main__':
     pass
-    # access_token = os.getenv("access_token")
+    access_token = token_vk.token_vk
     # #для теста
-    # list_input = ['30-40', 1, "Сочи"]
-    # age = list_input[0]
-    # city = list_input[2]
-    # sex = int(list_input[1])
-    # vk = VK(access_token)
+    list_input = [[30,30], 1, 'новосибирск']
+    age = list_input[0]
+    city = list_input[2]
+    sex = int(list_input[1])
+    vk = RequestsVk(access_token)
     # # user_info = vk.get_user(user_id)
     # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    # pprint(vk.users_info(age, city, sex))
-
+    # input_params = {'age': ['34', '57'], 'sex': '1', 'city': 99}
+    # users = vk.get_users(input_params)
+    # pprint(users)
+    #pprint(vk.get_users_photo('370844284'))
+    print(vk.get_city_id('сочи'))
 
 
 

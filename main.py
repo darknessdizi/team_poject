@@ -5,7 +5,7 @@ from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
 from VKinder import VKinder, PostgreSQL
-import pprint
+import time
 
 def main():
 
@@ -44,25 +44,36 @@ def main():
             if event.to_me:
                 message_text = event.text.lower().strip()
                 if variables['fields']['start']:
-
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
                     if variables['fields']['continue']:
                         variables['fields']['continue'] = False
                         continue
                     else:
+
                         # Запросы на фото для пользователя
                         number = 0
-                        respone = response.users_info(**variables['fields']['filtr_dict'])
+                        # список пользователей которые находим по параметрам
+                        # список вида [int(id), str(user_name)]
+                        # variables['fields']['filtr_dict'] = {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
+                        respone = response.get_users(variables['fields']['filtr_dict'])
+                        if respone is None:
+                            bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
+                            variables['fields']['filtr_dict'] = {}
 
                         if len(respone) == 0:
                             bot.write_msg(vk, variables['id'], "Простите, людей не найдено")
                             variables['fields']['filtr_dict'] = {}
                         else:
-                            attachment = bot.add_photos(vk, respone[number]['link_photo'])
+                            # возвращает фото в словаре вида {'href': [], 'owner_id': ""}
+                            photos = response.get_users_photo(str(respone[number][0]))
+                            message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
+                            bot.write_msg(vk, variables['id'], message)
+                            attachment = bot.add_photos(vk, photos.get('href'))
                             bot.send_photos(vk, variables['id'], attachment)
                             keyboard = bot.create_buttons(4)
                             bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
+
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
@@ -76,12 +87,26 @@ def main():
                         keyboard = bot.create_buttons(4)
                         bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
                         number += 1
-                        if len(respone) == number:
+                        if len(respone)-1 == number:
                             bot.write_msg(vk, variables['id'], "Больше никого нет")
                             variables['fields']['filtr_dict'] = {}
                             continue
-                        attachment = bot.add_photos(vk, respone[number]['link_photo'])
-                        bot.send_photos(vk, variables['id'], attachment)
+
+                        else:
+
+                            time.sleep(2)
+                            photos = response.get_users_photo(str(respone[number][0]))
+                            print(respone[number][0])
+                            print(photos)
+                            if photos is None:
+#### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
+#### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
+                                continue
+
+                            message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
+                            bot.write_msg(vk, variables['id'], message)
+                            attachment = bot.add_photos(vk, photos.get('href'))
+                            bot.send_photos(vk, variables['id'], attachment)
 
                     # elif message_text in ['поиск']:
                     #     VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
