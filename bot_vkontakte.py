@@ -284,6 +284,7 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['start'] = True
+
     elif message_text in dict_func:
         dict_func[message_text](**variables['sql'])
         keyboard = create_buttons(4)

@@ -46,7 +46,6 @@ def main():
             if event.to_me:
                 message_text = event.text.lower().strip()
                 if variables['fields']['start']:
-
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
                     if variables['fields']['continue']:
@@ -54,12 +53,15 @@ def main():
                         continue
                     else:
 
+                        bot.write_msg()
+
                         # Запросы на фото для пользователя
                         print(variables['fields']['filtr_dict'])
                         list_of_users = response.get_users(**variables['fields']['filtr_dict'])
 
                         kursor = 0
                         len_list = len(list_of_users)
+                        bot.write_msg()
                         #  если пользователь запрашивает еще фото
                         message_text = event.text
                         #while message_text == 'еще':
