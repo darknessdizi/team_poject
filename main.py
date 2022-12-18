@@ -24,7 +24,7 @@ def main():
 
     small = VKinder(longpoll, session)
 
-    # print(base.drop_table(cur)) #если нужно сбросить БД
+    print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
@@ -57,23 +57,24 @@ def main():
                         # список вида [int(id), str(user_name)]
                         # variables['fields']['filtr_dict'] = {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
                         respone = response.get_users(variables['fields']['filtr_dict']) # формат [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                        print(respone)
                         if respone is None:
                             bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
                             variables['fields']['filtr_dict'] = {}
-
-                        if len(respone) == 0:
+                        elif len(respone) == 0:
                             bot.write_msg(vk, variables['id'], "Простите, людей не найдено")
                             variables['fields']['filtr_dict'] = {}
                         else:
                             # возвращает фото в словаре вида {'href': [], 'owner_id': ""}
                             photos = response.get_users_photo(str(respone[number][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
+                            message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
+                            bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
                             if photos is None:
 #### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
 #### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
+                                keyboard = bot.create_buttons(4)
+                                bot.write_msg(vk, variables['id'], "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nИщем следующего. \U0001F914", keyboard)
                                 continue
-                            message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
-                            bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
+                            
                             attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
                             bot.send_photos(vk, variables['id'], attachment)
                             keyboard = bot.create_buttons(4)
@@ -82,7 +83,7 @@ def main():
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
-                        ask_user = small.the_command_to_greet(cur, variables['id'], vk)
+                        small.the_command_to_greet(cur, variables['id'], vk)
                     
                     elif message_text in ['список', 'показать весь список']:
                         if small.checking_the_favorites_list(cur, variables['id'], vk):
@@ -93,23 +94,21 @@ def main():
                         bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
                         number += 1
                         if len(respone)-1 == number:
-                            bot.write_msg(vk, variables['id'], "Больше никого нет")
+                            bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                             variables['fields']['filtr_dict'] = {}
                             continue
-
                         else:
-
                             time.sleep(2)
                             photos = response.get_users_photo(str(respone[number][0]))
-                            print(respone[number][0])
-                            print(photos)
                             if photos is None:
 #### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
 #### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
+                                keyboard = bot.create_buttons(4)
+                                bot.write_msg(vk, variables['id'], "\n\U000026D4 \U0001F6AB У пользователя нет фотографий.\nИщем следующего. \U0001F914", keyboard)
                                 continue
-
+                            
                             message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
-                            bot.write_msg(vk, variables['id'], message)
+                            bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
                             attachment = bot.add_photos(vk, photos.get('href'))
                             bot.send_photos(vk, variables['id'], attachment)
 
@@ -130,7 +129,7 @@ def main():
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                                                 **variables['fields']['filtr_dict']) 
-                        base.add_photos(cur, photos, favorites_id)     # errors list indices must be integers or slices, not str                     
+                        base.add_photos(cur, photos['href'], favorites_id)                        
 
                     elif message_text in ['добавить в черный список']:
                         
@@ -138,10 +137,8 @@ def main():
                                                 cur, variables['id'], 
                                                 *respone[number], 
                                                 **variables['fields']['filtr_dict']) 
-                        base.add_photos(cur, photos, favorites_id)
+                        base.add_photos(cur, photos['href'], favorites_id)
                         base.black_list(cur, favorites_id)
-
-                        print('Добавлено в чёрный список')
 
                     variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
 
