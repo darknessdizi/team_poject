@@ -131,17 +131,17 @@ class VKinder:
             users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
         return users
 
-    def checking_the_favorites_list(cur, sender_id: str, object_vk_api: object):
+    def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
         if base.get_favourites(cur, sender_id):
             db_source = base.get_favourites(cur, sender_id)
-            favourites = base.data_conversion(db_source)
-            for item in favourites:
-                bot.write_msg(object_vk_api, sender_id, f"{item['name']}\n{item['url']}")
-                bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
+            for item in db_source:
+                message_text = f'Имя: {item[1]}\nВозраст: {item[2]}\nГород: {item[4]}'
+                bot.write_msg(object_vk_api, sender_id, message_text)
+                # bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
         else:
             bot.write_msg(object_vk_api, sender_id, f"Список избранных пуст")
-            return True
-        return False
+        bot.write_msg(object_vk_api, sender_id, "Выполнено \U00002705")
+        return True
 
     def search_function(cur, sender_id: str, object_vk_api: object, ask_user, session, longpoll):
         if base.get_favourites(cur, sender_id):

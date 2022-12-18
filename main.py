@@ -24,7 +24,7 @@ def main():
 
     small = VKinder(longpoll, session)
 
-    print(base.drop_table(cur)) #если нужно сбросить БД
+    # print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
@@ -40,8 +40,6 @@ def main():
 
             small.checking_the_user_in_the_database(cur, variables['id'], response)
 
-            print('point 1')
-
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
                 message_text = event.text.lower().strip()
@@ -53,57 +51,38 @@ def main():
                         continue
                     else:
 
-                        bot.write_msg()
-
                         # Запросы на фото для пользователя
-                        print(variables['fields']['filtr_dict'])
-                        list_of_users = response.get_users(**variables['fields']['filtr_dict'])
+                        number = 0
+                        respone = response.users_info(**variables['fields']['filtr_dict'])
 
-                        kursor = 0
-                        len_list = len(list_of_users)
-                        bot.write_msg()
-                        #  если пользователь запрашивает еще фото
-                        message_text = event.text
-                        #while message_text == 'еще':
-                        photos, kursor = response.get_photo_from_iterator(list_of_users[kursor:], len_list, kursor)
-                        print(photos)
+                        if len(respone) == 0:
+                            bot.write_msg(vk, variables['id'], "Простите, людей не найдено")
+                            variables['fields']['filtr_dict'] = {}
+                        else:
+                            attachment = bot.add_photos(vk, respone[number]['link_photo'])
+                            bot.send_photos(vk, variables['id'], attachment)
+                            keyboard = bot.create_buttons(4)
+                            bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
 
-                            #### здесь отправляем фото и предлагаем сохранить  в избранное
-                        attachment = bot.add_photos(vk, photos.get('href'))
-                        message = f"{photos.get('user_name')}\n {photos.get('user_link')}"
-                        bot.write_msg(vk, variables['id'], message)
-                            # отправка фото
-                        bot.send_photos(vk, variables['id'], attachment)
-                            # отправка сообщения с сылкой на профилем и именем
-                        message = f"{photos.get('user_name')}\n {photos.get('user_link')}"
-                        bot.write_msg(vk, variables['id'], message)
-
-                            # if photos is None:
-                            #     continue
-                            # print(photos)
-                            # kursor += 1
-                            # # запрашиваем будет ли еще смотреть
-                            # bot.write_msg(vk, variables['id'], "Еще фото?")
-                            # message_text = event.text # или нажата кнопка еще
-                            #
-                            # if kursor == len(list_of_users) - 1:
-                            #     print('поиск завершен')
-                            #     break
-                            # if message_text == 'нет':
-                            #     break
-
-                        #attachment = bot.add_photos(vk, respone[1].['link_photo'])
-                        #bot.send_photos(vk, variables['id'], attachment) # тест на загрузку двух найденных профилей
-                        variables['fields']['filtr_dict'] = {}
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
                         ask_user = small.the_command_to_greet(cur, variables['id'], vk)
-                        print('point 2')
                     
-                    elif message_text in ['список']:
+                    elif message_text in ['список', 'показать весь список']:
                         if small.checking_the_favorites_list(cur, variables['id'], vk):
                             continue
+
+                    elif message_text in ['следующий']:
+                        keyboard = bot.create_buttons(4)
+                        bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
+                        number += 1
+                        if len(respone) == number:
+                            bot.write_msg(vk, variables['id'], "Больше никого нет")
+                            variables['fields']['filtr_dict'] = {}
+                            continue
+                        attachment = bot.add_photos(vk, respone[number]['link_photo'])
+                        bot.send_photos(vk, variables['id'], attachment)
 
                     elif message_text in ['поиск']:
                         VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
@@ -116,12 +95,13 @@ def main():
                             print('Данных нет')
                             bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
-                    elif message_text in ['добавить в список избранных']:
+                    elif message_text in ['добавить в избранное']:
 
-                        if VKinder.add_favourites(cur, counter - 1, 1):  # здесь ошибка type object 'VKinder' has no attribute 'add_favourites'
-
-                            print('Добавлено в избранное')
-                            bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
+                        favorites_id = base.add_favourites(
+                                                cur, variables['id'], 
+                                                respone[number]['user_name'], 
+                                                **variables['fields']['filtr_dict']) 
+                        base.add_photos(cur, respone[number]['link_photo'], favorites_id)                         
 
                     elif message_text in ['добавить в черный список']:
 

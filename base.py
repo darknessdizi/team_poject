@@ -2,8 +2,8 @@
 def drop_table(cur):
     cur.execute("""
         DROP TABLE photos;
-        DROP TABLE find_users;
-        DROP TABLE ask_user;       
+        DROP TABLE favorites;
+        DROP TABLE users;       
     """)
 
     return 'Таблицы очищены'
@@ -11,8 +11,8 @@ def drop_table(cur):
 
 def create_db(cur):
     cur.execute('''
-        CREATE TABLE IF NOT EXISTS ask_user (
-        user_id INTEGER UNIQUE PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS users (
+        id INTEGER UNIQUE PRIMARY KEY,
         user_name VARCHAR(40) NOT NULL,
         user_age VARCHAR(10) NOT NULL,
         user_city VARCHAR(20) NOT NULL,
@@ -21,35 +21,36 @@ def create_db(cur):
     ''')
 
     cur.execute('''
-        CREATE TABLE IF NOT EXISTS find_users (
-        f_user_id INTEGER UNIQUE PRIMARY KEY,
-        user_id INTEGER REFERENCES ask_user(user_id),
-        f_user_name VARCHAR(40) NOT NULL,
-        user_url VARCHAR(40) NOT NULL UNIQUE,
-        favourites INTEGER,
-        iterator SERIAL
+        CREATE TABLE IF NOT EXISTS favorites (
+        id SERIAL PRIMARY KEY,
+        users_id INTEGER REFERENCES users (id),
+        user_name VARCHAR(40),
+        age VARCHAR(40),
+        sex VARCHAR(40),
+        city VARCHAR(40)
     );
     ''')
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS photos (
         id SERIAL PRIMARY KEY,
-        f_user_ids INTEGER REFERENCES find_users(f_user_id),
-        photo_str VARCHAR(40)
+        link VARCHAR,
+        favorites_id INTEGER REFERENCES favorites (id)
     );
     ''')
+
     return 'БД создана'
 
 
 def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
     '''добавлем данные пользователя в базу данных (запрашивающий пользователь)'''
     cur.execute("""
-        INSERT INTO ask_user(user_id, user_name, user_age, user_city, user_sex)
+        INSERT INTO users(id, user_name, user_age, user_city, user_sex)
         VALUES (%s, %s, %s, %s, %s);
         """, (user_id, user_name, user_age, user_city, user_sex))
     cur.execute('''
-        SELECT * FROM ask_user
-        WHERE user_id = %s;
+        SELECT * FROM users
+        WHERE id = %s;
         ''', (user_id,))
 
     return cur.fetchone()
@@ -58,8 +59,8 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
 def get_ask_user_data(cur, user_id):
     '''достаем из базы данные пользователя'''
     cur.execute('''
-        SELECT * FROM ask_user
-        WHERE user_id = %s;
+        SELECT * FROM users
+        WHERE id = %s;
         ''', (user_id,))
     return cur.fetchone()
 
@@ -109,19 +110,6 @@ def add_find_users_photos(cur, f_user_id, photo_str):
         ''', (f_user_id,))
     return cur.fetchone()
 
-
-def add_favourites(cur, iterator, flag):
-    '''добавляем в список избранных'''
-    cur.execute('''
-        UPDATE find_users SET favourites = %s WHERE iterator = %s;
-    ''', (flag, iterator))
-    cur.execute('''
-        SELECT favourites FROM find_users
-        WHERE iterator = %s;
-    ''', (iterator,))
-    return cur.fetchone()
-
-
 def get_favourites(cur, user_id):
     '''Выгружаем из базы данных список избранных'''
     cur.execute('''
@@ -129,7 +117,6 @@ def get_favourites(cur, user_id):
         WHERE user_id = %s AND favourites = %s;
     ''', (user_id, 1))
     return cur.fetchall()
-
 
 def add_blacklist(cur, iterator, flag):
     '''добавляем в черный список'''
@@ -151,6 +138,38 @@ def get_blacklist(cur, user_id):
     ''', (user_id, 1))
     return cur.fetchall()
 
+
+
+
+
+
+
+def add_favourites(cur, id, user_name, age, sex, city):
+
+    '''Добавляем пользователя в список избранных'''
+
+    cur.execute('''
+        INSERT INTO favorites (users_id , user_name, age, sex, city)
+            VALUES (%s, %s, %s, %s, %s) RETURNING id;''', 
+            (id, user_name, age, sex, city))
+
+def add_photos(cur, list_photos, favorites_id):
+
+    '''Прикрепляем ссылки на фото в список избранных'''
+
+    for link in list_photos:
+        cur.execute('''
+            INSERT INTO photos (link , favorites_id)
+                VALUES (%s, %s);''', 
+                (link, favorites_id))
+
+def get_favourites(cur, user_id):
+    '''Выгружаем из базы данных список избранных'''
+    cur.execute('''
+        SELECT users_id, user_name, age, sex, city FROM favorites
+        WHERE users_id = %s;
+    ''', (user_id,))
+    return cur.fetchall()
 
 
 if __name__ == '__main__':
