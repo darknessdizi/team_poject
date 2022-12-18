@@ -24,7 +24,7 @@ def main():
 
     small = VKinder(longpoll, session)
 
-    print(base.drop_table(cur)) #если нужно сбросить БД
+    # print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
@@ -68,7 +68,7 @@ def main():
                     if message_text == 'привет':
                         ask_user = small.the_command_to_greet(cur, variables['id'], vk)
                     
-                    elif message_text in ['список']:
+                    elif message_text in ['список', 'показать весь список']:
                         if small.checking_the_favorites_list(cur, variables['id'], vk):
                             continue
 
@@ -96,10 +96,11 @@ def main():
 
                     elif message_text in ['добавить в избранное']:
 
-                        base.add_favourites(cur, variables['id'], respone[number]['user_name'], **variables['fields']['filtr_dict'])  
-
-                        print('Добавлено в избранное')
-                        
+                        favorites_id = base.add_favourites(
+                                                cur, variables['id'], 
+                                                respone[number]['user_name'], 
+                                                **variables['fields']['filtr_dict']) 
+                        base.add_photos(cur, respone[number]['link_photo'], favorites_id)                         
 
                     elif message_text in ['добавить в черный список']:
 

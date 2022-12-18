@@ -182,7 +182,7 @@ def create_buttons(number: int) -> VkKeyboard:
         keyboard.add_line()
         keyboard.add_button('Отменить', buttons_colors[-1])
     elif number == 4:
-        buttons = [i.capitalize() for i in dict_func]
+        buttons = [i.capitalize() for i in list_button]
         count = 0
         for btn, btn_color in zip(buttons, buttons_colors):
             if count == 2:
@@ -190,23 +190,6 @@ def create_buttons(number: int) -> VkKeyboard:
             keyboard.add_button(btn, btn_color)
             count += 1
     return keyboard
-
-
-def add_person_to_sql(*args, **kwargs):
-    pass
-
-
-def next_person(*args, **kwargs):
-    pass
-
-
-def show_the_full_list(*args, **kwargs):
-    pass
-    
-
-def add_to_blacklist(*args, **kwargs):
-    pass
-
 
 def add_data_to_the_dictionary(object_vk_api: object, index: int,
                                 sender_id: str, message_text: str, date: dict) -> dict:
@@ -285,8 +268,7 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['start'] = True
-    elif message_text in dict_func:
-        dict_func[message_text](**variables['sql'])
+    elif message_text in list_button:
         keyboard = create_buttons(4)
         write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)
     else:
@@ -294,12 +276,7 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     return variables
 
 
-dict_func = {
-    'добавить в избранное': add_person_to_sql,
-    'следующий': next_person,
-    'показать весь список': show_the_full_list,
-    'добавить в черный список': add_to_blacklist
-}
+list_button = ['добавить в избранное', 'следующий', 'показать весь список', 'добавить в черный список']
 
 bot_questions = [
     "Укажите возраст людей по образцу\nПример: 25 или 20-30 \U0001F609",

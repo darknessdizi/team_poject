@@ -1,7 +1,7 @@
 
 def drop_table(cur):
     cur.execute("""
-
+        DROP TABLE photos;
         DROP TABLE favorites;
         DROP TABLE users;       
     """)
@@ -31,15 +31,14 @@ def create_db(cur):
     );
     ''')
 
-    # 'user_url VARCHAR(40) NOT NULL UNIQUE,'
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS photos (
+        id SERIAL PRIMARY KEY,
+        link VARCHAR,
+        favorites_id INTEGER REFERENCES favorites (id)
+    );
+    ''')
 
-    # cur.execute('''
-    #     CREATE TABLE IF NOT EXISTS photos (
-    #     id SERIAL PRIMARY KEY,
-    #     f_user_ids INTEGER REFERENCES find_users(f_user_id),
-    #     photo_str VARCHAR(40)
-    # );
-    # ''')
     return 'БД создана'
 
 
@@ -119,17 +118,6 @@ def get_favourites(cur, user_id):
     ''', (user_id, 1))
     return cur.fetchall()
 
-
-
-def get_favourites(cur, user_id):
-    '''Выгружаем из базы данных список избранных'''
-    cur.execute('''
-        SELECT users_id, first_name, last_name, age, sex, city FROM favorites
-        WHERE user_id = %s AND favourites = %s;
-    ''', (user_id))
-    return cur.fetchall()
-
-
 def add_blacklist(cur, iterator, flag):
     '''добавляем в черный список'''
     cur.execute('''
@@ -158,12 +146,31 @@ def get_blacklist(cur, user_id):
 
 def add_favourites(cur, id, user_name, age, sex, city):
 
-    '''Добавляем в список избранных'''
+    '''Добавляем пользователя в список избранных'''
 
     cur.execute('''
         INSERT INTO favorites (users_id , user_name, age, sex, city)
-            VALUES (%s, %s, %s, %s, %s);''', 
+            VALUES (%s, %s, %s, %s, %s) RETURNING id;''', 
             (id, user_name, age, sex, city))
+
+def add_photos(cur, list_photos, favorites_id):
+
+    '''Прикрепляем ссылки на фото в список избранных'''
+
+    for link in list_photos:
+        cur.execute('''
+            INSERT INTO photos (link , favorites_id)
+                VALUES (%s, %s);''', 
+                (link, favorites_id))
+
+def get_favourites(cur, user_id):
+    '''Выгружаем из базы данных список избранных'''
+    cur.execute('''
+        SELECT users_id, user_name, age, sex, city FROM favorites
+        WHERE users_id = %s;
+    ''', (user_id,))
+    return cur.fetchall()
+
 
 if __name__ == '__main__':
     pass

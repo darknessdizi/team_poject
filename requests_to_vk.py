@@ -56,7 +56,7 @@ class RequestsVk:
             age_from, age_to = age.split("-")
             params = {'fields': "first_name, last_name, bdate, sex",
                   'q': city,
-                  'count': 1,
+                  'count': 5,
                   'offset': 1,
                   'age_from': age_from,
                   'age_to': age_to,
@@ -67,7 +67,7 @@ class RequestsVk:
             age = age.year
             params = {'fields': "first_name, bdate",
                       'q': city,
-                      'count': 3,
+                      'count': 5,
                       'offset': 1,
                       'birth_year': age,
                       'sex': sex
