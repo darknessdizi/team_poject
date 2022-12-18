@@ -47,7 +47,6 @@ def main():
 
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
-                    print(variables['fields']['filtr_dict'])
                     if variables['fields']['continue']:
                         variables['fields']['continue'] = False
                         continue
@@ -74,6 +73,8 @@ def main():
                             continue
 
                     elif message_text in ['следующий']:
+                        keyboard = bot.create_buttons(4)
+                        bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
                         number += 1
                         if len(respone) == number:
                             bot.write_msg(vk, variables['id'], "Больше никого нет")
@@ -95,12 +96,10 @@ def main():
 
                     elif message_text in ['добавить в избранное']:
 
-                        print('Зашли на событие')
-
-                        base.add_favourites(cur, variables['id'], **variables['fields']['filtr_dict'])  
+                        base.add_favourites(cur, variables['id'], respone[number]['user_name'], **variables['fields']['filtr_dict'])  
 
                         print('Добавлено в избранное')
-                        # bot.write_msg(vk, variables['id'], "Добавлен в список избранных")
+                        
 
                     elif message_text in ['добавить в черный список']:
 

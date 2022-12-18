@@ -131,7 +131,6 @@ class RequestsVk:
         и ссылками на их 3 фото'''
 
         list_users = self.get_users(city, sex, age)
-        print(list_users)
         list_new = []
         for item in list_users:
             # time.sleep(3)
@@ -139,7 +138,7 @@ class RequestsVk:
             dict1 = self.get_users_photo(item[0])
             if dict1.get("href") != []:
                 new_dict["link_photo"] = dict1.get("href")
-                new_dict["user_name"] = item[1] + item[2]
+                new_dict["user_name"] = item[1] + ' ' + item[2]
                 new_dict["user_link"] = "https://vk.com/id" + str(item[0])
                 list_new.append(new_dict)
         return list_new
