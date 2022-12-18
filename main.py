@@ -83,16 +83,16 @@ def main():
                         attachment = bot.add_photos(vk, respone[number]['link_photo'])
                         bot.send_photos(vk, variables['id'], attachment)
 
-                    elif message_text in ['поиск']:
-                        VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
+                    # elif message_text in ['поиск']:
+                    #     VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
 
-                    elif message_text in ['смотреть данные']:
+                    # elif message_text in ['смотреть данные']:
 
-                        if small.check_find_user(cur, ask_user[0]):   # здесь ошибка type object 'VKinder' has no attribute 'check_find_user'
-                            counter = VKinder.add_to_database(cur, variables['id'], result)
-                        else:
-                            print('Данных нет')
-                            bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
+                    #     if small.check_find_user(cur, ask_user[0]):   # здесь ошибка type object 'VKinder' has no attribute 'check_find_user'
+                    #         counter = VKinder.add_to_database(cur, variables['id'], result)
+                    #     else:
+                    #         print('Данных нет')
+                    #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
 
@@ -104,10 +104,15 @@ def main():
 
                     elif message_text in ['добавить в черный список']:
 
-                        if VKinder.add_favourites(cur, counter - 1, 2):  # здесь ошибка type object 'VKinder' has no attribute 'add_favourites'
+                        favorites_id = base.add_favourites(
+                                                cur, variables['id'], 
+                                                respone[number]['user_name'], 
+                                                **variables['fields']['filtr_dict']) 
+                        print('номер заблокированного', favorites_id)
+                        base.add_photos(cur, respone[number]['link_photo'], favorites_id)
+                        base.black_list(cur, favorites_id)
 
-                            print('Добавлено в чёрный список')
-                            bot.write_msg(vk, variables['id'], "Добавлен в чёрный список")
+                        print('Добавлено в чёрный список')
 
                     variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
 
