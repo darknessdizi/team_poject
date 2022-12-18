@@ -126,28 +126,19 @@ def main():
 
                     elif message_text in ['добавить в избранное']:
                         
-                        
-                        print("Ошибка", respone[number])
-                        print("Ошибка", respone[number][1]) # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
-                                                respone[number][1], 
-                                                **variables['fields']['filtr_dict'])
-                        print('favorites_id', favorites_id) 
-                        base.add_photos(cur, respone[number][1], favorites_id)     # errors list indices must be integers or slices, not str                     
+                                                *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                                                **variables['fields']['filtr_dict']) 
+                        base.add_photos(cur, photos, favorites_id)     # errors list indices must be integers or slices, not str                     
 
                     elif message_text in ['добавить в черный список']:
                         
-                        print("Ошибка", respone[number])
-                        print("Ошибка", respone[number][1])
-
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], 
-                                                respone[number][1], 
+                                                *respone[number], 
                                                 **variables['fields']['filtr_dict']) 
-                        print('номер заблокированного', favorites_id)
-                        base.add_photos(cur, respone[number][1], favorites_id)
+                        base.add_photos(cur, photos, favorites_id)
                         base.black_list(cur, favorites_id)
 
                         print('Добавлено в чёрный список')

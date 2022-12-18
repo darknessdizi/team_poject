@@ -45,7 +45,8 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, input_params): # формат input_params {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
+    def get_users(self, input_params): 
+        # формат input_params {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
 
         '''Возвращает список пользователей с номером id и их именами'''
 
@@ -85,7 +86,7 @@ class RequestsVk:
                 list_user.append(item.get('id')) # формат [488749963]
                 user_name = f"{item.get('first_name')} {item.get('last_name')}" # формат 'Юлия Волкова'
                 list_user.append(user_name) # формат [488749963, 'Юлия Волкова']
-                list_users.append(list_user) # формат [[488749963, 'Юлия Волкова']]
+                list_users.append(list_user) # формат [[488749963, 'Юлия Волкова'], ...]
         return list_users
 
     def get_users_photo(self, user_id):

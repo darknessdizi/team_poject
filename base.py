@@ -89,7 +89,7 @@ def get_blacklist(cur, user_id):
 
 
 
-def add_favourites(cur, id, user_name, age, sex, city):
+def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city):
     # format  id: 33579332
     # format  user_name: 'Юлия Волкова'
     # format  age: ['34', '57']
@@ -99,10 +99,9 @@ def add_favourites(cur, id, user_name, age, sex, city):
     '''Добавляем пользователя в список избранных'''
 
     cur.execute('''
-        INSERT INTO favorites (users_id , user_name, age, sex, city)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id;''',  # returning вернул ноне ???????
-            (id, user_name, age, sex, city))
-    print('add_favourites: ', cur.fetchone()[0])
+        INSERT INTO favorites (id, user_id , name, age, sex, city)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;''',  
+            (contact_id, id_user, contact_name, age, sex, city))
     return cur.fetchone()[0]
 
 def add_photos(cur, list_photos, favorites_id):
@@ -133,9 +132,9 @@ def get_favourites(cur, user_id):
     '''Выгружаем из базы данных список избранных'''
     
     cur.execute('''
-        SELECT users_id, user_name, age, sex, city FROM favorites as f
-        JOIN black_list as bl ON users_id = f.id
-        WHERE f.users_id = %s AND f.users_id != bl.favorites_id;
+        SELECT user_id, name, age, sex, city FROM favorites as f
+        JOIN black_list as bl ON bl.favorites_id = f.id
+        WHERE f.user_id = %s AND f.id != bl.favorites_id;
     ''', (user_id,))
     return cur.fetchall()
 
@@ -179,9 +178,9 @@ def create_db(cur):
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS favorites (
-        id SERIAL PRIMARY KEY,
-        users_id INTEGER REFERENCES users (id),
-        user_name VARCHAR(40),
+        id INTEGER UNIQUE PRIMARY KEY, 
+        user_id INTEGER REFERENCES users (id),
+        name VARCHAR(40),
         age VARCHAR(40),
         sex VARCHAR(40),
         city VARCHAR(40)

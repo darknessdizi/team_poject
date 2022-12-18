@@ -135,8 +135,9 @@ class VKinder:
         return users
 
     def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
-        if base.get_favourites(cur, sender_id):
-            db_source = base.get_favourites(cur, sender_id)
+        db_source = base.get_favourites(cur, sender_id)
+        print(db_source)
+        if db_source:
             for item in db_source:
                 message_text = f'Имя: {item[1]}\nВозраст: {item[2]}\nГород: {item[4]}'
                 bot.write_msg(object_vk_api, sender_id, message_text)
