@@ -51,44 +51,6 @@ def add_find_users_photos(cur, f_user_id, photo_str):
     return cur.fetchone()
 
 
-def get_favourites(cur, user_id):
-    '''Выгружаем из базы данных список избранных'''
-    cur.execute('''
-        SELECT f_user_id, f_user_name, user_url FROM find_users
-        WHERE user_id = %s AND favourites = %s;
-    ''', (user_id, 1))
-    return cur.fetchall()
-
-
-def add_blacklist(cur, iterator, flag):
-    '''добавляем в черный список'''
-    cur.execute('''
-        UPDATE find_users SET blacklist = %s WHERE iterator = %s;
-    ''', (flag, iterator))
-    cur.execute('''
-        SELECT blacklist FROM find_users
-        WHERE iterator = %s;
-    ''', (iterator,))
-    return cur.fetchone()
-
-
-def get_blacklist(cur, user_id):
-    '''Выгружаем из базы данных черный список'''
-    cur.execute('''
-        SELECT f_user_id, f_user_name, user_url FROM find_users
-        WHERE user_id = %s AND blacklist = %s;
-    ''', (user_id, 1))
-    return cur.fetchall()
-
-
-
-
-
-
-
-
-
-
 def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city):
     # format  id: 33579332
     # format  user_name: 'Юлия Волкова'
@@ -104,6 +66,7 @@ def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city):
             (contact_id, id_user, contact_name, age, sex, city))
     return cur.fetchone()[0]
 
+
 def add_photos(cur, list_photos, favorites_id):
 
     '''Прикрепляем ссылки на фото в список избранных'''
@@ -114,18 +77,7 @@ def add_photos(cur, list_photos, favorites_id):
                 VALUES (%s, %s);''', 
                 (link, favorites_id))
 
-def black_list(cur, favorites_id):
 
-    '''Добавляем к пользователю статус в черном списке'''
-
-    print('black_list', cur.execute('''
-        INSERT INTO black_list (favorites_id)
-            VALUES (%s);''', 
-            (favorites_id,)))
-    # cur.execute('''
-    #     INSERT INTO black_list (favorites_id)
-    #         VALUES (%s);''', 
-    #         (favorites_id,))
 
 def get_favourites(cur, user_id):
 
@@ -137,6 +89,44 @@ def get_favourites(cur, user_id):
         WHERE f.user_id = %s AND f.id != bl.favorites_id;
     ''', (user_id,))
     return cur.fetchall()
+
+
+
+def add_black_list(cur, iterator, flag):
+    '''добавляем в черный список'''
+    cur.execute('''
+        UPDATE find_users SET black_list = %s WHERE iterator = %s;
+    ''', (flag, iterator))
+    cur.execute('''
+        SELECT black_list FROM find_users
+        WHERE iterator = %s;
+    ''', (iterator,))
+    return cur.fetchone()
+
+
+def get_black_list(cur, user_id):
+    '''Выгружаем из базы данных черный список'''
+    cur.execute('''
+        SELECT f_user_id, f_user_name, user_url FROM find_users
+        WHERE user_id = %s AND black_list = %s;
+    ''', (user_id, 1))
+    return cur.fetchall()
+
+
+def black_list(cur, favorites_id):
+
+    '''Добавляем к пользователю статус в черном списке'''
+
+    print('black_list', cur.execute('''
+        INSERT INTO black_list (favorites_id)
+            VALUES (%s);''',
+            (favorites_id)))
+    # cur.execute('''
+    #     INSERT INTO black_list (favorites_id)
+    #         VALUES (%s);''',
+    #         (favorites_id,))
+
+
 
 def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
 
