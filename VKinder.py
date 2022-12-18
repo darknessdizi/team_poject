@@ -93,6 +93,9 @@ class VKinder:
 
 
     def checking_the_user_in_the_database(self, cur, sender_id, response): ### добавила self
+        # format  cur: <cursor object at 0x0000025CC1D4D580; closed: 0>
+        # format  sender_id: 33579332
+        # format  response: <requests_to_vk.RequestsVk object at 0x0000025CC1A1F670>
 
         if not base.get_ask_user_data(cur, sender_id):
             print('в базе отсутствует')
@@ -133,17 +136,19 @@ class VKinder:
             users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
         return users
 
-    def checking_the_favorites_list(cur, sender_id: str, object_vk_api: object):
-        if base.get_favourites(cur, sender_id):
-            db_source = base.get_favourites(cur, sender_id)
-            favourites = base.get_favourites(db_source)
-            for item in favourites:
-                bot.write_msg(object_vk_api, sender_id, f"{item['name']}\n{item['url']}")
-                bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
+
+    def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
+        db_source = base.get_favourites(cur, sender_id)
+        print(db_source)
+        if db_source:
+            for item in db_source:
+                message_text = f'Имя: {item[1]}\nВозраст: {item[2]}\nГород: {item[4]}'
+                bot.write_msg(object_vk_api, sender_id, message_text)
+                # bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
         else:
             bot.write_msg(object_vk_api, sender_id, f"Список избранных пуст")
-            return True
-        return False
+        bot.write_msg(object_vk_api, sender_id, "Выполнено \U00002705")
+        return True
 
     def search_function(cur, sender_id: str, object_vk_api: object, ask_user, session, longpoll):
         if base.get_favourites(cur, sender_id):
