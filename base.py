@@ -90,15 +90,20 @@ def get_blacklist(cur, user_id):
 
 
 def add_favourites(cur, id, user_name, age, sex, city):
+    # format  id: 33579332
+    # format  user_name: 'Юлия Волкова'
+    # format  age: ['34', '57']
+    # format  sex: '1'
+    # format  city: 'новосибирск'
 
     '''Добавляем пользователя в список избранных'''
 
-    number = cur.execute('''
+    cur.execute('''
         INSERT INTO favorites (users_id , user_name, age, sex, city)
             VALUES (%s, %s, %s, %s, %s) RETURNING id;''',  # returning вернул ноне ???????
             (id, user_name, age, sex, city))
-    print('add_favourites: ', number)
-    return number
+    print('add_favourites: ', cur.fetchone()[0])
+    return cur.fetchone()[0]
 
 def add_photos(cur, list_photos, favorites_id):
 

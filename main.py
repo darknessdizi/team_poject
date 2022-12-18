@@ -33,10 +33,10 @@ def main():
         if event.type == VkEventType.MESSAGE_NEW:
 
             # Выставляем параметры для пользователя написавшего сообщение
-            result = bot.user_support(event, list_of_users, list_of_dicts)
-            variables = result[0]
-            list_of_users = result[1]
-            list_of_dicts = result[2]
+            result = bot.user_support(event, list_of_users, list_of_dicts) # format ({'id': 33579332, 'fields': {...}}, [33579332], [{...}])           ---       {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}     ----         [33579332]      ---       [{'id': 33579332, 'fields': {...}}]  
+            variables = result[0] # формат {'id': 33579332, 'fields': {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
+            list_of_users = result[1] # формат [33579332, 45686545]
+            list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
 
             small.checking_the_user_in_the_database(cur, variables['id'], response)
 
@@ -46,7 +46,7 @@ def main():
                 if variables['fields']['start']:
                     # Активирована команда старт (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
-                    if variables['fields']['continue']:
+                    if variables['fields']['continue']: # формат {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                         variables['fields']['continue'] = False
                         continue
                     else:
@@ -56,7 +56,8 @@ def main():
                         # список пользователей которые находим по параметрам
                         # список вида [int(id), str(user_name)]
                         # variables['fields']['filtr_dict'] = {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
-                        respone = response.get_users(variables['fields']['filtr_dict'])
+                        respone = response.get_users(variables['fields']['filtr_dict']) # формат [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                        print(respone)
                         if respone is None:
                             bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
                             variables['fields']['filtr_dict'] = {}
@@ -66,10 +67,14 @@ def main():
                             variables['fields']['filtr_dict'] = {}
                         else:
                             # возвращает фото в словаре вида {'href': [], 'owner_id': ""}
-                            photos = response.get_users_photo(str(respone[number][0]))
+                            photos = response.get_users_photo(str(respone[number][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
+                            if photos is None:
+#### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
+#### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
+                                continue
                             message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
-                            bot.write_msg(vk, variables['id'], message)
-                            attachment = bot.add_photos(vk, photos.get('href'))
+                            bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
+                            attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
                             bot.send_photos(vk, variables['id'], attachment)
                             keyboard = bot.create_buttons(4)
                             bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
@@ -120,21 +125,29 @@ def main():
                     #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
+                        
+                        
+                        print("Ошибка", respone[number])
+                        print("Ошибка", respone[number][1]) # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
 
                         favorites_id = base.add_favourites(
-                                                cur, variables['id'], 
-                                                respone[number]['user_name'], 
-                                                **variables['fields']['filtr_dict']) 
-                        base.add_photos(cur, respone[number]['link_photo'], favorites_id)                         
+                                                cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
+                                                respone[number][1], 
+                                                **variables['fields']['filtr_dict'])
+                        print('favorites_id', favorites_id) 
+                        base.add_photos(cur, respone[number][1], favorites_id)     # errors list indices must be integers or slices, not str                     
 
                     elif message_text in ['добавить в черный список']:
+                        
+                        print("Ошибка", respone[number])
+                        print("Ошибка", respone[number][1])
 
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], 
-                                                respone[number]['user_name'], 
+                                                respone[number][1], 
                                                 **variables['fields']['filtr_dict']) 
                         print('номер заблокированного', favorites_id)
-                        base.add_photos(cur, respone[number]['link_photo'], favorites_id)
+                        base.add_photos(cur, respone[number][1], favorites_id)
                         base.black_list(cur, favorites_id)
 
                         print('Добавлено в чёрный список')

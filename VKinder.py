@@ -91,6 +91,9 @@ class VKinder:
 
 
     def checking_the_user_in_the_database(self, cur, sender_id, response): ### добавила self
+        # format  cur: <cursor object at 0x0000025CC1D4D580; closed: 0>
+        # format  sender_id: 33579332
+        # format  response: <requests_to_vk.RequestsVk object at 0x0000025CC1A1F670>
 
         if not base.get_ask_user_data(cur, sender_id):
             print('в базе отсутствует')
