@@ -71,8 +71,8 @@ def main():
                             if photos is None:
 #### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
 #### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
-                                keyboard = bot.create_buttons(4)
-                                bot.write_msg(vk, variables['id'], "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nИщем следующего. \U0001F914", keyboard)
+                                keyboard = bot.create_buttons(1)
+                                bot.write_msg(vk, variables['id'], "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                 continue
                             
                             attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
@@ -103,8 +103,8 @@ def main():
                             if photos is None:
 #### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
 #### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
-                                keyboard = bot.create_buttons(4)
-                                bot.write_msg(vk, variables['id'], "\n\U000026D4 \U0001F6AB У пользователя нет фотографий.\nИщем следующего. \U0001F914", keyboard)
+                                keyboard = bot.create_buttons(1)
+                                bot.write_msg(vk, variables['id'], "\n\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                 continue
                             
                             message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"

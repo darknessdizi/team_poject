@@ -185,7 +185,9 @@ def create_buttons(number: int) -> VkKeyboard:
     keyboard = VkKeyboard()
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE,
                         VkKeyboardColor.NEGATIVE, VkKeyboardColor.SECONDARY]
-    if number == 2:
+    if number == 1:
+        keyboard.add_button('Следующий', buttons_colors[1])
+    elif number == 2:
         keyboard.add_button('Сбросить', buttons_colors[0])
         keyboard.add_line()
         keyboard.add_button('Отменить', buttons_colors[-1])
