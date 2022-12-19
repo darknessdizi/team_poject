@@ -3,7 +3,8 @@ import requests
 from pprint import pprint
 import time
 import token_vk
-
+from time import time
+import datetime
 
 class RequestsVk:
     def __init__(self, access_token, version='5.131'):
@@ -86,7 +87,8 @@ class RequestsVk:
                 list_user.append(item.get('id')) # формат [488749963]
                 user_name = f"{item.get('first_name')} {item.get('last_name')}" # формат 'Юлия Волкова'
                 list_user.append(user_name) # формат [488749963, 'Юлия Волкова']
-                list_user.append(item.get('bdate'))
+                bdate = item.get('bdate')
+                list_user.append(bdate)
                 list_users.append(list_user) # формат [[488749963, 'Юлия Волкова'], ...]
 
         return list_users
