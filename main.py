@@ -124,11 +124,11 @@ def main():
                     #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
-                        
+                        print(*respone[number])
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                                                **variables['fields']['filtr_dict']) 
+                                                variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
                         base.add_photos(cur, photos['href'], favorites_id)                        
 
                     elif message_text in ['добавить в черный список']:
@@ -136,7 +136,7 @@ def main():
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], 
                                                 *respone[number], 
-                                                **variables['fields']['filtr_dict']) 
+                                                variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
                         base.add_photos(cur, photos['href'], favorites_id)
                         base.black_list(cur, favorites_id)
 

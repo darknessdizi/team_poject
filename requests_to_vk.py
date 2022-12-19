@@ -46,7 +46,7 @@ class RequestsVk:
         return user_info
 
     def get_users(self, input_params): 
-        # формат input_params {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
+        # формат input_params {'age': ['34', '57'], 'sex': 1, 'city': 'новосибирск'}
 
         '''Возвращает список пользователей с номером id и их именами'''
 
@@ -82,11 +82,13 @@ class RequestsVk:
         list_users = []
         for item in result:
             list_user = []
-            if item.get('blacklisted') == 0 and item.get('is_closed') is False :
+            if item.get('blacklisted') == 0 and item.get('is_closed') is False:
                 list_user.append(item.get('id')) # формат [488749963]
                 user_name = f"{item.get('first_name')} {item.get('last_name')}" # формат 'Юлия Волкова'
                 list_user.append(user_name) # формат [488749963, 'Юлия Волкова']
+                list_user.append(item.get('bdate'))
                 list_users.append(list_user) # формат [[488749963, 'Юлия Волкова'], ...]
+
         return list_users
 
     def get_users_photo(self, user_id):
@@ -144,6 +146,7 @@ class RequestsVk:
 
             dict_likes.get('count').pop(index)
             dict_likes_max['href'].append(dict_likes.get('href').pop(index))
+            dict_likes_max['owner_id'] = dict_likes.get('owner_id')
 
         return dict_likes_max
 
@@ -155,6 +158,8 @@ class RequestsVk:
             'count': 1
         }
         res = requests.get(url=url,  params={**self.params, **params}, headers=headers) # формат <Response [200]>  '{"response":{"count":3,"items":[{"id":99,"title":"Новосибирск","country":"Новосибирская область"}]}}'
+        if not res.json().get('response').get('items'):
+            return None
         city_id = res.json().get('response').get('items')[0].get('id') # формат 99
         return city_id
 
@@ -170,10 +175,10 @@ if __name__ == '__main__':
     vk = RequestsVk(access_token)
     # # user_info = vk.get_user(user_id)
     # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    # input_params = {'age': ['34', '57'], 'sex': '1', 'city': 99}
-    # users = vk.get_users(input_params)
-    # pprint(users)
-    #pprint(vk.get_users_photo('370844284'))
+    input_params = {'age': ['34', '57'], 'sex': 1, 'city': 'сочи'}
+    users = vk.get_users(input_params)
+    pprint(users)
+    pprint(vk.get_users_photo('370844284'))
     print(vk.get_city_id('сочи'))
 
 
