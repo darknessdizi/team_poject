@@ -50,12 +50,12 @@ def main():
                         variables['fields']['continue'] = False
                         continue
                     else:
-
                         # Запросы на фото для пользователя
                         number = 0
                         # список пользователей которые находим по параметрам
                         # список вида [int(id), str(user_name)]
                         # variables['fields']['filtr_dict'] = {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
+
                         respone = response.get_users(variables['fields']['filtr_dict']) # формат [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                         if respone is None:
                             bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
@@ -82,7 +82,6 @@ def main():
                             bot.send_photos(vk, variables['id'], attachment)
                             keyboard = bot.create_buttons(4)
                             bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
-
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
@@ -97,6 +96,7 @@ def main():
                         bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
                         number += 1
                         if len(respone)-1 == number:
+                            # respone = response.get_users(offset, variables['fields']['filtr_dict'])
                             bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                             variables['fields']['filtr_dict'] = {}
                             continue
@@ -127,7 +127,7 @@ def main():
                     #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
-                        print(*respone[number])
+                        #print(*respone[number])
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
