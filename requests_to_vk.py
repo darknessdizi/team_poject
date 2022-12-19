@@ -47,7 +47,7 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, input_params): #  нужен параметр offset
+    def get_users(self, input_params):  # нужен параметр offset
         # формат input_params {'age': ['34', '57'], 'sex': 1, 'city': 'новосибирск'}
 
         '''Возвращает список пользователей с номером id и их именами'''
@@ -103,38 +103,23 @@ class RequestsVk:
         Фото берутся со страницы пользователя и стены"""
 
         url = "https://api.vk.com/method/photos.get"
-        params1 = {
-            'owner_id': user_id,
-            'album_id': -7,
-            'extended': 1,
-            'photo_sizes': 1,
-            'count': 30
 
-
-        }
-        params2 = {
+        params = {
             'owner_id': user_id,
             'album_id': -6,
             'extended': 1,
             'photo_sizes': 1
-
-
         }
-        headers = self.get_headers()  # format {'Content-Type': 'application/json', 'Authorization': 'OAuth vk1.a.Y45795E4...nsUC3NqXDQ'}
-        # res1 = requests.get(url=url, params={**self.params, **params1},
-        #                     headers=headers)  # format <Response [200]> content: '{"response":{"count":1012,"items":[{"album_id":-7,"date":1526899792,"id":456239046,"owner_id":488749963,"can_comment":1,"sizes":[{"height":130,"type":"m","width":97,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=97x130&quality=96&sign=4523b97bd3745b01f71d48aa475c3a06&c_uniq_tag=26i6HUYYFQn5ANZYe-q14-bXSIrc7kGHUvjf6ZodvlQ&type=album"},{"height":173,"type":"o","width":130,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=130x173&quality=96&sign=e86a82008bf8076363b5ca8e5f8d4289&c_uniq_tag=azDo1TUF5op70MZG4nYldHsY995nsCK22zS_vTTl2_E&type=album"},{"height":267,"type":"p","width":200,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=200x267&quality=96&sign=0addd0d6c7e3ab5c3bd8f538af40c198&c_uniq_tag=_c0zhlj8259iRZ2YfgSYZfFeR5LdtjpUTTz7tDePLrE&type=album"},{"height":427,"type":"q","width":320,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=320x427&quality=96&sign=f758aba662597faa0d6b7579d5d2d927&c_uniq_tag=EpPRhAGVznbi_9jb8eKg7vRHuOPH9Q6Q-y30ElUmH5U&type=album"},{"height":680,"type":"r","width":510,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=510x680&quality=96&sign=e2c550f1571aba90f95c80350b5b58cb&c_uniq_tag=kepYApS_npkunTWjG2f7PmMBOAtpVf8sOaKTetIzIrs&type=album"},{"height":75,"type":"s","width":56,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=56x75&quality=96&sign=b19f63f4e396dd37dc6e2b9c2b32e805&c_uniq_tag=-kJESyZn0KozFFfgoEABx8NZEdCAA4hd1l0-B7iAfS0&type=album"},{"height":2160,"type":"w","width":1620,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=1620x2160&quality=96&sign=b1a48f60a587986ae30c06c4b56b0b4c&c_uniq_tag=MbOh6EWd5vq5jLOoC725Ra9XsSPfpDyZ3kg34SnSSK8&type=album"},{"height":604,"type":"x","width":453,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=453x604&quality=96&sign=ce979191defa21b891802c3f3fbe294c&c_uniq_tag=YWM0aJaLZHzT-RKwbG1hWkUaWSfBdpjtjwDTxLNE0Kc&type=album"},{"height":807,"type":"y","width":605,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=605x807&quality=96&sign=c1edcba2ef41500d3cb137671c2cab88&c_uniq_tag=d7FLYEgIF-ihw0dGcy5C5vEj8FFq6YgP_C39xuIUebQ&type=album"},{"height":1080,"type":"z","width":810,"url":"https:\\/\\/sun9-1.userapi.com\\/impf\\/dUxDPhYlGTIK_fQXW2APeNPc76sGwhFr2KdEAg\\/p8lU2Pz_CsE.jpg?size=810x1080&quality=96&sign=ce7ad10e4f5391ce15d3256fc8a42ca9&c_uniq_tag=3INxWtah9LqitbXruWgMX7_F9Sx7c2GOrM935GDklgk&type=album"}],"text":"","has_tags":false,"likes":{"count":849,"user_likes":0},"comments":{"count":25},"reposts":{"count":0},"tags":{"count":0}}, ... ...
-        res2 = requests.get(url=url, params={**self.params, **params2},
-                            headers=headers)  # format <Response [200]> content: '{"response":{"count":1,"items":[{"album_id":-6,"date":1526898727,"id":456239045,"owner_id":488749963,"can_comment":1,"post_id":5,"sizes":[{"height":130,"type":"m","width":97,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=97x130&quality=96&sign=d376f274cc2e968ff827ebebcdff9428&c_uniq_tag=XOkh-ivCOQlMtXI2a9_QufZxBPRCQzk6AmdsYsP5WAU&type=album"},{"height":173,"type":"o","width":130,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=130x173&quality=96&sign=04fcd531c2815b541e09d8c5517c09ac&c_uniq_tag=TUAsuENtSZWB43HuQMsuramx2nl9utOD-OSvZlwQkAQ&type=album"},{"height":267,"type":"p","width":200,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=200x267&quality=96&sign=083853194b40638dc21d4828ab8b2a68&c_uniq_tag=hi08SI4r__rLkBGR2FaVSmDR23xE8LdIuGn22kl6NBg&type=album"},{"height":427,"type":"q","width":320,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=320x427&quality=96&sign=0e09fc04896c42226c91a1c7aad4f83e&c_uniq_tag=pxFfTynJhz3vRikrVqPnuLF1FUmcTyE21YSZzJEq18g&type=album"},{"height":680,"type":"r","width":510,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=510x680&quality=96&sign=5c367a71777160e23fef8b8137a69f4f&c_uniq_tag=zBojfWMxh-MkC7VCJ6UDodY-L73y9CvAzQG0iNtn_tA&type=album"},{"height":75,"type":"s","width":56,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=56x75&quality=96&sign=263cd34ec08534cf5c20f1a6df15b33f&c_uniq_tag=2NVltDWuj_zn506YglVRxf7g95P6jOk69wWjD3LEK3M&type=album"},{"height":2160,"type":"w","width":1620,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=1620x2160&quality=96&sign=ab6ff0f74f3c74fad45e0aad239f4e04&c_uniq_tag=H3wU4KdOUSHdO3Q3WpIVcEZOJfT2ej7AvTMZozsAPgY&type=album"},{"height":604,"type":"x","width":453,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=453x604&quality=96&sign=4874c4567aa0b1dd5f219de57885974d&c_uniq_tag=oB12NoaIpYtsknUm6gOo3uqzDwOCV2WVQjJfymCLfys&type=album"},{"height":807,"type":"y","width":605,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=605x807&quality=96&sign=9d00713f4192f36ce47c3361fe41f627&c_uniq_tag=PkeMs1q-A_f2Via62J4W5xLe3uTBSNxWVWiqnHoST50&type=album"},{"height":1080,"type":"z","width":810,"url":"https:\\/\\/sun1-89.userapi.com\\/impf\\/c844321\\/v844321090\\/5f0d2\\/DL1exc5mS4U.jpg?size=810x1080&quality=96&sign=7ad52fbc1a526d52c6f309e4132c3696&c_uniq_tag=89A5nG6lPjSYeMdcL8h3fTgsUOVwo-d9QnrL223BU1c&type=album"}],"square_crop":"85,573,1448","text":"","has_tags":false,"likes":{"count":2107,"user_likes":0},"comments":{"count":168},"reposts":{"count":5},"tags":{"count":0}}]}}'
+        headers = self.get_headers()
+        time.sleep(2)
+        res = requests.get(url=url, params={**self.params, **params}, headers=headers)
 
         with open('photo.json', 'w') as file:
-            #json.dump(res1.json(), file, ensure_ascii=False, indent=3)
-            json.dump(res2.json(), file, ensure_ascii=False, indent=3)
-       # photos_info1 = res1.json().get('response').get('items')    # format [{'album_id': -7, 'date': 1526899792, 'id': 456239046, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899796, 'id': 456239047, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899800, 'id': 456239048, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899803, 'id': 456239049, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899807, 'id': 456239050, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899810, 'id': 456239051, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899814, 'id': 456239052, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899818, 'id': 456239053, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899821, 'id': 456239054, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899825, 'id': 456239055, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900519, 'id': 456239056, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900523, 'id': 456239057, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900526, 'id': 456239058, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900530, 'id': 456239059, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, ...]
-        photos_info2 = res2.json().get('response').get('items')     # format [{'album_id': -6, 'date': 1526898727, 'id': 456239045, 'owner_id': 488749963, 'can_comment': 1, 'post_id': 5, 'sizes': [...], 'square_crop': '85,573,1448', 'text': '', ...}]
+            json.dump(res.json(), file, ensure_ascii=False, indent=3)
+
+        photos_info = res.json().get('response').get('items')
 
         # берем фото из запроса по фото с профиля и по  фото со стены
-        #photos_info = photos_info1 + photos_info2  # format [{'album_id': -7, 'date': 1526899792, 'id': 456239046, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899796, 'id': 456239047, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899800, 'id': 456239048, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899803, 'id': 456239049, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899807, 'id': 456239050, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899810, 'id': 456239051, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899814, 'id': 456239052, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899818, 'id': 456239053, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899821, 'id': 456239054, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899825, 'id': 456239055, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900519, 'id': 456239056, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900523, 'id': 456239057, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900526, 'id': 456239058, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900530, 'id': 456239059, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, ...]
-        photos_info = photos_info2 # format [{'album_id': -6, 'date': 1655272794, 'id': 457239059, 'owner_id': 654533646, 'can_comment': 0, 'sizes': [...], 'square_crop': '79,0,1051', 'text': '', 'has_tags': False, ...}]
 
         if len(photos_info) < 3 or photos_info is None:
             return None
@@ -157,12 +142,9 @@ class RequestsVk:
             dict_likes_max['href'].append(dict_likes.get('href').pop(index))
             dict_likes_max['owner_id'] = dict_likes.get('owner_id')
 
-        res3 = self.get_photo_tag(user_id)  # берем фото с отметками пользователя
-        if res3:
-            dict_likes_max['href'] = dict_likes_max['href'] + res3
-
-            pprint(res3)
-
+        print(type(user_id))
+        if self.get_photo_tag(str(user_id)):  # берем фото с отметками пользователя
+            dict_likes_max['href'] = dict_likes_max['href'] + self.get_photo_tag(str(user_id))
 
         return dict_likes_max
 
@@ -172,26 +154,25 @@ class RequestsVk:
 
         url = "https://api.vk.com/method/newsfeed.get"
         headers = self.get_headers()
-        start_time = 1#int(datetime.datetime.now().timestamp()-365.24*86400)# - 365.24*86400)
-        print(start_time)
-        params =   {
+        start_time = 1  # int(datetime.datetime.now().timestamp()-365.24*86400)# - 365.24*86400)
+
+        params = {
             'filters': 'photo_tag',
             'source_ids': user_id,
             'start_time': start_time
-                }
+        }
         params = {**self.params, **params}
         res = requests.get(url=url, params=params, headers=headers)
 
         if not res.json().get('response').get('items'):
-           return None
+            return None
 
         list_photos = []
         for item in res.json().get('response').get('items')[0].get('photo_tags').get('items'):
             link = item.get('sizes')[-1].get('url')
             list_photos.append(link)
-        # pprint(res.json())
-        return list_photos
 
+        return list_photos
 
     def get_city_id(self, city):
         url = "https://api.vk.com/method/database.getCities"
@@ -219,13 +200,25 @@ if __name__ == '__main__':
     vk = RequestsVk(access_token)
     # # user_info = vk.get_user(user_id)
     # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    input_params = {'age': ['34', '57'], 'sex': 1, 'city': 'москва'}
-    offset = 1
-    while True:
-        users = vk.get_users(offset, input_params)
-        for i in users:
-            pprint(i)
-        offset += 10
+    input_params = {'age': ['15', '25'], 'sex': 1, 'city': 'сочи'}
+    # pprint(vk.get_users(input_params))
+    list_ = [[621028572, 'Ирина Павлова', '11.3.1997'],
+             [638832767, 'Lumıne Blondeshıne', '11.4.2006'],
+             [559067825, 'Арина Фатова', '2.2.2001'],
+             [96847160, 'Елена Поволоцкая', '28.9.1998'],
+             [265143019, 'Юлия Секси', '7.4.1998'],
+             [559378944, 'Екатерина Миронова', '9.6.2000'],
+             [458593529, 'Мика Цугба', '24.3.2003'],
+             [122226091, 'Дарья Постникова', '12.11.1997'],
+             [568368117, 'Анжелика Пожидаева', '26.1.1998']]
+    # pprint(vk.get_users_photo())
+    # offset = 1
+    # while True:
+    users = vk.get_users(input_params)
+    for i in users:
+        # pprint(vk.get_photo_tag(i[0]))
+        pprint(vk.get_users_photo(i[0]))
+    #     offset += 10
 
     # #pprint(users)
     # for user in users:
@@ -233,4 +226,4 @@ if __name__ == '__main__':
     #     pprint(vk.get_users_photo(user[0]))
     # # print(vk.get_city_id('сочи'))
 
-    #pprint(vk.get_users_photo('243426041'))
+    # pprint(vk.get_photo_tag('243426041'))
