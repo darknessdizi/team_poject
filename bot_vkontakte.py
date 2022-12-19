@@ -139,7 +139,7 @@ def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None
         keyboard = VkKeyboard()
         post['keyboard'] = keyboard.get_empty_keyboard()
 
-    object_vk_api.method('messages.send', post)
+    object_vk_api.method('messages.send', post) # format post {'user_id': 33579332, 'message': 'Укажите возраст люде...ли 20-30 😉', 'random_id': 9981976, 'keyboard': '{"one_time":false,"i...нить"}}]]}'}
 
 
 def send_photos(object_vk_api: object, sender_id: str, attachment: list) -> None:
@@ -203,14 +203,18 @@ def create_buttons(number: int) -> VkKeyboard:
 
 def add_data_to_the_dictionary(object_vk_api: object, index: int,
                                 sender_id: str, message_text: str, date: dict) -> dict:
+    # format message_text: '15-25' 
+
 
     '''Добавляет данные полученные от пользователя в словарь'''
 
     if index - 1 == 0:
         if '-' in message_text:
-            text = message_text.replace(' ', '').split('-')
+            text = message_text.replace(' ', '').split('-') # format ['15', '25']
         else:
             text = message_text.strip()
+            text_list = [message_text]
+            text = text_list.append(message_text)
         for element in text:
             if not element.isdigit():
                 index = index - 1
@@ -238,7 +242,14 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
     sender_id = variables['id']
     variables = variables['fields']
     if message_text == 'сбросить':
-        variables['count'] = 0   # Найти баг!!! После сброса он никого не находит. !!!!!!!!!!!!!!!!
+        variables['count'] = 0
+        keyboard = create_buttons(2)
+        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
+        variables['filtr_dict'] = {}
+        variables['count'] = 1
+        variables['continue'] = True
+        return variables
+           # Найти баг!!! После сброса он никого не находит. !!!!!!!!!!!!!!!!
     elif message_text == 'отменить':
         variables['count'] = 0
         variables['start'] = False
@@ -248,7 +259,7 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
 
     variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(
         object_vk_api, variables['count'], sender_id, message_text, variables['filtr_dict']
-    )   # формат {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {'age': [...], 'sex': '1', 'city': 'новосибирск'}, 'sql': {}, 'start_request': False, 'number': 0}
+    )   # формат  variables {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {'age': [...], 'sex': '1', 'city': 'новосибирск'}, 'sql': {}, 'start_request': False, 'number': 0}
     if variables['count'] < len(bot_questions):
         # бот продолжает задавать вопросы
         keyboard = create_buttons(2)
@@ -269,8 +280,8 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
 
     '''Обработка событий простых сообщений и нажатия кнопок'''
 
-    sender_id = variables['id']
-    variables = variables['fields']
+    sender_id = variables['id'] #format 33579332
+    variables = variables['fields'] # format {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {}, 'sql': {}, 'start_request': False, 'number': 0}
     if message_text == "привет":
         pass
     elif message_text == "старт":

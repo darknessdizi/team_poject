@@ -68,7 +68,7 @@ class RequestsVk:
         age_to = int(age_to)
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city",
                   'q': "",
-                  'count': 10,
+                  'count': 3,
 
                   'age_from': age_from,
                   'age_to': age_to,
@@ -134,7 +134,7 @@ class RequestsVk:
 
         # берем фото из запроса по фото с профиля и по  фото со стены
         #photos_info = photos_info1 + photos_info2  # format [{'album_id': -7, 'date': 1526899792, 'id': 456239046, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899796, 'id': 456239047, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899800, 'id': 456239048, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899803, 'id': 456239049, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899807, 'id': 456239050, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899810, 'id': 456239051, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899814, 'id': 456239052, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899818, 'id': 456239053, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899821, 'id': 456239054, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526899825, 'id': 456239055, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900519, 'id': 456239056, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900523, 'id': 456239057, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900526, 'id': 456239058, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, {'album_id': -7, 'date': 1526900530, 'id': 456239059, 'owner_id': 488749963, 'can_comment': 1, 'sizes': [...], 'text': '', 'has_tags': False, 'likes': {...}, ...}, ...]
-        photos_info = photos_info2
+        photos_info = photos_info2 # format [{'album_id': -6, 'date': 1655272794, 'id': 457239059, 'owner_id': 654533646, 'can_comment': 0, 'sizes': [...], 'square_crop': '79,0,1051', 'text': '', 'has_tags': False, ...}]
 
         if len(photos_info) < 3 or photos_info is None:
             return None
