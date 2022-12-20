@@ -67,7 +67,7 @@ class RequestsVk:
         age_to = int(age[1])
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
                   'q': "",
-                  'count': 5,
+                  'count': 1000,
 
                   'age_from': age_from,
                   'age_to': age_to,
@@ -111,7 +111,7 @@ class RequestsVk:
             'has_photo': 1
         }
         headers = self.get_headers()
-        time.sleep(2) 
+        # time.sleep(2) 
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
 
         with open('photo.json', 'w') as file:

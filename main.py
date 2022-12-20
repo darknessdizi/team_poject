@@ -23,7 +23,7 @@ def main():
 
     longpoll, session, vk = bot.connection()
 
-    small = VKinder(longpoll, session)
+    object_vkinder = VKinder(longpoll, session)
 
     #print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
@@ -40,7 +40,7 @@ def main():
             list_of_users = result[1] # формат [33579332, 45686545]
             list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
 
-            small.checking_the_user_in_the_database(cur, variables['id'], response)
+            object_vkinder.checking_the_user_in_the_database(cur, variables['id'], response)
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
             if event.to_me:
@@ -70,8 +70,6 @@ def main():
                             photos = response.get_users_photo(str(respone[number][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
                             
                             if photos is None:
-#### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
-#### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
                                 keyboard = bot.create_buttons(1)
                                 bot.write_msg(vk, variables['id'], "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                 continue
@@ -86,10 +84,10 @@ def main():
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
-                        small.the_command_to_greet(cur, variables['id'], vk)
+                        object_vkinder.the_command_to_greet(cur, variables['id'], vk)
                     
                     elif message_text in ['список', 'показать весь список']:
-                        if small.checking_the_favorites_list(cur, variables['id'], vk):
+                        if object_vkinder.checking_the_favorites_list(cur, variables['id'], vk):
                             continue
 
                     elif message_text in ['следующий']:
@@ -107,8 +105,6 @@ def main():
                             # time.sleep(2)
                             photos = response.get_users_photo(str(respone[number][0]))
                             if photos is None:
-#### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
-#### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
                                 keyboard = bot.create_buttons(1)
                                 bot.write_msg(vk, variables['id'], "\n\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                 continue
@@ -117,17 +113,6 @@ def main():
                             bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
                             attachment = bot.add_photos(vk, photos.get('href'))
                             bot.send_photos(vk, variables['id'], attachment)
-
-                    # elif message_text in ['поиск']:
-                    #     VKinder.search_function(cur, variables['id'], vk, ask_user, session, longpoll)
-
-                    # elif message_text in ['смотреть данные']:
-
-                    #     if small.check_find_user(cur, ask_user[0]):   # здесь ошибка type object 'VKinder' has no attribute 'check_find_user'
-                    #         counter = VKinder.add_to_database(cur, variables['id'], result)
-                    #     else:
-                    #         print('Данных нет')
-                    #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
                         favorites_id = base.add_favourites(
@@ -143,6 +128,13 @@ def main():
                                                 variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
                         base.add_photos(cur, photos['href'], favorites_id)
                         base.black_list(cur, favorites_id)
+
+                    elif message_text in ['отменить']:
+                        variables['count'] = 0
+                        variables['start'] = False
+                        variables['continue'] = False
+                        variables['filtr_dict'] = {}
+                        bot.write_msg(vk, variables['id'], "Желаете найти кого-то другого? \U0001F914 Наберите команду старт. \U0001F920")
 
                     variables['fields'] = bot.processing_a_simple_message(vk, message_text, variables)
 

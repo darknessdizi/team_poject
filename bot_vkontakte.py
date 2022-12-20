@@ -199,6 +199,8 @@ def create_buttons(number: int) -> VkKeyboard:
                 keyboard.add_line()
             keyboard.add_button(btn, btn_color)
             count += 1
+        keyboard.add_line()
+        keyboard.add_button('Отменить', buttons_colors[0])
     return keyboard
 
 def add_data_to_the_dictionary(object_vk_api: object, index: int,
@@ -282,9 +284,7 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
 
     sender_id = variables['id']
     variables = variables['fields']
-    if message_text == "привет":
-        pass
-    elif message_text == "старт":
+    if message_text == "старт":
         keyboard = create_buttons(2)
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
@@ -294,6 +294,8 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     elif message_text in list_button:
         keyboard = create_buttons(4)
         write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)
+    elif message_text in ['привет', 'отменить']:
+        pass
     else:
         write_msg(object_vk_api, sender_id, "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A")
     return variables
