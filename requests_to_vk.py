@@ -142,7 +142,6 @@ class RequestsVk:
             dict_likes_max['href'].append(dict_likes.get('href').pop(index))
             dict_likes_max['owner_id'] = dict_likes.get('owner_id')
 
-        print(type(user_id))
         if self.get_photo_tag(str(user_id)):  # берем фото с отметками пользователя
             dict_likes_max['href'] = dict_likes_max['href'] + self.get_photo_tag(str(user_id))
 
@@ -215,15 +214,12 @@ if __name__ == '__main__':
     # offset = 1
     # while True:
     users = vk.get_users(input_params)
-    for i in users:
+    #for i in users:
         # pprint(vk.get_photo_tag(i[0]))
-        pprint(vk.get_users_photo(i[0]))
+        #pprint(vk.get_users_photo(i[0]))
     #     offset += 10
 
-    # #pprint(users)
-    # for user in users:
-    #     time.sleep(2)
-    #     pprint(vk.get_users_photo(user[0]))
+    pprint(vk.get_users_photo('710698165'))
     # # print(vk.get_city_id('сочи'))
 
     # pprint(vk.get_photo_tag('243426041'))
