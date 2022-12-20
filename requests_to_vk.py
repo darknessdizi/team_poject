@@ -186,6 +186,7 @@ class RequestsVk:
             return None
         city_id = res.json().get('response').get('items')[0].get('id')  # формат 99
         return city_id
+    
 
 
 if __name__ == '__main__':
