@@ -288,6 +288,8 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
         write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
         variables['count'] += 1
         variables['start'] = True
+        variables['continue'] = True
+        variables['filtr_dict'] = {}
     elif message_text in list_button:
         keyboard = create_buttons(4)
         write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)

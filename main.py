@@ -7,6 +7,7 @@ from requests_to_vk import RequestsVk
 from VKinder import VKinder, PostgreSQL
 import time
 
+
 def main():
 
     # Основной цикл
@@ -96,12 +97,11 @@ def main():
                         bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
                         number += 1
                         if len(respone)-1 == number:
-                            # respone = response.get_users(offset, variables['fields']['filtr_dict'])
                             bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                             variables['fields']['filtr_dict'] = {}
                             continue
                         else:
-                            time.sleep(2)
+                            # time.sleep(2)
                             photos = response.get_users_photo(str(respone[number][0]))
                             if photos is None:
 #### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
@@ -127,7 +127,6 @@ def main():
                     #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
-                        #print(*respone[number])
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
@@ -135,7 +134,6 @@ def main():
                         base.add_photos(cur, photos['href'], favorites_id)                        
 
                     elif message_text in ['добавить в черный список']:
-                        
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], 
                                                 *respone[number], 
