@@ -211,6 +211,10 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
             text = message_text.replace(' ', '').split('-')
         else:
             text = message_text.strip()
+            text_list = []
+            text_list.append(text)
+            text_list.append(text)
+            text = text_list
         for element in text:
             if not element.isdigit():
                 index = index - 1
