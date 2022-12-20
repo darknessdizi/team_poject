@@ -2,7 +2,7 @@ import base
 import bot_vkontakte as bot
 from datetime import date
 import psycopg2
-
+import requests
 
 class PostgreSQL:
 
@@ -164,3 +164,20 @@ class VKinder:
                 print('Ошибка')
         else:
             bot.write_msg(object_vk_api, sender_id, "Смотреть данные")
+
+
+
+    def request_black_users(self, user_id):
+
+        # удаление из поиска пользователей  находяшихся в черном списке
+        self.black_list = []
+        self.id_users = []
+        for user_id in self.black_list:
+            url = 'https://api.vk.com/method/users.get'
+            params = {"user_ids": user_id, "fields": "black_list"}
+            response = requests.get(url=url, params=params)
+            link_load = response.json()
+            for link in link_load['response']:
+               if link['black_list'] == 0:
+                 self.id_users.append(link['user_id'])
+
