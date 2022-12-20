@@ -67,15 +67,14 @@ class RequestsVk:
         age_to = int(age[1])
         # age_from = int(age_from)
         # age_to = int(age_to)
-        params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city",
+        params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
                   'q': "",
-                  'count': 10,
+                  'count': 1000,
 
                   'age_from': age_from,
                   'age_to': age_to,
                   'sex': sex,
-                  'city': city_id,
-                  'has_photo': 1
+                  'city': city_id
                   }
 
         res = requests.get(url=url, params={**self.params, **params},
@@ -110,7 +109,8 @@ class RequestsVk:
             'owner_id': user_id,
             'album_id': -6,
             'extended': 1,
-            'photo_sizes': 1
+            'photo_sizes': 1,
+            'has_photo': 1
         }
         headers = self.get_headers()
         time.sleep(2)
@@ -119,35 +119,40 @@ class RequestsVk:
         with open('photo.json', 'w') as file:
             json.dump(res.json(), file, ensure_ascii=False, indent=3)
 
-        photos_info = res.json().get('response').get('items')
+        if res.json().get('response').get('count') >= 3:
+
+            photos_info = res.json().get('response').get('items')
 
         # берем фото из запроса по фото с профиля и по  фото со стены
 
-        if len(photos_info) < 3 or photos_info is None:
+        # if len(photos_info) < 3 or photos_info is None:
+        #     return None
+
+            dict_likes = {'count': [], 'href': [], 'owner_id': ""}
+            dict_likes_max = {'href': [], 'owner_id': ""}
+
+            for photo in photos_info:
+                dict_likes['count'].append(photo.get('likes').get(
+                    'count'))  # format {'count': [849], 'href': ['https://sun9-1.usera...type=album'], 'owner_id': ''}
+                dict_likes['href'].append(photo.get('sizes')[-1].get('url'))
+                dict_likes['owner_id'] = str(photo.get('owner_id'))
+                # format {'count': [849, 858, 272, 341, 316, 214, 304, 253], 'href': ['https://sun9-1.usera...type=album', 'https://sun9-64.user...type=album', 'https://sun9-75.user...type=album', 'https://sun9-80.user...type=album', 'https://sun9-9.usera...type=album', 'https://sun9-9.usera...type=album', 'https://sun9-80.user...type=album', 'https://sun9-61.user...type=album'], 'owner_id': '488749963'}
+
+            while len(dict_likes_max.get("href")) < 3:
+                max_like = max(dict_likes.get('count'))  # format 2107
+                index = dict_likes.get('count').index(max_like)  # format 30
+
+                dict_likes.get('count').pop(index)
+                dict_likes_max['href'].append(dict_likes.get('href').pop(index))
+                dict_likes_max['owner_id'] = dict_likes.get('owner_id')
+
+            if self.get_photo_tag(str(user_id)):  # берем фото с отметками пользователя
+                dict_likes_max['href'] = dict_likes_max['href'] + self.get_photo_tag(str(user_id))
+
+            return dict_likes_max
+
+        else:
             return None
-
-        dict_likes = {'count': [], 'href': [], 'owner_id': ""}
-        dict_likes_max = {'href': [], 'owner_id': ""}
-
-        for photo in photos_info:
-            dict_likes['count'].append(photo.get('likes').get(
-                'count'))  # format {'count': [849], 'href': ['https://sun9-1.usera...type=album'], 'owner_id': ''}
-            dict_likes['href'].append(photo.get('sizes')[-1].get('url'))
-            dict_likes['owner_id'] = str(photo.get('owner_id'))
-            # format {'count': [849, 858, 272, 341, 316, 214, 304, 253], 'href': ['https://sun9-1.usera...type=album', 'https://sun9-64.user...type=album', 'https://sun9-75.user...type=album', 'https://sun9-80.user...type=album', 'https://sun9-9.usera...type=album', 'https://sun9-9.usera...type=album', 'https://sun9-80.user...type=album', 'https://sun9-61.user...type=album'], 'owner_id': '488749963'}
-
-        while len(dict_likes_max.get("href")) < 3:
-            max_like = max(dict_likes.get('count'))  # format 2107
-            index = dict_likes.get('count').index(max_like)  # format 30
-
-            dict_likes.get('count').pop(index)
-            dict_likes_max['href'].append(dict_likes.get('href').pop(index))
-            dict_likes_max['owner_id'] = dict_likes.get('owner_id')
-
-        if self.get_photo_tag(str(user_id)):  # берем фото с отметками пользователя
-            dict_likes_max['href'] = dict_likes_max['href'] + self.get_photo_tag(str(user_id))
-
-        return dict_likes_max
 
     def get_photo_tag(self, user_id):
 
@@ -193,32 +198,32 @@ class RequestsVk:
 
 if __name__ == '__main__':
     pass
-    access_token = token_vk.token_vk
-    # #для теста
-    # list_input = [[30, 30], 1, 'новосибирск']
-    # age = list_input[0]
-    # city = list_input[2]
-    # sex = int(list_input[1])
-    vk = RequestsVk(access_token)
-    # # user_info = vk.get_user(user_id)
-    # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    input_params = {'age': ['119', '121'], 'sex': 2, 'city': 'обь'}
-    # pprint(vk.get_users(input_params))
-    list_ = [[621028572, 'Ирина Павлова', '11.3.1997'],
-             [638832767, 'Lumıne Blondeshıne', '11.4.2006'],
-             [559067825, 'Арина Фатова', '2.2.2001'],
-             [96847160, 'Елена Поволоцкая', '28.9.1998'],
-             [265143019, 'Юлия Секси', '7.4.1998'],
-             [559378944, 'Екатерина Миронова', '9.6.2000'],
-             [458593529, 'Мика Цугба', '24.3.2003'],
-             [122226091, 'Дарья Постникова', '12.11.1997'],
-             [568368117, 'Анжелика Пожидаева', '26.1.1998']]
-    # pprint(vk.get_users_photo())
-    # offset = 1
-    # while True:
-    users = vk.get_users(input_params)
-    print(len(users))
-    pprint(users)
+    # access_token = token_vk.token_vk
+    # # #для теста
+    # # list_input = [[30, 30], 1, 'новосибирск']
+    # # age = list_input[0]
+    # # city = list_input[2]
+    # # sex = int(list_input[1])
+    # vk = RequestsVk(access_token)
+    # # # user_info = vk.get_user(user_id)
+    # # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
+    # input_params = {'age': ['119', '121'], 'sex': 2, 'city': 'обь'}
+    # # pprint(vk.get_users(input_params))
+    # list_ = [[621028572, 'Ирина Павлова', '11.3.1997'],
+    #          [638832767, 'Lumıne Blondeshıne', '11.4.2006'],
+    #          [559067825, 'Арина Фатова', '2.2.2001'],
+    #          [96847160, 'Елена Поволоцкая', '28.9.1998'],
+    #          [265143019, 'Юлия Секси', '7.4.1998'],
+    #          [559378944, 'Екатерина Миронова', '9.6.2000'],
+    #          [458593529, 'Мика Цугба', '24.3.2003'],
+    #          [122226091, 'Дарья Постникова', '12.11.1997'],
+    #          [568368117, 'Анжелика Пожидаева', '26.1.1998']]
+    # # pprint(vk.get_users_photo())
+    # # offset = 1
+    # # while True:
+    # users = vk.get_users(input_params)
+    # print(len(users))
+    # pprint(users)
     #for i in users:
         # pprint(vk.get_photo_tag(i[0]))
         #pprint(vk.get_users_photo(i[0]))
