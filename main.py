@@ -115,19 +115,23 @@ def main():
                             bot.send_photos(vk, variables['id'], attachment)
 
                     elif message_text in ['добавить в избранное']:
+                        sex = variables['fields']['filtr_dict'].get('sex')
+                        city = variables['fields']['filtr_dict'].get('city')
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                                                variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
+                                                sex, city, False)
                         base.add_photos(cur, photos['href'], favorites_id)                        
 
                     elif message_text in ['добавить в черный список']:
+                        sex = variables['fields']['filtr_dict'].get('sex')
+                        city = variables['fields']['filtr_dict'].get('city')
                         favorites_id = base.add_favourites(
-                                                cur, variables['id'], 
-                                                *respone[number], 
-                                                variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
+                                                cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
+                                                *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                                                sex, city, False)
                         base.add_photos(cur, photos['href'], favorites_id)
-                        base.black_list(cur, favorites_id)
+                        base.block_list(cur, respone[number][0])
 
                     elif message_text in ['отменить']:
                         variables['count'] = 0

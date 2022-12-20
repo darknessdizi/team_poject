@@ -7,51 +7,51 @@ def get_ask_user_data(cur, user_id):
     return cur.fetchone()
 
 
-def add_find_users(cur, f_user_id, user_id, f_user_name, user_url):
-    '''добавляем в базу данных всех найденных людей'''
-    cur.execute("""
-        INSERT INTO find_users(f_user_id, user_id, f_user_name, user_url, favourites)
-        VALUES (%s, %s, %s, %s, %s, %s);
-        """, (f_user_id, user_id, f_user_name, user_url, 0))
-    cur.execute('''
-        SELECT * FROM find_users
-        WHERE f_user_id = %s;
-        ''', (f_user_id,))
-    return cur.fetchone()
+# def add_find_users(cur, f_user_id, user_id, f_user_name, user_url):
+#     '''добавляем в базу данных всех найденных людей'''
+#     cur.execute("""
+#         INSERT INTO find_users(f_user_id, user_id, f_user_name, user_url, favourites)
+#         VALUES (%s, %s, %s, %s, %s, %s);
+#         """, (f_user_id, user_id, f_user_name, user_url, 0))
+#     cur.execute('''
+#         SELECT * FROM find_users
+#         WHERE f_user_id = %s;
+#         ''', (f_user_id,))
+#     return cur.fetchone()
 
 
-def get_find_users(cur, user_id, iterator):
-    '''получаем данные из базы о найденных пользователях'''
-    cur.execute('''
-        SELECT f_user_id, f_user_name, user_url FROM find_users
-        WHERE user_id = %s AND favourites < 1 AND iterator = %s;
-    ''', (user_id, iterator))
-    return cur.fetchone()
+# def get_find_users(cur, user_id, iterator):
+#     '''получаем данные из базы о найденных пользователях'''
+#     cur.execute('''
+#         SELECT f_user_id, f_user_name, user_url FROM find_users
+#         WHERE user_id = %s AND favourites < 1 AND iterator = %s;
+#     ''', (user_id, iterator))
+#     return cur.fetchone()
 
 
-def get_photo(cur, f_user_id):
-    '''получаем фото из базы данных'''
-    cur.execute('''
-        SELECT photo_str FROM photos
-        WHERE f_user_ids = %s;
-    ''', (f_user_id,))
-    return cur.fetchall()
+# def get_photo(cur, f_user_id):
+#     '''получаем фото из базы данных'''
+#     cur.execute('''
+#         SELECT photo_str FROM photos
+#         WHERE f_user_ids = %s;
+#     ''', (f_user_id,))
+#     return cur.fetchall()
 
 
-def add_find_users_photos(cur, f_user_id, photo_str):
-    '''добавляем в таблицу фото найденных людей'''
-    cur.execute('''
-        INSERT INTO photos(f_user_ids, photo_str)
-        VALUES (%s, %s);
-        ''', (f_user_id, photo_str))
-    cur.execute('''
-        SELECT * FROM photos
-        WHERE f_user_ids = %s;
-        ''', (f_user_id,))
-    return cur.fetchone()
+# def add_find_users_photos(cur, f_user_id, photo_str):
+#     '''добавляем в таблицу фото найденных людей'''
+#     cur.execute('''
+#         INSERT INTO photos(f_user_ids, photo_str)
+#         VALUES (%s, %s);
+#         ''', (f_user_id, photo_str))
+#     cur.execute('''
+#         SELECT * FROM photos
+#         WHERE f_user_ids = %s;
+#         ''', (f_user_id,))
+#     return cur.fetchone()
 
 
-def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city):
+def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city, block):
     # format  id: 33579332
     # format  user_name: 'Юлия Волкова'
     # format  age: ['34', '57']
@@ -61,9 +61,9 @@ def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city):
     '''Добавляем пользователя в список избранных'''
 
     cur.execute('''
-        INSERT INTO favorites (id, user_id , name, age, sex, city)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;''',  
-            (contact_id, id_user, contact_name, age, sex, city))
+        INSERT INTO favorites (id, user_id , name, age, sex, city, block_list)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;''',  
+            (contact_id, id_user, contact_name, age, sex, city, block))
     return cur.fetchone()[0]
 
 
@@ -79,48 +79,50 @@ def add_photos(cur, list_photos, favorites_id):
 
 
 
-def get_favourites(cur, user_id):
+def get_favourites(cur):
 
     '''Выгружаем из базы данных список избранных'''
     
     cur.execute('''
-        SELECT user_id, name, age, sex, city FROM favorites as f
-        JOIN black_list as bl ON bl.favorites_id = f.id
-        WHERE f.user_id = %s AND f.id != bl.favorites_id;
-    ''', (user_id,))
+        SELECT f.name, f.age, f.city 
+        FROM favorites as f
+	    WHERE f.block_list = False ;
+        ''')
+    
     return cur.fetchall()
 
 
 
-def add_black_list(cur, iterator, flag):
-    '''добавляем в черный список'''
-    cur.execute('''
-        UPDATE find_users SET black_list = %s WHERE iterator = %s;
-    ''', (flag, iterator))
-    cur.execute('''
-        SELECT black_list FROM find_users
-        WHERE iterator = %s;
-    ''', (iterator,))
-    return cur.fetchone()
+# def add_black_list(cur, iterator, flag):
+#     '''добавляем в черный список'''
+#     cur.execute('''
+#         UPDATE find_users SET black_list = %s WHERE iterator = %s;
+#     ''', (flag, iterator))
+#     cur.execute('''
+#         SELECT black_list FROM find_users
+#         WHERE iterator = %s;
+#     ''', (iterator,))
+#     return cur.fetchone()
 
 
-def get_black_list(cur, user_id):
-    '''Выгружаем из базы данных черный список'''
-    cur.execute('''
-        SELECT f_user_id, f_user_name, user_url FROM find_users
-        WHERE user_id = %s AND black_list = %s;
-    ''', (user_id, 1))
-    return cur.fetchall()
+# def get_black_list(cur, user_id):
+#     '''Выгружаем из базы данных черный список'''
+#     cur.execute('''
+#         SELECT f_user_id, f_user_name, user_url FROM find_users
+#         WHERE user_id = %s AND black_list = %s;
+#     ''', (user_id, 1))
+#     return cur.fetchall()
 
 
-def black_list(cur, favorites_id):
+def block_list(cur, user_id):
 
     '''Добавляем к пользователю статус в черном списке'''
 
     cur.execute('''
-        INSERT INTO black_list (favorites_id)
-            VALUES (%s);''',
-            (favorites_id,))
+        UPDATE favorites 
+        SET block_list = TRUE 
+        WHERE id = %s;
+        ''', (user_id,))
             
 
 def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
@@ -141,7 +143,6 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
 
 def drop_table(cur):
     cur.execute("""
-        DROP TABLE black_list;
         DROP TABLE photos;
         DROP TABLE favorites;
         DROP TABLE users;       
@@ -168,7 +169,8 @@ def create_db(cur):
         name VARCHAR(40),
         age VARCHAR(40),
         sex VARCHAR(40),
-        city VARCHAR(40)
+        city VARCHAR(40),
+        block_list BOOLEAN
     );
     ''')
 
@@ -176,13 +178,6 @@ def create_db(cur):
         CREATE TABLE IF NOT EXISTS photos (
         id SERIAL PRIMARY KEY,
         link VARCHAR,
-        favorites_id INTEGER REFERENCES favorites (id)
-    );
-    ''')
-
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS black_list (
-        id SERIAL PRIMARY KEY,
         favorites_id INTEGER REFERENCES favorites (id)
     );
     ''')

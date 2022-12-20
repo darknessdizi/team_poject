@@ -138,11 +138,11 @@ class VKinder:
 
 
     def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
-        db_source = base.get_favourites(cur, sender_id)
+        db_source = base.get_favourites(cur)
         print(db_source)
         if db_source:
             for item in db_source:
-                message_text = f'Имя: {item[1]}\nВозраст: {item[2]}\nГород: {item[4]}'
+                message_text = f'Имя: {item[0]}\nВозраст: {item[1]}\nГород: {item[2]}'
                 bot.write_msg(object_vk_api, sender_id, message_text)
                 # bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
         else:
