@@ -98,6 +98,9 @@ def main():
                         number += 1
                         if len(respone)-1 == number:
                             bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
+                            variables['count'] = 0
+                            variables['start'] = False
+                            variables['continue'] = False
                             variables['fields']['filtr_dict'] = {}
                             continue
                         else:

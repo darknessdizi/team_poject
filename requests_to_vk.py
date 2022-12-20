@@ -111,7 +111,7 @@ class RequestsVk:
             'has_photo': 1
         }
         headers = self.get_headers()
-        # time.sleep(2) 
+        time.sleep(2) 
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
 
         with open('photo.json', 'w') as file:

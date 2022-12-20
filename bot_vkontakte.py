@@ -248,12 +248,13 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         variables['filtr_dict'] = {}
         variables['count'] = 1
         variables['continue'] = True
-        return variables   # Найти баг!!! После сброса он никого не находит. !!!!!!!!!!!!!!!!
+        return variables   
     elif message_text == 'отменить':
         variables['count'] = 0
         variables['start'] = False
         write_msg(object_vk_api, sender_id, 'Ок')
         variables['continue'] = True
+        variables['filtr_dict'] = {}
         return variables
 
     variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(
@@ -304,10 +305,9 @@ bot_questions = [
     "Укажите возраст людей по образцу\nПример: 25 или 20-30 \U0001F609",
     "Укажите пол (жен - 1 \U0001F483 или муж - 2 \U0001F57A ):",
     "Укажите город: \U0001F3E1"
-    #"Семейное положение: \U0001F48F"
 ]
 
-categories_of_questions = ['age', 'sex', 'city'] #, 'status'] 
+categories_of_questions = ['age', 'sex', 'city'] 
 
 
 if __name__ == '__main__':
