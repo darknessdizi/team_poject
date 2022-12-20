@@ -4,7 +4,7 @@ from pprint import pprint
 import token_vk
 from datetime import time
 import time
-#import base
+
 
 class RequestsVk:
     def __init__(self, access_token, version='5.131'):
@@ -187,21 +187,7 @@ class RequestsVk:
             return None
         city_id = res.json().get('response').get('items')[0].get('id')  # формат 99
         return city_id
-    #
-    # def request_black_users(self, user_id):
-    #
-    #     # удаление из поиска пользователей  находяшихся в черном списке
-    #     self.black_list = []
-    #     self.id_users = []
-    #     for user_id in self.black_list:
-    #         url = 'https://api.vk.com/method/users.get'
-    #         params = {"user_ids": user_id, "fields": "black_list"}
-    #         response = requests.get(url=url, params=params)
-    #         link_load = response.json()
-    #         for link in link_load['response']:
-    #            if link['black_list'] == 0:
-    #              self.id_users.append(link['user_id'])
-    #
+    
 
 
 if __name__ == '__main__':
