@@ -24,7 +24,7 @@ def main():
 
     small = VKinder(longpoll, session)
 
-    # print(base.drop_table(cur)) #если нужно сбросить БД
+    #print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
@@ -34,6 +34,7 @@ def main():
 
             # Выставляем параметры для пользователя написавшего сообщение
             result = bot.user_support(event, list_of_users, list_of_dicts) # format ({'id': 33579332, 'fields': {...}}, [33579332], [{...}])           ---       {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}     ----         [33579332]      ---       [{'id': 33579332, 'fields': {...}}]  
+
             variables = result[0] # формат {'id': 33579332, 'fields': {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
             list_of_users = result[1] # формат [33579332, 45686545]
             list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
@@ -50,12 +51,12 @@ def main():
                         variables['fields']['continue'] = False
                         continue
                     else:
-
                         # Запросы на фото для пользователя
                         number = 0
                         # список пользователей которые находим по параметрам
                         # список вида [int(id), str(user_name)]
                         # variables['fields']['filtr_dict'] = {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
+
                         respone = response.get_users(variables['fields']['filtr_dict']) # формат [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                         if respone is None:
                             bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
@@ -76,12 +77,11 @@ def main():
                             
                             message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
                             bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
-                            
+
                             attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
                             bot.send_photos(vk, variables['id'], attachment)
                             keyboard = bot.create_buttons(4)
                             bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
-
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
@@ -96,6 +96,7 @@ def main():
                         bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
                         number += 1
                         if len(respone)-1 == number:
+                            # respone = response.get_users(offset, variables['fields']['filtr_dict'])
                             bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                             variables['fields']['filtr_dict'] = {}
                             continue
@@ -126,11 +127,11 @@ def main():
                     #         bot.write_msg(vk, variables['id'], "Данных нет. Выполнить поиск")
 
                     elif message_text in ['добавить в избранное']:
-                        
+                        #print(*respone[number])
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                                                **variables['fields']['filtr_dict']) 
+                                                variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
                         base.add_photos(cur, photos['href'], favorites_id)                        
 
                     elif message_text in ['добавить в черный список']:
@@ -138,7 +139,7 @@ def main():
                         favorites_id = base.add_favourites(
                                                 cur, variables['id'], 
                                                 *respone[number], 
-                                                **variables['fields']['filtr_dict']) 
+                                                variables['fields']['filtr_dict'].get('sex'), variables['fields']['filtr_dict'].get('city'))
                         base.add_photos(cur, photos['href'], favorites_id)
                         base.black_list(cur, favorites_id)
 
