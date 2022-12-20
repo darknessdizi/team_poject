@@ -69,7 +69,7 @@ class RequestsVk:
         # age_to = int(age_to)
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city",
                   'q': "",
-                  'count': 150,
+                  'count': 10,
 
                   'age_from': age_from,
                   'age_to': age_to,

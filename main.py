@@ -35,8 +35,6 @@ def main():
             # Выставляем параметры для пользователя написавшего сообщение
             result = bot.user_support(event, list_of_users, list_of_dicts) # format ({'id': 33579332, 'fields': {...}}, [33579332], [{...}])           ---       {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}     ----         [33579332]      ---       [{'id': 33579332, 'fields': {...}}]  
 
-            print(list_of_dicts)
-
             variables = result[0] # формат {'id': 33579332, 'fields': {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
             list_of_users = result[1] # формат [33579332, 45686545]
             list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
@@ -69,19 +67,21 @@ def main():
                         else:
                             # возвращает фото в словаре вида {'href': [], 'owner_id': ""}
                             photos = response.get_users_photo(str(respone[number][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
+
                             # message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
                             # bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
+
+                            
+
                             if photos is None:
 #### тут бот останавливается на передаче дальнейшей отправке. просмотр дальше будет если нажать на кнопку следующий/
 #### значит тут какую то логику действия бота надо прикрутитьн, чтобы он переходил опять на строчку 86 кода
                                 keyboard = bot.create_buttons(1)
                                 bot.write_msg(vk, variables['id'], "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                 continue
-
+                            
                             message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
-                            bot.write_msg(vk, variables['id'], message)  # format 'Юлия Волкова\n https://vk.com/id'
-
-                            print(photos.get('href'))
+                            bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
 
                             attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
                             bot.send_photos(vk, variables['id'], attachment)

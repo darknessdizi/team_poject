@@ -211,6 +211,10 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
             text = message_text.replace(' ', '').split('-')
         else:
             text = message_text.strip()
+            text_list = []
+            text_list.append(text)
+            text_list.append(text)
+            text = text_list
         for element in text:
             if not element.isdigit():
                 index = index - 1
@@ -238,7 +242,13 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
     sender_id = variables['id']
     variables = variables['fields']
     if message_text == 'сбросить':
-        variables['count'] = 0   # Найти баг!!! После сброса он никого не находит. !!!!!!!!!!!!!!!!
+        variables['count'] = 0
+        keyboard = create_buttons(2)
+        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
+        variables['filtr_dict'] = {}
+        variables['count'] = 1
+        variables['continue'] = True
+        return variables   # Найти баг!!! После сброса он никого не находит. !!!!!!!!!!!!!!!!
     elif message_text == 'отменить':
         variables['count'] = 0
         variables['start'] = False
