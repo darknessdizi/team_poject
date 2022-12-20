@@ -34,6 +34,9 @@ def main():
 
             # Выставляем параметры для пользователя написавшего сообщение
             result = bot.user_support(event, list_of_users, list_of_dicts) # format ({'id': 33579332, 'fields': {...}}, [33579332], [{...}])           ---       {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}     ----         [33579332]      ---       [{'id': 33579332, 'fields': {...}}]  
+
+            print(list_of_dicts)
+
             variables = result[0] # формат {'id': 33579332, 'fields': {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
             list_of_users = result[1] # формат [33579332, 45686545]
             list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
@@ -77,7 +80,9 @@ def main():
 
                             message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
                             bot.write_msg(vk, variables['id'], message)  # format 'Юлия Волкова\n https://vk.com/id'
-                            
+
+                            print(photos.get('href'))
+
                             attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
                             bot.send_photos(vk, variables['id'], attachment)
                             keyboard = bot.create_buttons(4)

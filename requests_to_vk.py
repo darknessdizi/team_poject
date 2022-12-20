@@ -63,17 +63,19 @@ class RequestsVk:
 
         sex = input_params.get('sex')
         age = input_params.get('age')
-        age_from, age_to = age
-        age_from = int(age_from)
-        age_to = int(age_to)
+        age_from = int(age[0])
+        age_to = int(age[1])
+        # age_from = int(age_from)
+        # age_to = int(age_to)
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city",
                   'q': "",
-                  'count': 10,
+                  'count': 150,
 
                   'age_from': age_from,
                   'age_to': age_to,
                   'sex': sex,
-                  'city': city_id
+                  'city': city_id,
+                  'has_photo': 1
                   }
 
         res = requests.get(url=url, params={**self.params, **params},
@@ -193,14 +195,14 @@ if __name__ == '__main__':
     pass
     access_token = token_vk.token_vk
     # #для теста
-    list_input = [[30, 30], 1, 'новосибирск']
-    age = list_input[0]
-    city = list_input[2]
-    sex = int(list_input[1])
+    # list_input = [[30, 30], 1, 'новосибирск']
+    # age = list_input[0]
+    # city = list_input[2]
+    # sex = int(list_input[1])
     vk = RequestsVk(access_token)
     # # user_info = vk.get_user(user_id)
     # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    input_params = {'age': ['15', '25'], 'sex': 1, 'city': 'сочи'}
+    input_params = {'age': ['119', '121'], 'sex': 2, 'city': 'обь'}
     # pprint(vk.get_users(input_params))
     list_ = [[621028572, 'Ирина Павлова', '11.3.1997'],
              [638832767, 'Lumıne Blondeshıne', '11.4.2006'],
@@ -215,12 +217,14 @@ if __name__ == '__main__':
     # offset = 1
     # while True:
     users = vk.get_users(input_params)
+    print(len(users))
+    pprint(users)
     #for i in users:
         # pprint(vk.get_photo_tag(i[0]))
         #pprint(vk.get_users_photo(i[0]))
     #     offset += 10
 
-    pprint(vk.get_users_photo('710698165'))
+    #pprint(vk.get_users_photo('710698165'))
     # # print(vk.get_city_id('сочи'))
 
     # pprint(vk.get_photo_tag('243426041'))
