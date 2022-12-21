@@ -121,18 +121,16 @@ def main():
                                                 cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                                                 sex, city, False)
-                        base.add_photos(cur, photos['href'], favorites_id)                        
+                        base.add_photos(cur, photos['href'], favorites_id)   
+
 
                     elif message_text in ['добавить в черный список']:
+                        id, name, bdate = respone[number] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                         sex = variables['fields']['filtr_dict'].get('sex')
                         city = variables['fields']['filtr_dict'].get('city')
                         link = f"https://vk.com/id{photos.get('owner_id')}"
-                        favorites_id = base.add_favourites(
-                                                cur, *respone[number], bdate, sex, city, False, 
-                                                
-                                                variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
-                                                *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                                                sex, city, False)
+                        favorites_id = base.add_favourites(cur, id, name, bdate, 
+                                                sex, city, False, link)
                         base.add_photos(cur, photos['href'], favorites_id)
                         base.block_list(cur, respone[number][0])
 

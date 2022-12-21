@@ -40,7 +40,6 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
                         'continue': False, 
                         'filtr_dict': {}, 
                         'sql': {},
-                        'link': None,
                         'start_request': False,
                         'number': 0
                         }

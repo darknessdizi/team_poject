@@ -61,8 +61,8 @@ def add_favourites(cur, contact_id, contact_name, bdate, sex, city, block, link)
     '''Добавляем пользователя в список избранных'''
 
     cur.execute('''
-        INSERT INTO favorites (id, name, bdate, sex, city, block_list, link)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;''',  
+        INSERT INTO Favorites (id, name, bdate, sex, city, block_list, link)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;''',  
             (contact_id, contact_name, bdate, sex, city, block, link))
     return cur.fetchone()[0]
 
