@@ -25,7 +25,7 @@ def main():
 
     object_vkinder = VKinder(longpoll, session)
 
-    # print(base.drop_table(cur)) #если нужно сбросить БД
+    print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
@@ -102,7 +102,6 @@ def main():
                             variables['fields']['filtr_dict'] = {}
                             continue
                         else:
-                            # time.sleep(2)
                             photos = response.get_users_photo(str(respone[number][0]))
                             if photos is None:
                                 keyboard = bot.create_buttons(1)
@@ -116,28 +115,40 @@ def main():
 
                     elif message_text in ['добавить в избранное']:
                         id, name, bdate = respone[number] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                        if not base.checking_favorites(cur, id):
+                        if not base.checking_list_favorites(cur, id):
                             sex = variables['fields']['filtr_dict'].get('sex')
                             city = variables['fields']['filtr_dict'].get('city')
                             link = f"https://vk.com/id{photos.get('owner_id')}"
                             favorites_id = base.add_favourites(cur, id, name, bdate, 
-                                                    sex, city, False, link)
+                                                    sex, city, link)
                             base.add_photos(cur, photos['href'], favorites_id)  
-                        base.add_a_human_user_relationship(cur, variables['id'], id) 
-                        base.del_block_list(cur, respone[number][0])
+                        if not base.checking_the_human_user_connection(cur, variables['id'], id):
+                            base.add_a_human_user_relationship(cur, variables['id'], id, False) 
+                        else:
+                            if base.checking_the_human_user_connection(cur, variables['id'], id)[0][-1] == True: # format [(1, 33579332, 711644755, False)]
+                                base.del_block_list(cur, variables['id'], id)
+                            else:
+                                keyboard = bot.create_buttons(4)
+                                bot.write_msg(vk, variables['id'], "Данный человек ранее был добавлен в список избранных \U0001F60D", keyboard)
 
 
                     elif message_text in ['добавить в черный список']:
                         id, name, bdate = respone[number] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-                        if not base.checking_favorites(cur, id):
+                        if not base.checking_list_favorites(cur, id):
                             sex = variables['fields']['filtr_dict'].get('sex')
                             city = variables['fields']['filtr_dict'].get('city')
                             link = f"https://vk.com/id{photos.get('owner_id')}"
                             favorites_id = base.add_favourites(cur, id, name, bdate, 
-                                                    sex, city, False, link)
+                                                    sex, city, link)
                             base.add_photos(cur, photos['href'], favorites_id)
-                        base.add_a_human_user_relationship(cur, variables['id'], id)
-                        base.add_block_list(cur, respone[number][0])
+                        if not base.checking_the_human_user_connection(cur, variables['id'], id):
+                            base.add_a_human_user_relationship(cur, variables['id'], id, True) 
+                        else:
+                            if base.checking_the_human_user_connection(cur, variables['id'], id)[0][-1] == False:
+                                base.add_block_list(cur, variables['id'], id)
+                            else:
+                                keyboard = bot.create_buttons(4)
+                                bot.write_msg(vk, variables['id'], "Данный человек ранее был добавлен в черный список \U0001F628", keyboard)
 
                     elif message_text in ['отменить']:
                         variables['count'] = 0

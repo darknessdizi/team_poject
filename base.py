@@ -7,6 +7,98 @@ def get_ask_user_data(cur, user_id):
     return cur.fetchone()
 
 
+def checking_list_favorites(cur, contact_id):
+
+    '''Проверяем список избранных на наличие человека в базе'''
+
+    cur.execute('''
+        SELECT f.id FROM Favorites as f 
+	        WHERE f.id = %s;
+            ''', (contact_id,))
+    return cur.fetchone()
+
+
+def add_favourites(cur, contact_id, contact_name, bdate, sex, city, link):
+
+    '''Добавляем пользователя в список избранных'''
+
+    cur.execute('''
+        INSERT INTO Favorites (id, name, bdate, sex, city, link)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;
+        ''', (contact_id, contact_name, bdate, sex, city, link))
+    return cur.fetchone()[0]
+
+
+def add_a_human_user_relationship(cur, users_id, favorites_id, status):
+
+    '''Создаем связь пользователя и избранного человека'''
+    
+    cur.execute('''
+        INSERT INTO Users_Favorites (users_id, favorites_id, block_status)
+                VALUES (%s, %s, %s);
+        ''', (users_id, favorites_id, status))
+
+
+def add_photos(cur, list_photos, favorites_id):
+
+    '''Прикрепляем ссылки на фото в список избранных'''
+
+    for link in list_photos:
+        cur.execute('''
+            INSERT INTO photos (link , favorites_id)
+                VALUES (%s, %s);''', 
+                (link, favorites_id))
+
+
+def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
+
+    '''добавлем данные пользователя в базу данных (запрашивающий пользователь)'''
+
+    cur.execute("""
+        INSERT INTO users(id, user_name, user_age, user_city, user_sex)
+        VALUES (%s, %s, %s, %s, %s);
+        """, (user_id, user_name, user_age, user_city, user_sex))
+    cur.execute('''
+        SELECT * FROM users
+        WHERE id = %s;
+        ''', (user_id,))
+
+    return cur.fetchone()
+
+
+def checking_the_human_user_connection(cur, user_id, favorites_id):
+
+    cur.execute('''
+        SELECT * FROM Users_Favorites
+        WHERE users_id = %s AND favorites_id = %s;
+        ''', (user_id, favorites_id))
+    
+    return cur.fetchall()
+
+
+def add_block_list(cur, user_id, favorites_id):
+
+    '''Добавляем к пользователю статус в черном списке'''
+
+    cur.execute('''
+        UPDATE Users_Favorites 
+        SET block_status = TRUE 
+        WHERE users_id = %s AND favorites_id = %s;
+        ''', (user_id, favorites_id))
+
+
+def del_block_list(cur, user_id, favorites_id):
+
+    '''Добавляем к пользователю статус в черном списке'''
+
+    cur.execute('''
+        UPDATE Users_Favorites 
+        SET block_status = FALSE 
+        WHERE users_id = %s AND favorites_id = %s;
+        ''', (user_id, favorites_id))
+
+
+
 # def add_find_users(cur, f_user_id, user_id, f_user_name, user_url):
 #     '''добавляем в базу данных всех найденных людей'''
 #     cur.execute("""
@@ -50,64 +142,18 @@ def get_ask_user_data(cur, user_id):
 #         ''', (f_user_id,))
 #     return cur.fetchone()
 
-def checking_favorites(cur, contact_id):
 
-    '''Проверяем список избранных на наличие человека в базе'''
+# def get_favourites(cur):
 
-    cur.execute('''
-        SELECT f.id FROM Favorites as f 
-	        WHERE f.id = %s;
-            ''', (contact_id,))
-    return cur.fetchone()
-
-def add_favourites(cur, contact_id, contact_name, bdate, sex, city, block, link):
-    # format  id: 33579332
-    # format  user_name: 'Юлия Волкова'
-    # format  age: ['34', '57']
-    # format  sex: '1'
-    # format  city: 'новосибирск'
-
-    '''Добавляем пользователя в список избранных'''
-
-    cur.execute('''
-        INSERT INTO Favorites (id, name, bdate, sex, city, block_list, link)
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
-        ''', (contact_id, contact_name, bdate, sex, city, block, link))
-    return cur.fetchone()[0]
-
-def add_a_human_user_relationship(cur, users_id, favorites_id):
-
-    '''Создаем связь пользователя и избранного человека'''
+#     '''Выгружаем из базы данных список избранных'''
     
-    cur.execute('''
-        INSERT INTO Users_Favorites (users_id, favorites_id)
-                VALUES (%s, %s);
-        ''', (users_id, favorites_id))
-
-
-def add_photos(cur, list_photos, favorites_id):
-
-    '''Прикрепляем ссылки на фото в список избранных'''
-
-    for link in list_photos:
-        cur.execute('''
-            INSERT INTO photos (link , favorites_id)
-                VALUES (%s, %s);''', 
-                (link, favorites_id))
-
-
-
-def get_favourites(cur):
-
-    '''Выгружаем из базы данных список избранных'''
+#     cur.execute('''
+#         SELECT f.name, f.age, f.city 
+#         FROM favorites as f
+# 	    WHERE f.block_list = False ;
+#         ''')
     
-    cur.execute('''
-        SELECT f.name, f.age, f.city 
-        FROM favorites as f
-	    WHERE f.block_list = False ;
-        ''')
-    
-    return cur.fetchall()
+#     return cur.fetchall()
 
 
 
@@ -131,44 +177,26 @@ def get_favourites(cur):
 #     ''', (user_id, 1))
 #     return cur.fetchall()
 
+# def add_block_list(cur, user_id):
 
-def add_block_list(cur, user_id):
+#     '''Добавляем к пользователю статус в черном списке'''
 
-    '''Добавляем к пользователю статус в черном списке'''
+#     cur.execute('''
+#         UPDATE favorites 
+#         SET block_list = TRUE 
+#         WHERE id = %s;
+#         ''', (user_id,))
 
-    cur.execute('''
-        UPDATE favorites 
-        SET block_list = TRUE 
-        WHERE id = %s;
-        ''', (user_id,))
+# def del_block_list(cur, user_id):
 
-def del_block_list(cur, user_id):
+#     '''Снимаем у пользователю статус в черном списке'''
 
-    '''Снимаем у пользователю статус в черном списке'''
-
-    cur.execute('''
-        UPDATE favorites 
-        SET block_list = False 
-        WHERE id = %s;
-        ''', (user_id,))
+#     cur.execute('''
+#         UPDATE favorites 
+#         SET block_list = False 
+#         WHERE id = %s;
+#         ''', (user_id,))
             
-
-def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
-
-    '''добавлем данные пользователя в базу данных (запрашивающий пользователь)'''
-
-    cur.execute("""
-        INSERT INTO users(id, user_name, user_age, user_city, user_sex)
-        VALUES (%s, %s, %s, %s, %s);
-        """, (user_id, user_name, user_age, user_city, user_sex))
-    cur.execute('''
-        SELECT * FROM users
-        WHERE id = %s;
-        ''', (user_id,))
-
-    return cur.fetchone()
-
-
 def drop_table(cur):
     cur.execute("""
         DROP TABLE Users_Favorites;
@@ -198,7 +226,6 @@ def create_db(cur):
         bdate VARCHAR(40),
         sex VARCHAR(40),
         city VARCHAR(40),
-        block_list BOOLEAN,
         link VARCHAR
     );
     ''')
@@ -207,7 +234,8 @@ def create_db(cur):
         CREATE TABLE IF NOT EXISTS Users_Favorites (
 	id SERIAL PRIMARY KEY,
 	users_id INTEGER NOT NULL REFERENCES Users (id),
-	favorites_id INTEGER REFERENCES Favorites (id)
+	favorites_id INTEGER NOT NULL REFERENCES Favorites (id),
+    block_status BOOLEAN
     );
     ''')
     
