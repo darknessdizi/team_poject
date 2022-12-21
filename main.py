@@ -25,7 +25,7 @@ def main():
 
     object_vkinder = VKinder(longpoll, session)
 
-    #print(base.drop_table(cur)) #если нужно сбросить БД
+    # print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():
@@ -36,7 +36,7 @@ def main():
             # Выставляем параметры для пользователя написавшего сообщение
             result = bot.user_support(event, list_of_users, list_of_dicts) # format ({'id': 33579332, 'fields': {...}}, [33579332], [{...}])           ---       {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}     ----         [33579332]      ---       [{'id': 33579332, 'fields': {...}}]  
 
-            variables = result[0] # формат {'id': 33579332, 'fields': {'text': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
+            variables = result[0] # формат {'id': 33579332, 'fields': {'link': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
             list_of_users = result[1] # формат [33579332, 45686545]
             list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
 
@@ -126,8 +126,11 @@ def main():
                     elif message_text in ['добавить в черный список']:
                         sex = variables['fields']['filtr_dict'].get('sex')
                         city = variables['fields']['filtr_dict'].get('city')
+                        link = f"https://vk.com/id{photos.get('owner_id')}"
                         favorites_id = base.add_favourites(
-                                                cur, variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
+                                                cur, *respone[number], bdate, sex, city, False, 
+                                                
+                                                variables['id'], # format {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
                                                 *respone[number], # format [[488749963, 'Юлия Волкова'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                                                 sex, city, False)
                         base.add_photos(cur, photos['href'], favorites_id)

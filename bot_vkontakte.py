@@ -35,12 +35,12 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
                 return variables, list_of_users, list_of_dicts
     else:
         first_variables = {'id': None, 'fields': {
-                        'text': None,
                         'count': 0, 
                         'start': False, 
                         'continue': False, 
                         'filtr_dict': {}, 
                         'sql': {},
+                        'link': None,
                         'start_request': False,
                         'number': 0
                         }

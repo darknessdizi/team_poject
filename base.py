@@ -51,7 +51,7 @@ def get_ask_user_data(cur, user_id):
 #     return cur.fetchone()
 
 
-def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city, block):
+def add_favourites(cur, contact_id, contact_name, bdate, sex, city, block, link):
     # format  id: 33579332
     # format  user_name: 'Юлия Волкова'
     # format  age: ['34', '57']
@@ -61,9 +61,9 @@ def add_favourites(cur, id_user, contact_id, contact_name, age, sex, city, block
     '''Добавляем пользователя в список избранных'''
 
     cur.execute('''
-        INSERT INTO favorites (id, user_id , name, age, sex, city, block_list)
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;''',  
-            (contact_id, id_user, contact_name, age, sex, city, block))
+        INSERT INTO favorites (id, name, bdate, sex, city, block_list, link)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;''',  
+            (contact_id, contact_name, bdate, sex, city, block, link))
     return cur.fetchone()[0]
 
 
@@ -143,9 +143,10 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
 
 def drop_table(cur):
     cur.execute("""
-        DROP TABLE photos;
-        DROP TABLE favorites;
-        DROP TABLE users;       
+        DROP TABLE Users_Favorites;
+        DROP TABLE Photos;
+        DROP TABLE Favorites;
+        DROP TABLE Users;       
     """)
 
     return 'Таблицы очищены'
@@ -153,7 +154,7 @@ def drop_table(cur):
 
 def create_db(cur):
     cur.execute('''
-        CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE IF NOT EXISTS Users (
         id INTEGER UNIQUE PRIMARY KEY,
         user_name VARCHAR(40) NOT NULL,
         user_age VARCHAR(10) NOT NULL,
@@ -161,24 +162,32 @@ def create_db(cur):
         user_sex VARCHAR(20) NOT NULL
     );
     ''')
-
+    
     cur.execute('''
-        CREATE TABLE IF NOT EXISTS favorites (
+        CREATE TABLE IF NOT EXISTS Favorites (
         id INTEGER UNIQUE PRIMARY KEY, 
-        user_id INTEGER REFERENCES users (id),
         name VARCHAR(40),
-        age VARCHAR(40),
+        bdate VARCHAR(40),
         sex VARCHAR(40),
         city VARCHAR(40),
-        block_list BOOLEAN
+        block_list BOOLEAN,
+        link VARCHAR
     );
     ''')
 
     cur.execute('''
-        CREATE TABLE IF NOT EXISTS photos (
+        CREATE TABLE IF NOT EXISTS Users_Favorites (
+	id SERIAL PRIMARY KEY,
+	users_id INTEGER NOT NULL REFERENCES Users (id),
+	favorites_id INTEGER REFERENCES Favorites (id)
+    );
+    ''')
+    
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS Photos (
         id SERIAL PRIMARY KEY,
         link VARCHAR,
-        favorites_id INTEGER REFERENCES favorites (id)
+        favorites_id INTEGER REFERENCES Favorites (id)
     );
     ''')
 

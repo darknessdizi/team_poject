@@ -142,9 +142,8 @@ class VKinder:
         print(db_source)
         if db_source:
             for item in db_source:
-                message_text = f'Имя: {item[0]}\nВозраст: {item[1]}\nГород: {item[2]}'
+                message_text = f'Имя: {item[0]}\nДата рождения: {item[1]}\nГород: {item[2]}'
                 bot.write_msg(object_vk_api, sender_id, message_text)
-                # bot.write_msg(object_vk_api, sender_id, "Просмотреть данные")
         else:
             bot.write_msg(object_vk_api, sender_id, f"Список избранных пуст")
         bot.write_msg(object_vk_api, sender_id, "Выполнено \U00002705")
