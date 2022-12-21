@@ -50,6 +50,15 @@ def get_ask_user_data(cur, user_id):
 #         ''', (f_user_id,))
 #     return cur.fetchone()
 
+def checking_favorites(cur, contact_id):
+
+    '''Проверяем список избранных на наличие человека в базе'''
+
+    cur.execute('''
+        SELECT f.id FROM Favorites as f 
+	        WHERE f.id = %s;
+            ''', (contact_id,))
+    return cur.fetchone()
 
 def add_favourites(cur, contact_id, contact_name, bdate, sex, city, block, link):
     # format  id: 33579332
@@ -62,9 +71,18 @@ def add_favourites(cur, contact_id, contact_name, bdate, sex, city, block, link)
 
     cur.execute('''
         INSERT INTO Favorites (id, name, bdate, sex, city, block_list, link)
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;''',  
-            (contact_id, contact_name, bdate, sex, city, block, link))
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
+        ''', (contact_id, contact_name, bdate, sex, city, block, link))
     return cur.fetchone()[0]
+
+def add_a_human_user_relationship(cur, users_id, favorites_id):
+
+    '''Создаем связь пользователя и избранного человека'''
+    
+    cur.execute('''
+        INSERT INTO Users_Favorites (users_id, favorites_id)
+                VALUES (%s, %s);
+        ''', (users_id, favorites_id))
 
 
 def add_photos(cur, list_photos, favorites_id):
@@ -114,13 +132,23 @@ def get_favourites(cur):
 #     return cur.fetchall()
 
 
-def block_list(cur, user_id):
+def add_block_list(cur, user_id):
 
     '''Добавляем к пользователю статус в черном списке'''
 
     cur.execute('''
         UPDATE favorites 
         SET block_list = TRUE 
+        WHERE id = %s;
+        ''', (user_id,))
+
+def del_block_list(cur, user_id):
+
+    '''Снимаем у пользователю статус в черном списке'''
+
+    cur.execute('''
+        UPDATE favorites 
+        SET block_list = False 
         WHERE id = %s;
         ''', (user_id,))
             
