@@ -25,7 +25,7 @@ def main():
 
     object_vkinder = VKinder(longpoll, session)
 
-    print(base.drop_table(cur)) #если нужно сбросить БД
+    # print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
 
     for event in longpoll.listen():

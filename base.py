@@ -98,6 +98,19 @@ def del_block_list(cur, user_id, favorites_id):
         ''', (user_id, favorites_id))
 
 
+def get_favourites(cur):
+
+    '''Выгружаем из базы данных список избранных'''
+    
+    cur.execute('''
+        SELECT f.name, f.bdate, f.city, f.link FROM users_favorites AS uf
+	    JOIN favorites AS f ON uf.favorites_id = f.id
+	    WHERE uf.block_status = FALSE;
+        ''')
+    
+    return cur.fetchall()
+
+
 
 # def add_find_users(cur, f_user_id, user_id, f_user_name, user_url):
 #     '''добавляем в базу данных всех найденных людей'''
@@ -141,21 +154,6 @@ def del_block_list(cur, user_id, favorites_id):
 #         WHERE f_user_ids = %s;
 #         ''', (f_user_id,))
 #     return cur.fetchone()
-
-
-# def get_favourites(cur):
-
-#     '''Выгружаем из базы данных список избранных'''
-    
-#     cur.execute('''
-#         SELECT f.name, f.age, f.city 
-#         FROM favorites as f
-# 	    WHERE f.block_list = False ;
-#         ''')
-    
-#     return cur.fetchall()
-
-
 
 # def add_black_list(cur, iterator, flag):
 #     '''добавляем в черный список'''

@@ -4,6 +4,7 @@ from datetime import date
 import psycopg2
 import requests
 
+
 class PostgreSQL:
 
     def __init__(self, **kwargs):
@@ -23,73 +24,11 @@ class VKinder:
         self.session = session
 
 
-    def _search(self, user_param):
-
-        '''первоначальный поиск'''
-        if user_param[4] == 'Мужской':
-            sex = 1
-        elif user_param[4] == 'Женский':
-            sex = 2
-        else:
-            sex = 0
-
-        result = self.session.users.search(count=1000, blacklisted_by_me=0, fields=['photo_id', 'name', 'age', 'sex', 'city',
-                                                                                  'is_closed'],
-                                           city=user_param[3], sex=sex,
-                                           age_from=user_param[3], age_to=user_param[2], has_photo=1,)['items']
-        print('Выполнен первоначальный поиск')
-        return result
-
-
-
-    def _find_photo(self, user_id):
-
-        '''подбираем фото'''
-        get_photo = self.session.photos.get(owner_id=user_id, album_id='profile', extended=1, photo_sizes=1)['items']
-        photo_list = sorted(get_photo, key=lambda k: k['likes']['count'], reverse=True)
-        if len(photo_list) > 3:
-            photo_list = photo_list[:3]
-        attachment_list = list()
-        for item in photo_list:
-            attachment_list.append(f'photo{user_id}_{item["id"]}')
-        return attachment_list
-
-
-
-    def find_user(self, user_param):
-
-        '''выборка по параметрам'''
-        search_users_dict = self._search(user_param)
-        find_users = list()
-        print("Ищем фото, формируем данные")
-        for user in search_users_dict:
-            if not user['is_closed']:
-                print('. ', end="")
-                attachment = self._find_photo(user['id'])
-                find_users.append({'user_name': f"{user['user_name']} " ,
-                                   'url': f"https://vk.com/id{user['id']}",
-                                   'attachment': attachment, 'id': user['id']})
-
-        print("\nПоиск фото окончен, данные сформированы")
-        return find_users
-
-
     def calculate_age(self, born):  ### добавила self
 
         born = born.split(".")
         today = date.today()
         return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
-
-
-    def add_to_database(cur, sender_id, result):
-
-        '''Пишет полученные данные из поиска в базу данных'''
-        for i_user in result:
-            if not base.add_find_users(cur, i_user['id']):
-                if base.add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
-                    for item in i_user['attachment']:
-                        base.add_find_users_photos(cur, i_user['id'], item)
-        return True
 
 
     def checking_the_user_in_the_database(self, cur, sender_id, response): ### добавила self
@@ -114,6 +53,7 @@ class VKinder:
             else:
                 print('пользователь НЕ добавлен в базу')
 
+
     def the_command_to_greet(self, cur, sender_id: str, object_vk_api: object):
 
         '''Функция отвечает на приветствие пользователя'''
@@ -128,55 +68,122 @@ class VKinder:
                                                 f"(Введите: старт\список) \U0001F60E")
         return ask_user
 
-    def data_conversion(sender_id, cur):
-
-        '''Преобразует данные из базы данных для бота '''
-        users = list()
-        for item in sender_id:
-            users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
-        return users
-
 
     def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
-        db_source = base.get_favourites(cur)
-        print(db_source)
+        db_source = base.get_favourites(cur) # format [('Марианна Иванова', '18.1.2000', 'волгоград', 'https://vk.com/id629503475'), ('Аза Кузинкова', '2.12.2002', 'волгоград', 'https://vk.com/id695107067'), ('Galina Abramova', '3.3.1993', 'волгоград', 'https://vk.com/id610224605'), ('Луиза Аннакулова', '18.8.1995', 'волгоград', 'https://vk.com/id706108662')]
         if db_source:
             for item in db_source:
-                message_text = f'Имя: {item[0]}\nДата рождения: {item[1]}\nГород: {item[2]}'
+                age = self.calculate_age(item[1])
+                city = item[2].capitalize()
+                message_text = f'Имя: {item[0]}\nВозраст: {age}\nГород: {city}\n{item[3]}'
                 bot.write_msg(object_vk_api, sender_id, message_text)
         else:
             bot.write_msg(object_vk_api, sender_id, f"Список избранных пуст")
         bot.write_msg(object_vk_api, sender_id, "Выполнено \U00002705")
         return True
 
-    def search_function(cur, sender_id: str, object_vk_api: object, ask_user, session, longpoll):
-        if base.get_favourites(cur, sender_id):
-            bot.write_msg(object_vk_api, sender_id, f"Поиск...")
-
-            v_kinder = VKinder(longpoll, session)
-            result = v_kinder.find_user(ask_user)
-
-            if base.add_find_users(cur, ask_user[0], result):
-                print('Добавлено в базу')
-                bot.write_msg(object_vk_api, sender_id, "Данные записаны в базу")
-            else:
-                print('Ошибка')
-        else:
-            bot.write_msg(object_vk_api, sender_id, "Смотреть данные")
 
 
 
-    def request_black_users(self, user_id):
 
-        # удаление из поиска пользователей  находяшихся в черном списке
-        self.black_list = []
-        self.id_users = []
-        for user_id in self.black_list:
-            url = 'https://api.vk.com/method/users.get'
-            params = {"user_ids": user_id, "fields": "black_list"}
-            response = requests.get(url=url, params=params)
-            link_load = response.json()
-            for link in link_load['response']:
-               if link['black_list'] == 0:
-                 self.id_users.append(link['user_id'])
+
+    # def _search(self, user_param):
+
+    #     '''первоначальный поиск'''
+    #     if user_param[4] == 'Мужской':
+    #         sex = 1
+    #     elif user_param[4] == 'Женский':
+    #         sex = 2
+    #     else:
+    #         sex = 0
+
+    #     result = self.session.users.search(count=1000, blacklisted_by_me=0, fields=['photo_id', 'name', 'age', 'sex', 'city',
+    #                                                                               'is_closed'],
+    #                                        city=user_param[3], sex=sex,
+    #                                        age_from=user_param[3], age_to=user_param[2], has_photo=1,)['items']
+    #     print('Выполнен первоначальный поиск')
+    #     return result
+
+
+
+    # def _find_photo(self, user_id):
+
+    #     '''подбираем фото'''
+    #     get_photo = self.session.photos.get(owner_id=user_id, album_id='profile', extended=1, photo_sizes=1)['items']
+    #     photo_list = sorted(get_photo, key=lambda k: k['likes']['count'], reverse=True)
+    #     if len(photo_list) > 3:
+    #         photo_list = photo_list[:3]
+    #     attachment_list = list()
+    #     for item in photo_list:
+    #         attachment_list.append(f'photo{user_id}_{item["id"]}')
+    #     return attachment_list
+
+
+
+    # def find_user(self, user_param):
+
+    #     '''выборка по параметрам'''
+    #     search_users_dict = self._search(user_param)
+    #     find_users = list()
+    #     print("Ищем фото, формируем данные")
+    #     for user in search_users_dict:
+    #         if not user['is_closed']:
+    #             print('. ', end="")
+    #             attachment = self._find_photo(user['id'])
+    #             find_users.append({'user_name': f"{user['user_name']} " ,
+    #                                'url': f"https://vk.com/id{user['id']}",
+    #                                'attachment': attachment, 'id': user['id']})
+
+    #     print("\nПоиск фото окончен, данные сформированы")
+    #     return find_users
+
+
+    # def add_to_database(cur, sender_id, result):
+
+    #     '''Пишет полученные данные из поиска в базу данных'''
+    #     for i_user in result:
+    #         if not base.add_find_users(cur, i_user['id']):
+    #             if base.add_find_users(cur, i_user['id'], sender_id, i_user['user_name'], i_user['url']):
+    #                 for item in i_user['attachment']:
+    #                     base.add_find_users_photos(cur, i_user['id'], item)
+    #     return True
+
+    # def data_conversion(sender_id, cur):
+
+    #     '''Преобразует данные из базы данных для бота '''
+    #     users = list()
+    #     for item in sender_id:
+    #         users.append({'id': item[0], 'name': f'{item[1]} {item[2]}', 'url': item[3]})
+    #     return users
+
+    # def search_function(cur, sender_id: str, object_vk_api: object, ask_user, session, longpoll):
+    #     if base.get_favourites(cur, sender_id):
+    #         bot.write_msg(object_vk_api, sender_id, f"Поиск...")
+
+    #         v_kinder = VKinder(longpoll, session)
+    #         result = v_kinder.find_user(ask_user)
+
+    #         if base.add_find_users(cur, ask_user[0], result):
+    #             print('Добавлено в базу')
+    #             bot.write_msg(object_vk_api, sender_id, "Данные записаны в базу")
+    #         else:
+    #             print('Ошибка')
+    #     else:
+    #         bot.write_msg(object_vk_api, sender_id, "Смотреть данные")
+
+
+
+    # def request_black_users(self, user_id):
+
+    #     # удаление из поиска пользователей  находяшихся в черном списке
+    #     self.black_list = []
+    #     self.id_users = []
+    #     for user_id in self.black_list:
+    #         url = 'https://api.vk.com/method/users.get'
+    #         params = {"user_ids": user_id, "fields": "black_list"}
+    #         response = requests.get(url=url, params=params)
+    #         link_load = response.json()
+    #         for link in link_load['response']:
+    #            if link['black_list'] == 0:
+    #              self.id_users.append(link['user_id'])
 
