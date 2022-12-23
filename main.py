@@ -53,19 +53,8 @@ def main():
                         continue
                     else:
                         # Запросы на фото для пользователя
-                        number = variables['fields']['number']
-                        # список пользователей которые находим по параметрам
-                        # список вида [int(id), str(user_name)]
-                        # variables['fields']['filtr_dict'] = {'age': ['34', '57'], 'sex': '1', 'city': 'новосибирск'}
-
                         respone = response.get_users(variables['fields']['filtr_dict']) # формат respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                         block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
-                        print('1 - respone: ', respone)
-                        print('1 - variables', variables['fields']['filtr_dict'])
-                        print('1 - number: ', number)
-                        print('1 - block_list: ', block_list)
-                        print('1 - кто ты: ', variables['id'])
-                        print('*'*40)
                         if respone is None:
                             bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
                             variables['fields']['filtr_dict'] = {}
@@ -74,13 +63,10 @@ def main():
                             variables['fields']['filtr_dict'] = {}
                         else:
                             # возвращает фото в словаре вида {'href': [], 'owner_id': ""}
-                            # for element in base.get_favourites(cur, variables['id'], True): # format [('Эльвира Давыдова', '15.10.2001', 'волгоград', 'https://vk.com/id613603160', 613603160), ('Марина Трофимова', '17.2.1999', 'волгоград', 'https://vk.com/id634283248', 634283248), ('Светлана Железнова', '11.11.1996', 'волгоград', 'https://vk.com/id702412794', 702412794), ('Яна Прокофьева', '5.8.2000', 'санкт-петербург', 'https://vk.com/id663766137', 663766137), ('Nathalie Hoff', '2.7.1996', 'санкт-петербург', 'https://vk.com/id614651212', 614651212)]
-                            #     block_list.append(element[4])
                             while True:
-                                if respone[number][0] in block_list:
-                                    number += 1
-                                    variables['fields']['number'] = number
-                                    if len(respone) < number:
+                                if respone[variables['fields']['number']][0] in block_list:
+                                    variables['fields']['number'] += 1
+                                    if len(respone) < variables['fields']['number']:
                                         bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                                         variables['count'] = 0
                                         variables['start'] = False
@@ -90,14 +76,14 @@ def main():
                                         variables['fields']['number'] = 0
                                         break
                                 else:
-                                    photos = response.get_users_photo(str(respone[number][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
+                                    photos = response.get_users_photo(str(respone[variables['fields']['number']][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
                                     
                                     if photos is None:
                                         keyboard = bot.create_buttons(1)
                                         bot.write_msg(vk, variables['id'], "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                         continue
                                     
-                                    message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
+                                    message = f"{respone[variables['fields']['number']][1]}\n https://vk.com/id{photos.get('owner_id')}"
                                     bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
 
                                     attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
@@ -115,16 +101,10 @@ def main():
                             continue
 
                     elif message_text in ['следующий']:
-                        print('2 - respone: ', respone)
-                        print('2 - variables', variables['fields']['filtr_dict'])
-                        print('2 - number: ', number)
-                        print('2 - кто ты: ', variables['id'])
-                        print('*'*40)
                         keyboard = bot.create_buttons(4)
                         bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
-                        number += 1
-                        variables['fields']['number'] = number
-                        if len(respone) == number:
+                        variables['fields']['number'] += 1
+                        if len(respone) == variables['fields']['number']:
                             bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                             variables['count'] = 0
                             variables['start'] = False
@@ -133,13 +113,12 @@ def main():
                             variables['fields']['end_list'] = True
                             variables['fields']['number'] = 0
                             continue
-                        else:
+                        else:                           
                             block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
                             while True:
-                                if respone[number][0] in block_list:
-                                    number += 1
-                                    variables['fields']['number'] = number
-                                    if len(respone) == number:
+                                if respone[variables['fields']['number']][0] in block_list:
+                                    variables['fields']['number'] += 1
+                                    if len(respone) == variables['fields']['number']:
                                         bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                                         variables['count'] = 0
                                         variables['start'] = False
@@ -149,20 +128,22 @@ def main():
                                         variables['fields']['number'] = 0
                                         break
                                 else:
-                                    photos = response.get_users_photo(str(respone[number][0]))
+                                    photos = response.get_users_photo(str(respone[variables['fields']['number']][0]))
                                     if photos is None:
                                         keyboard = bot.create_buttons(1)
                                         bot.write_msg(vk, variables['id'], "\n\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", keyboard)
                                         continue
                                     
-                                    message = f"{respone[number][1]}\n https://vk.com/id{photos.get('owner_id')}"
+                                    message = f"{respone[variables['fields']['number']][1]}\n https://vk.com/id{photos.get('owner_id')}"
                                     bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
                                     attachment = bot.add_photos(vk, photos.get('href'))
                                     bot.send_photos(vk, variables['id'], attachment)
+                                    print('1 - Получены фото, значение number: ', variables['fields']['number'])
+                                    print('*'*40)
                                     break
 
                     elif message_text in ['добавить в избранное']:
-                        id, name, bdate = respone[number] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                        id, name, bdate = respone[variables['fields']['number']] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                         if not base.checking_list_favorites(cur, id):
                             sex = variables['fields']['filtr_dict'].get('sex')
                             city = variables['fields']['filtr_dict'].get('city')
@@ -181,7 +162,7 @@ def main():
 
 
                     elif message_text in ['добавить в черный список']:
-                        id, name, bdate = respone[number] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                        id, name, bdate = respone[variables['fields']['number']] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
                         if not base.checking_list_favorites(cur, id):
                             sex = variables['fields']['filtr_dict'].get('sex')
                             city = variables['fields']['filtr_dict'].get('city')
