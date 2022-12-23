@@ -98,15 +98,15 @@ def del_block_list(cur, user_id, favorites_id):
         ''', (user_id, favorites_id))
 
 
-def get_favourites(cur):
+def get_favourites(cur, users_id, status=False):
 
     '''Выгружаем из базы данных список избранных'''
     
     cur.execute('''
-        SELECT f.name, f.bdate, f.city, f.link FROM users_favorites AS uf
+        SELECT f.name, f.bdate, f.city, f.link, f.id FROM users_favorites AS uf
 	    JOIN favorites AS f ON uf.favorites_id = f.id
-	    WHERE uf.block_status = FALSE;
-        ''')
+	    WHERE uf.users_id = %s AND uf.block_status = %s;
+        ''', (users_id, status))
     
     return cur.fetchall()
 

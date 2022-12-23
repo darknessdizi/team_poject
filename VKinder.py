@@ -70,11 +70,11 @@ class VKinder:
 
 
     def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
-        db_source = base.get_favourites(cur) # format [('Марианна Иванова', '18.1.2000', 'волгоград', 'https://vk.com/id629503475'), ('Аза Кузинкова', '2.12.2002', 'волгоград', 'https://vk.com/id695107067'), ('Galina Abramova', '3.3.1993', 'волгоград', 'https://vk.com/id610224605'), ('Луиза Аннакулова', '18.8.1995', 'волгоград', 'https://vk.com/id706108662')]
+        db_source = base.get_favourites(cur, sender_id) # format [('Марианна Иванова', '18.1.2000', 'волгоград', 'https://vk.com/id629503475'), ('Аза Кузинкова', '2.12.2002', 'волгоград', 'https://vk.com/id695107067'), ('Galina Abramova', '3.3.1993', 'волгоград', 'https://vk.com/id610224605'), ('Луиза Аннакулова', '18.8.1995', 'волгоград', 'https://vk.com/id706108662')]
         if db_source:
             for item in db_source:
                 age = self.calculate_age(item[1])
-                city = item[2].capitalize()
+                city = item[2].upper()
                 message_text = f'Имя: {item[0]}\nВозраст: {age}\nГород: {city}\n{item[3]}'
                 bot.write_msg(object_vk_api, sender_id, message_text)
         else:
