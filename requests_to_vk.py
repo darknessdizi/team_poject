@@ -47,7 +47,7 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, input_params):  # нужен параметр offset
+    def get_users(self, offset, input_params):  # нужен параметр offset
         # формат input_params {'age': ['34', '57'], 'sex': 1, 'city': 'новосибирск'}
 
         '''Возвращает список пользователей с номером id и их именами'''
@@ -68,7 +68,7 @@ class RequestsVk:
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
                   'q': "",
                   'count': 5,
-
+                  'offset': offset,
                   'age_from': age_from,
                   'age_to': age_to,
                   'sex': sex,
@@ -103,24 +103,34 @@ class RequestsVk:
 
         url = "https://api.vk.com/method/photos.get"
 
-        params = {
+        params_profile = {
             'owner_id': user_id,
             'album_id': -6,
             'extended': 1,
             'photo_sizes': 1,
             'has_photo': 1
         }
+        params_wall = {
+            'owner_id': user_id,
+            'album_id': -7,
+            'extended': 1,
+            'photo_sizes': 1,
+            'has_photo': 1
+        }
         headers = self.get_headers()
         # time.sleep(2) 
-        res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        res_profile = requests.get(url=url, params={**self.params, **params_profile}, headers=headers)
+        res_wall = requests.get(url=url, params={**self.params, **params_wall}, headers=headers)
 
-        with open('photo.json', 'w') as file:
-            json.dump(res.json(), file, ensure_ascii=False, indent=3)
+        # with open('photo.json', 'w') as file:
+        #     json.dump(res.json(), file, ensure_ascii=False, indent=3)
 
         # if res.json().get('response').get('count') >= 3:
         #     photos_info = res.json().get('response').get('items')
 
-        photos_info = res.json().get('response').get('items')
+        photos_profile = res_profile.json().get('response').get('items')
+        photos_wall = res_wall.json().get('response').get('items')
+        photos_info = photos_profile + photos_wall
 
         # берем фото из запроса по фото с профиля и по  фото со стены
 
@@ -151,9 +161,6 @@ class RequestsVk:
                 dict_likes_max['href'].append(dict_likes.get('href').pop(index))
         
         dict_likes_max['owner_id'] = dict_likes['owner_id']
-
-        # if self.get_photo_tag(str(user_id)):  # берем фото с отметками пользователя
-        #     dict_likes_max['href'] = dict_likes_max['href'] + self.get_photo_tag(str(user_id))
 
         return dict_likes_max
 
@@ -201,38 +208,3 @@ class RequestsVk:
 
 if __name__ == '__main__':
     pass
-    # access_token = token_vk.token_vk
-    # # #для теста
-    # # list_input = [[30, 30], 1, 'новосибирск']
-    # # age = list_input[0]
-    # # city = list_input[2]
-    # # sex = int(list_input[1])
-    # vk = RequestsVk(access_token)
-    # # # user_info = vk.get_user(user_id)
-    # # # возвращает список словарей пользователей вида {"href": [], "first_name": "", "last_name": "", "user_link": ""}
-    # input_params = {'age': ['119', '121'], 'sex': 2, 'city': 'обь'}
-    # # pprint(vk.get_users(input_params))
-    # list_ = [[621028572, 'Ирина Павлова', '11.3.1997'],
-    #          [638832767, 'Lumıne Blondeshıne', '11.4.2006'],
-    #          [559067825, 'Арина Фатова', '2.2.2001'],
-    #          [96847160, 'Елена Поволоцкая', '28.9.1998'],
-    #          [265143019, 'Юлия Секси', '7.4.1998'],
-    #          [559378944, 'Екатерина Миронова', '9.6.2000'],
-    #          [458593529, 'Мика Цугба', '24.3.2003'],
-    #          [122226091, 'Дарья Постникова', '12.11.1997'],
-    #          [568368117, 'Анжелика Пожидаева', '26.1.1998']]
-    # # pprint(vk.get_users_photo())
-    # # offset = 1
-    # # while True:
-    # users = vk.get_users(input_params)
-    # print(len(users))
-    # pprint(users)
-    #for i in users:
-        # pprint(vk.get_photo_tag(i[0]))
-        #pprint(vk.get_users_photo(i[0]))
-    #     offset += 10
-
-    #pprint(vk.get_users_photo('710698165'))
-    # # print(vk.get_city_id('сочи'))
-
-    # pprint(vk.get_photo_tag('243426041'))

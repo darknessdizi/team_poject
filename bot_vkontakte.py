@@ -40,7 +40,7 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
                         'continue': False, 
                         'filtr_dict': {}, 
                         'number': 0,
-                        'start_request': False,
+                        'offset': 0,
                         'end_list': False
                         }
                     }
@@ -249,6 +249,7 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         variables['filtr_dict'] = {}
         variables['count'] = 1
         variables['continue'] = True
+        variables['fields']['number'] = 0
         return variables   
     elif message_text == 'отменить':
         variables['count'] = 0
@@ -256,6 +257,7 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         write_msg(object_vk_api, sender_id, 'Ок')
         variables['continue'] = True
         variables['filtr_dict'] = {}
+        variables['fields']['number'] = 0
         return variables
 
     variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(

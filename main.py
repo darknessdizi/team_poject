@@ -53,7 +53,9 @@ def main():
                         continue
                     else:
                         # Запросы на фото для пользователя
-                        respone = response.get_users(variables['fields']['filtr_dict']) # формат respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                        offset = 0
+                        respone = response.get_users(variables['fields']['filtr_dict']['offset'], variables['fields']['filtr_dict']) # формат respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+                        print('Наши клиенты ', respone)
                         block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
                         if respone is None:
                             bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
@@ -66,6 +68,7 @@ def main():
                             while True:
                                 if respone[variables['fields']['number']][0] in block_list:
                                     variables['fields']['number'] += 1
+                                    print('Удалена из печати: ', respone[variables['fields']['number']][1])
                                     if len(respone) < variables['fields']['number']:
                                         bot.write_msg(vk, variables['id'], "Больше никого нет. \U0001F605")
                                         variables['count'] = 0
@@ -138,8 +141,6 @@ def main():
                                     bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
                                     attachment = bot.add_photos(vk, photos.get('href'))
                                     bot.send_photos(vk, variables['id'], attachment)
-                                    print('1 - Получены фото, значение number: ', variables['fields']['number'])
-                                    print('*'*40)
                                     break
 
                     elif message_text in ['добавить в избранное']:
