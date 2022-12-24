@@ -39,19 +39,9 @@ def photo_requests_for_users(
             if respone[variables['fields']['number']][0] in block_list:
                 variables['fields']['number'] += 1
                 if len(respone) == variables['fields']['number']:
-                    # bot.write_msg(
-                    #     object_vk_api, variables['id'], 
-                    #     "\U000026D4 Обновляю список обнаруженных людей. \U0001F605"
-                    # )
                     variables['fields']['number'] = 0
                     variables['fields']['offset'] += 1000
                     respone = response.get_users(variables['fields'])
-                    # keyboard = bot.create_buttons(4)
-                    # bot.write_msg(
-                    #     object_vk_api, variables['id'], 
-                    #     "Подождите. Сейчас загружаю фотографии. \U0001F609", 
-                    #     keyboard
-                    # )
                     continue
             else:
                 photos = response.get_users_photo(
@@ -89,10 +79,6 @@ def updates_the_list_of_people(
 
     '''Обновляет список людей для вывода в чат бота'''
 
-    bot.write_msg(
-        object_vk_api, variables['id'], 
-        "\U000026D4 Обновляю список обнаруженных людей. \U0001F605"
-    )
     variables['fields']['number'] = 0
     variables['fields']['offset'] += 1000
     variables, respone, photos = photo_requests_for_users(
