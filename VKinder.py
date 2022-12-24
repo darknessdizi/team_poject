@@ -36,7 +36,7 @@ class VKinder:
         # format  response: <requests_to_vk.RequestsVk object at 0x0000025CC1A1F670>
 
         if not base.get_ask_user_data(cur, sender_id):
-            print('в базе отсутствует')
+            print('В базе отсутствует')
             user_info = response.get_user(sender_id)
             user_info['age'] = self.calculate_age(user_info['age'])  ## изменила было  base.calculate()
             if user_info['sex'] == 2:
@@ -48,17 +48,14 @@ class VKinder:
             if base.add_ask_user(cur, sender_id, user_info['user_name'],
                             user_info['age'], user_info['city'],
                             user_info['gender']):
-                print('пользователь добавлен в базу')
+                print('Пользователь добавлен в базу')
             else:
-                print('пользователь НЕ добавлен в базу')
+                print('Пользователь НЕ добавлен в базу')
 
 
     def the_command_to_greet(self, cur, sender_id: str, object_vk_api: object):
 
         '''Функция отвечает на приветствие пользователя'''
-
-        ask_user = base.get_ask_user_data(cur, sender_id)
-        print(f'Пользователь = {ask_user}')
 
         ask_user = base.get_ask_user_data(cur, sender_id)
         bot.write_msg(object_vk_api, sender_id, f"Здравствуйте, {ask_user[1]}!\n"

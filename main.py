@@ -9,7 +9,6 @@ from VKinder import VKinder, PostgreSQL
 def photo_requests_for_users(vk, response, cur, variables):
 
     respone = response.get_users(variables['fields']) # формат respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-    print('Список пользователей: ', respone)
     block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
     if respone is None:
         bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
@@ -34,7 +33,6 @@ def photo_requests_for_users(vk, response, cur, variables):
                     respone = response.get_users(variables['fields'])
                     keyboard = bot.create_buttons(4)
                     bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
-                    print('Обновленный Список пользователей: ', respone)
                     continue
             else:
                 photos = response.get_users_photo(str(respone[variables['fields']['number']][0])) # format {'href': ['https://sun1-89.user...type=album', 'https://sun9-64.user...type=album', 'https://sun9-1.usera...type=album'], 'owner_id': ''}
@@ -51,8 +49,6 @@ def photo_requests_for_users(vk, response, cur, variables):
                 bot.send_photos(vk, variables['id'], attachment)
                 keyboard = bot.create_buttons(4)
                 bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
-                print('variables', variables)
-                print('respone', respone)
                 return variables, respone, photos
 
 
