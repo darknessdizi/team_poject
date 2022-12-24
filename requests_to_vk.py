@@ -19,18 +19,22 @@ import requests
 
 class RequestsVk:
 
+    '''Класс для осуществления requests запросов в Api вконтакте'''
     
     def __init__(self, access_token, version='5.131'):
         self.access_token = access_token
         self.version = version
         self.params = {'access_token': self.access_token, 'v': self.version}
 
+
     def get_headers(self):
-        return {'Content-Type': 'application/json', 'Authorization': f'OAuth {self.access_token}'}
+        return {'Content-Type': 'application/json', 
+                'Authorization': f'OAuth {self.access_token}'}
 
-    def get_user(self, user_id):
 
-        '''Возвращает инф-ию о пользователе'''
+    def get_user(self, user_id: str) -> dict:
+
+        '''Возвращает информацию о пользователе'''
 
         url = "https://api.vk.com/method/users.get"
         headers = self.get_headers()
@@ -59,7 +63,8 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, input_params):  
+
+    def get_users(self, input_params: dict) -> list:  
         
         '''Возвращает список пользователей с номером id и их именами'''
 
@@ -78,7 +83,7 @@ class RequestsVk:
         age_to = int(age[1])
         offset = input_params.get('offset')
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
-                  'q': "",
+                  'q': '',
                   'count': 3,
                   'offset': offset,
                   'age_from': age_from,
@@ -105,9 +110,14 @@ class RequestsVk:
 
         return list_users
 
-    def get_users_photo(self, user_id):
-        """ Возвращает до 3-х фото пользователя с макс. количеством лайков.
-        Фото берутся со страницы пользователя и стены"""
+
+    def get_users_photo(self, user_id: str) -> dict:
+
+        ''' Возвращает до 3-х фото пользователя с макс. количеством лайков.
+
+        Фото берутся со страницы пользователя и стены
+        
+        '''
 
         url = "https://api.vk.com/method/photos.get"
 
@@ -163,9 +173,10 @@ class RequestsVk:
 
         return dict_likes_max
 
-    def get_photo_tag(self, user_id):
 
-        """ Метод возвращает список ссылок на фотографии, где отмечен пользователь"""
+    def get_photo_tag(self, user_id: str) -> list:
+
+        ''' Метод возвращает список ссылок на фотографии, где отмечен пользователь'''
 
         url = "https://api.vk.com/method/newsfeed.get"
         headers = self.get_headers()
@@ -189,7 +200,11 @@ class RequestsVk:
 
         return list_photos
 
-    def get_city_id(self, city):
+
+    def get_city_id(self, city: str) -> int:
+
+        '''Поиск id города'''
+
         url = "https://api.vk.com/method/database.getCities"
         headers = self.get_headers()
         params = {
