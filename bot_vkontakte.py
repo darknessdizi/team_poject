@@ -52,75 +52,6 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
     return variables, list_of_users, list_of_dicts
 
 
-# def create_keyboard(response):
-
-#     """Создание клавиатуры"""
-
-#     keyboard = VkKeyboard(one_time=True)
-#     if response in ['Привет', 'привет', 'Поиск', 'поиск']:
-#         keyboard.add_button('Заполнить базу')
-#         keyboard.add_line()
-#         keyboard.add_button('Список',
-#                             color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Смотреть данные',
-#                             color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Закончить')
-
-#     elif response in ['Заполнить базу']:
-#         keyboard.add_button('Просмотреть список избранных',
-#                             color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Просмотреть данные пользователей',
-#                             color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Закончить')
-
-#     elif response in ['Просмотреть список избранных']:
-#         keyboard.add_button('Просмотреть данные пользователей',
-#                             color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Закончить')
-
-#     elif response in ['Начать поиск', 'Просмотреть данные пользователей', 'Вернуться к поиску',
-#                        'Добавить в список избранных', 'Добавить в черный список', 'Продолжить поиск']:
-#         keyboard.add_button('Добавить в список избранных',
-#                             color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_button('Добавить в черный список',
-#                             color=VkKeyboardColor.NEGATIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Продолжить поиск')
-#         keyboard.add_line()
-#         keyboard.add_button('Закончить')
-
-#     elif response in ['Получить фото', 'Написать']:
-#         keyboard.add_button('Вернуться к поиску')
-#         keyboard.add_line()
-#         keyboard.add_button('Закончить')
-
-#     elif response in ['Получить фото', 'Написать']:
-#         keyboard.add_button('Получить фото', color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_button('Написать', color=VkKeyboardColor.POSITIVE)
-#         keyboard.add_line()
-#         keyboard.add_button('Вернуться к поиску')
-
-#     elif response == 'Закончить':
-#         keyboard.add_button('Пока')
-#         keyboard.add_line()
-#         keyboard.add_button('Вернуться к поиску')
-
-#     elif response == 'Пока':
-#         keyboard.add_button('Привет')
-
-#     else:
-#         keyboard.add_button('Начать поиск', color=VkKeyboardColor.POSITIVE)
-
-#     keyboard = keyboard.get_keyboard()
-#     return keyboard
-
-
-
 def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None) -> None:
 
     '''Отправляет сообщения и добавляет кнопки к сообщениям'''
@@ -249,7 +180,7 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         variables['filtr_dict'] = {}
         variables['count'] = 1
         variables['continue'] = True
-        variables['fields']['number'] = 0
+        variables['number'] = 0
         return variables   
     elif message_text == 'отменить':
         variables['count'] = 0
@@ -257,7 +188,7 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         write_msg(object_vk_api, sender_id, 'Ок')
         variables['continue'] = True
         variables['filtr_dict'] = {}
-        variables['fields']['number'] = 0
+        variables['number'] = 0
         return variables
 
     variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(

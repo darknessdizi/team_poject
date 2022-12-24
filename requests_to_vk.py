@@ -1,9 +1,5 @@
 import json
 import requests
-from pprint import pprint
-import token_vk
-from datetime import time
-import time
 
 
 class RequestsVk:
@@ -24,7 +20,6 @@ class RequestsVk:
         params = {"user_ids": user_id,
                   "fields": "city, sex, bdate"}
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
-        pprint(res.json())
         user_info = {"city": "", "age": "", "user_name": "", "sex": ""}
         first_name = res.json().get('response')[0].get("first_name")
         last_name = res.json().get('response')[0].get("last_name")
@@ -129,8 +124,10 @@ class RequestsVk:
         # if res.json().get('response').get('count') >= 3:
         #     photos_info = res.json().get('response').get('items')
 
-        photos_profile = res_profile.json().get('response').get('items')
-        photos_wall = res_wall.json().get('response').get('items')
+        if res_profile.json().get('response').get('items'):
+            photos_profile = res_profile.json().get('response').get('items')
+        if res_wall.json().get('response').get('items'):
+            photos_wall = res_wall.json().get('response').get('items')
         photos_info = photos_profile + photos_wall
 
         # берем фото из запроса по фото с профиля и по  фото со стены
