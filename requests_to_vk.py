@@ -17,6 +17,8 @@ import json
 import requests
 from pprint import pprint
 
+import token_vk
+
 
 class RequestsVk:
     def __init__(self, access_token, version='5.131'):
@@ -207,3 +209,7 @@ class RequestsVk:
 
 if __name__ == '__main__':
     pass
+    input = [[30], 1, ' манк']
+    access_token = token_vk.token_vk
+    vk = RequestsVk(access_token)
+    users = vk.get_users(input)
