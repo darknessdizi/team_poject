@@ -15,7 +15,6 @@ class PostgreSQL:
         self.connect.autocommit = True
 
 
-
 class VKinder:
 
     def __init__(self, longpoll, session):
@@ -23,22 +22,19 @@ class VKinder:
         self.session = session
 
 
-    def calculate_age(self, born):  ### добавила self
+    def calculate_age(self, born):  
 
         born = born.split(".")
         today = date.today()
         return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
 
 
-    def checking_the_user_in_the_database(self, cur, sender_id, response): ### добавила self
-        # format  cur: <cursor object at 0x0000025CC1D4D580; closed: 0>
-        # format  sender_id: 33579332
-        # format  response: <requests_to_vk.RequestsVk object at 0x0000025CC1A1F670>
+    def checking_the_user_in_the_database(self, cur, sender_id, response): 
 
         if not base.get_ask_user_data(cur, sender_id):
             print('В базе отсутствует')
             user_info = response.get_user(sender_id)
-            user_info['age'] = self.calculate_age(user_info['age'])  ## изменила было  base.calculate()
+            user_info['age'] = self.calculate_age(user_info['age'])  
             if user_info['sex'] == 2:
                 user_info['gender'] = 'Мужской'
             elif user_info['sex'] == 1:
@@ -77,3 +73,7 @@ class VKinder:
             bot.write_msg(object_vk_api, sender_id, f"Список избранных пуст")
         bot.write_msg(object_vk_api, sender_id, "Выполнено \U00002705")
         return True
+
+
+if __name__ == '__main__':
+    pass

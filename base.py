@@ -1,5 +1,7 @@
 def get_ask_user_data(cur, user_id):
+
     '''достаем из базы данные пользователя'''
+
     cur.execute('''
         SELECT * FROM users
         WHERE id = %s;
@@ -62,7 +64,6 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
         SELECT * FROM users
         WHERE id = %s;
         ''', (user_id,))
-
     return cur.fetchone()
 
 
@@ -72,7 +73,6 @@ def checking_the_human_user_connection(cur, user_id, favorites_id):
         SELECT * FROM Users_Favorites
         WHERE users_id = %s AND favorites_id = %s;
         ''', (user_id, favorites_id))
-    
     return cur.fetchall()
 
 
@@ -107,18 +107,16 @@ def get_favourites(cur, users_id, status=False):
 	    JOIN favorites AS f ON uf.favorites_id = f.id
 	    WHERE uf.users_id = %s AND uf.block_status = %s;
         ''', (users_id, status))
-    
     return cur.fetchall()
 
             
 def drop_table(cur):
-    cur.execute("""
+    cur.execute('''
         DROP TABLE Users_Favorites;
         DROP TABLE Photos;
         DROP TABLE Favorites;
         DROP TABLE Users;       
-    """)
-
+    ''')
     return 'Таблицы очищены'
 
 
@@ -162,7 +160,6 @@ def create_db(cur):
     ''')
 
     return 'БД создана'
-
 
 
 if __name__ == '__main__':
