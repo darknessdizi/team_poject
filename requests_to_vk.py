@@ -84,7 +84,7 @@ class RequestsVk:
         offset = input_params.get('offset')
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
                   'q': '',
-                  'count': 3,
+                  'count': 1000,
                   'offset': offset,
                   'age_from': age_from,
                   'age_to': age_to,
@@ -100,13 +100,14 @@ class RequestsVk:
         list_users = []
         for item in result:
             list_user = []
-            if item.get('blacklisted') == 0 and item.get('is_closed') is False:
-                list_user.append(item.get('id'))  
-                user_name = f"{item.get('first_name')} {item.get('last_name')}"  
-                list_user.append(user_name)  
-                bdate = item.get('bdate')
-                list_user.append(bdate)
-                list_users.append(list_user)  
+            if item.get('city'):
+                if item.get('blacklisted') == 0 and item.get('is_closed') is False and item.get('city').get('id') == city_id:
+                    list_user.append(item.get('id'))  
+                    user_name = f"{item.get('first_name')} {item.get('last_name')}"  
+                    list_user.append(user_name)  
+                    bdate = item.get('bdate')
+                    list_user.append(bdate)
+                    list_users.append(list_user)  
 
         return list_users
 
