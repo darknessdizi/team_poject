@@ -18,6 +18,8 @@ import requests
 
 
 class RequestsVk:
+
+    
     def __init__(self, access_token, version='5.131'):
         self.access_token = access_token
         self.version = version

@@ -6,6 +6,8 @@ import psycopg2
 
 class PostgreSQL:
 
+    '''Класс для подключения к базе данных'''
+
     def __init__(self, **kwargs):
         self.connect = psycopg2.connect(
             dbname=kwargs['dbname'],
@@ -17,19 +19,33 @@ class PostgreSQL:
 
 class VKinder:
 
+    '''Класс для работы пользователя с Api вконтакте'''
+
     def __init__(self, longpoll, session):
         self.longpoll = longpoll
         self.session = session
 
 
-    def calculate_age(self, born):  
+    def calculate_age(self, born: str) -> int:  
+
+        '''Вычисляет возраст от даты рождения'''
 
         born = born.split(".")
         today = date.today()
-        return today.year - int(born[2]) - ((today.month, today.day) < (int(born[1]), int(born[0])))
+        age = today.year - int(born[2]) - (
+            (today.month, today.day) < (int(born[1]), int(born[0]))
+        )
+        return age
 
 
-    def checking_the_user_in_the_database(self, cur, sender_id, response): 
+    def checking_the_user_in_the_database(self, 
+        cur: object, sender_id: str, response: object) -> None: 
+
+        '''Проверят подключившегося пользователя по базе данных, 
+        
+        если не находит, то добавляет в базу данных пользователя
+        
+        '''
 
         if not base.get_ask_user_data(cur, sender_id):
             print('В базе отсутствует')
@@ -49,20 +65,28 @@ class VKinder:
                 print('Пользователь НЕ добавлен в базу')
 
 
-    def the_command_to_greet(self, cur, sender_id: str, object_vk_api: object):
+    def the_command_to_greet(self, 
+        cur: object, sender_id: str, object_vk_api: object) -> str:
 
         '''Функция отвечает на приветствие пользователя'''
 
         ask_user = base.get_ask_user_data(cur, sender_id)
-        bot.write_msg(object_vk_api, sender_id, f"Здравствуйте, {ask_user[1]}!\n"
-                                                f"Ваши параметры:\nГород: {ask_user[3]}\n"
-                                                f"Пол: {ask_user[4]}\nВозраст: {ask_user[2]}\n"
-                                                f"(Введите: старт\список) \U0001F60E")
+        bot.write_msg(
+            object_vk_api, sender_id, 
+            f"Здравствуйте, {ask_user[1]}!\n"
+            f"Ваши параметры:\nГород: {ask_user[3]}\n"
+            f"Пол: {ask_user[4]}\nВозраст: {ask_user[2]}\n"
+            f"(Введите: старт\список) \U0001F60E"
+        )
         return ask_user
 
 
-    def checking_the_favorites_list(self, cur, sender_id: str, object_vk_api: object):
-        db_source = base.get_favourites(cur, sender_id) # format [('Марианна Иванова', '18.1.2000', 'волгоград', 'https://vk.com/id629503475'), ('Аза Кузинкова', '2.12.2002', 'волгоград', 'https://vk.com/id695107067'), ('Galina Abramova', '3.3.1993', 'волгоград', 'https://vk.com/id610224605'), ('Луиза Аннакулова', '18.8.1995', 'волгоград', 'https://vk.com/id706108662')]
+    def checking_the_favorites_list(self, 
+        cur: object, sender_id: str, object_vk_api: object) -> bool:
+
+        '''Выводит в чат список избранных для указанного пользователя'''
+        
+        db_source = base.get_favourites(cur, sender_id) 
         if db_source:
             for item in db_source:
                 age = self.calculate_age(item[1])

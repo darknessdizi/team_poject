@@ -146,7 +146,7 @@ def main():
 
     # Создание объекта для осуществления request запросов
     response = RequestsVk(token_vk)
-    longpoll, session, vk = bot.connection()
+    longpoll, session, community = bot.connection()
     object_vkinder = VKinder(longpoll, session)
 
     # print(base.drop_table(cur)) #если нужно сбросить БД
@@ -172,7 +172,7 @@ def main():
                 if variables['fields']['start']:
                     # Активирована команда СТАРТ (поиск людей)
                     variables['fields'] = bot.event_handling_start(
-                        vk, message_text, variables
+                        community, message_text, variables
                     )
                     if variables['fields']['continue']: 
                         variables['fields']['continue'] = False
@@ -180,32 +180,32 @@ def main():
                     else:
                         # Запросы на фото для пользователя
                         variables, respone, photos = photo_requests_for_users(
-                            vk, response, cur, variables
+                            community, response, cur, variables
                         )
                 else:
                     # Логика обычного ответа
                     if message_text == 'привет':
                         object_vkinder.the_command_to_greet(
-                            cur, variables['id'], vk
+                            cur, variables['id'], community
                         )
                     
                     elif message_text in ['список', 'показать весь список']:
                         if object_vkinder.checking_the_favorites_list(
-                            cur, variables['id'], vk
+                            cur, variables['id'], community
                         ):
                             continue
 
                     elif message_text in ['следующий']:
                         keyboard = bot.create_buttons(4)
                         bot.write_msg(
-                            vk, variables['id'], 
+                            community, variables['id'], 
                             "Подождите. Сейчас загружаю фотографии. \U0001F609", 
                             keyboard
                         )
                         variables['fields']['number'] += 1
                         if len(respone) == variables['fields']['number']:
                             variables, respone, photos = updates_the_list_of_people(
-                                variables, respone, vk, response, cur
+                                variables, respone, community, response, cur
                             )
                             continue
                         else:                           
@@ -218,7 +218,7 @@ def main():
                                     variables['fields']['number'] += 1
                                     if len(respone) == variables['fields']['number']:
                                         variables, respone, photos = updates_the_list_of_people(
-                                            variables, respone, vk, response, cur
+                                            variables, respone, community, response, cur
                                         )
                                         break
                                 else:
@@ -228,7 +228,7 @@ def main():
                                     if photos is None:
                                         keyboard = bot.create_buttons(1)
                                         bot.write_msg(
-                                            vk, variables['id'], 
+                                            community, variables['id'], 
                                             "\n\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914",
                                             keyboard
                                         )
@@ -236,9 +236,9 @@ def main():
                                     
                                     text = respone[variables['fields']['number']][1]
                                     message = f"{text}\n https://vk.com/id{photos.get('owner_id')}"
-                                    bot.write_msg(vk, variables['id'], message) 
-                                    attachment = bot.add_photos(vk, photos.get('href'))
-                                    bot.send_photos(vk, variables['id'], attachment)
+                                    bot.write_msg(community, variables['id'], message) 
+                                    attachment = bot.add_photos(community, photos.get('href'))
+                                    bot.send_photos(community, variables['id'], attachment)
                                     break
 
                     elif message_text in ['добавить в избранное']:
@@ -257,7 +257,7 @@ def main():
                             else:
                                 keyboard = bot.create_buttons(4)
                                 bot.write_msg(
-                                    vk, variables['id'], 
+                                    community, variables['id'], 
                                     "Данный человек ранее был добавлен в список избранных \U0001F60D", 
                                     keyboard
                                 )
@@ -278,16 +278,16 @@ def main():
                             else:
                                 keyboard = bot.create_buttons(4)
                                 bot.write_msg(
-                                    vk, variables['id'], 
+                                    community, variables['id'], 
                                     "Данный человек ранее был добавлен в черный список \U0001F628", 
                                     keyboard
                                 )
 
                     elif message_text in ['отменить']:
-                        variables = cancel_button(vk, variables)
+                        variables = cancel_button(community, variables)
 
                     variables['fields'] = bot.processing_a_simple_message(
-                        vk, message_text, variables
+                        community, message_text, variables
                     )
 
 
