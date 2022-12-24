@@ -47,32 +47,33 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, offset, input_params):  # нужен параметр offset
+    def get_users(self, input_params):  # нужен параметр offset
         # формат input_params {'age': ['34', '57'], 'sex': 1, 'city': 'новосибирск'}
 
         '''Возвращает список пользователей с номером id и их именами'''
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()  # формат {'Content-Type': 'application/json', 'Authorization': 'OAuth vk1.a.Y45795E4...nsUC3NqXDQ'}
-        city = input_params.get('city')  # формат 'новосибирск'
+        city = input_params['filtr_dict'].get('city')  # формат 'новосибирск'
         city_id = self.get_city_id(city)
 
         if city_id is None:
             print("город не найден. уточните название города")
             return None
 
-        sex = input_params.get('sex')
-        age = input_params.get('age')
+        sex = input_params['filtr_dict'].get('sex')
+        age = input_params['filtr_dict'].get('age')
         age_from = int(age[0])
         age_to = int(age[1])
+        offset = input_params.get('offset')
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
                   'q': "",
-                  'count': 5,
+                  'count': 3,
                   'offset': offset,
                   'age_from': age_from,
                   'age_to': age_to,
                   'sex': sex,
-                  'city': city_id
+                  'city_id': city_id
                   }
 
         res = requests.get(url=url, params={**self.params, **params},

@@ -292,6 +292,8 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
         variables['start'] = True
         variables['continue'] = True
         variables['filtr_dict'] = {}
+        variables['number'] = 0
+        variables['offset'] = 0
     elif message_text in list_button:
         if variables['end_list'] == True:
             write_msg(object_vk_api, sender_id, "Выполнено \U00002705")
