@@ -87,8 +87,8 @@ class RequestsVk:
 
         res = requests.get(url=url, params={**self.params, **params},headers=headers)
         result = res.json().get('response').get('items')
-        with open('data.json', 'w', encoding='utf-8') as file:
-            json.dump(res.json(), file, ensure_ascii=False, indent=3)
+        # with open('data.json', 'w', encoding='utf-8') as file:
+        #     json.dump(res.json(), file, ensure_ascii=False, indent=3)
 
         list_users = []
         for item in result:
