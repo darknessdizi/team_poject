@@ -1,5 +1,4 @@
 import base
-import json
 import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
@@ -9,25 +8,26 @@ from VKinder import VKinder, PostgreSQL
 
 def photo_requests_for_users(vk, response, cur, variables):
 
-    respone = response.get_users(variables['fields']) # формат respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
-    print('1', respone)
+    respone = response.get_users(variables['fields']) 
     block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
     if respone is None:
         bot.write_msg(vk, variables['id'], "Ничего не найдено. Уточните параметры поиска")
         variables['fields']['filtr_dict'] = {}
+        photos = None
+        return variables, respone, photos
     elif len(respone) == 0:
         bot.write_msg(vk, variables['id'], "Простите, людей не найдено")
-        variables['fields']['filtr_dict'] = {}
+        variables['fields']['offset'] += 3
+        photos = None
+        return variables, respone, photos
     else:
-        # возвращает фото в словаре вида {'href': [], 'owner_id': ""}
         while True:
             if respone[variables['fields']['number']][0] in block_list:
                 variables['fields']['number'] += 1
-                if len(respone) < variables['fields']['number']:
+                if len(respone) == variables['fields']['number']:
                     bot.write_msg(vk, variables['id'], "\U000026D4 Обновляю список обнаруженных людей. \U0001F605")
                     variables['fields']['number'] = 0
-                    variables['fields']['offset'] += 1
-                    ################################################
+                    variables['fields']['offset'] += 3
                     respone = response.get_users(variables['fields'])
                     keyboard = bot.create_buttons(4)
                     bot.write_msg(vk, variables['id'], "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
@@ -41,9 +41,9 @@ def photo_requests_for_users(vk, response, cur, variables):
                     continue
                                     
                 message = f"{respone[variables['fields']['number']][1]}\n https://vk.com/id{photos.get('owner_id')}"
-                bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
+                bot.write_msg(vk, variables['id'], message) 
 
-                attachment = bot.add_photos(vk, photos.get('href')) # format ['photo-217703779_457239656', 'photo-217703779_457239657', 'photo-217703779_457239658']
+                attachment = bot.add_photos(vk, photos.get('href')) 
                 bot.send_photos(vk, variables['id'], attachment)
                 keyboard = bot.create_buttons(4)
                 bot.write_msg(vk, variables['id'], "Выполнено \U00002705", keyboard)
@@ -73,7 +73,7 @@ def cancel_button(vk, variables):
 
 def save_to_favorites(cur, photos, respone, variables):
 
-    id, name, bdate = respone[variables['fields']['number']] # format respone [[488749963, 'Юлия Волкова', '20.11.1999'], [576362782, 'Katy Perry'], [574435155, 'Кристина Белова'], [400790625, 'Яна Гончарова'], [417877132, 'Ирина Родомакина'], [433476343, 'Кира Чудина'], [397419005, 'Tanya Aronovich']]
+    id, name, bdate = respone[variables['fields']['number']] 
     if not base.checking_list_favorites(cur, id):
         sex = variables['fields']['filtr_dict'].get('sex')
         city = variables['fields']['filtr_dict'].get('city')
@@ -96,9 +96,7 @@ def main():
 
     # Создание объекта для осуществления request запросов
     response = RequestsVk(token_vk)
-
     longpoll, session, vk = bot.connection()
-
     object_vkinder = VKinder(longpoll, session)
 
     # print(base.drop_table(cur)) #если нужно сбросить БД
@@ -110,12 +108,10 @@ def main():
         if event.type == VkEventType.MESSAGE_NEW:
 
             # Выставляем параметры для пользователя написавшего сообщение
-            result = bot.user_support(event, list_of_users, list_of_dicts) # format ({'id': 33579332, 'fields': {...}}, [33579332], [{...}])           ---       {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}     ----         [33579332]      ---       [{'id': 33579332, 'fields': {...}}]  
-
-            variables = result[0] # формат {'id': 33579332, 'fields': {'link': None, 'count': 3, 'start': True, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
-            list_of_users = result[1] # формат [33579332, 45686545]
-            list_of_dicts = result[2] # формат [{'id': 33579332, 'fields': {...}}]
-
+            result = bot.user_support(event, list_of_users, list_of_dicts) 
+            variables = result[0] 
+            list_of_users = result[1] 
+            list_of_dicts = result[2] 
             object_vkinder.checking_the_user_in_the_database(cur, variables['id'], response)
 
             # Пользователь отправил сообщение или нажал кнопку для бота(бот вк)
@@ -124,7 +120,7 @@ def main():
                 if variables['fields']['start']:
                     # Активирована команда СТАРТ (поиск людей)
                     variables['fields'] = bot.event_handling_start(vk, message_text, variables)
-                    if variables['fields']['continue']: # формат {'id': 33579332, 'fields': {'text': None, 'count': 0, 'start': False, 'continue': False, 'filtr_dict': {...}, 'sql': {}, 'start_request': False, 'number': 0}}
+                    if variables['fields']['continue']: 
                         variables['fields']['continue'] = False
                         continue
                     else:
@@ -162,7 +158,7 @@ def main():
                                         continue
                                     
                                     message = f"{respone[variables['fields']['number']][1]}\n https://vk.com/id{photos.get('owner_id')}"
-                                    bot.write_msg(vk, variables['id'], message) # format 'Юлия Волкова\n https://vk.com/id'
+                                    bot.write_msg(vk, variables['id'], message) 
                                     attachment = bot.add_photos(vk, photos.get('href'))
                                     bot.send_photos(vk, variables['id'], attachment)
                                     break
@@ -177,7 +173,6 @@ def main():
                             else:
                                 keyboard = bot.create_buttons(4)
                                 bot.write_msg(vk, variables['id'], "Данный человек ранее был добавлен в список избранных \U0001F60D", keyboard)
-
 
                     elif message_text in ['добавить в черный список']:
                         id = save_to_favorites(cur, photos, respone, variables)

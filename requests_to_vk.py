@@ -15,7 +15,6 @@
 
 import json
 import requests
-from pprint import pprint
 
 import token_vk
 
@@ -38,7 +37,6 @@ class RequestsVk:
         params = {"user_ids": user_id,
                   "fields": "city, sex, bdate"}
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
-        pprint(res.json())
         user_info = {"city": "", "age": "", "user_name": "", "sex": ""}
         first_name = res.json().get('response')[0].get("first_name")
         last_name = res.json().get('response')[0].get("last_name")
@@ -61,18 +59,17 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
-    def get_users(self, input_params):  # нужен параметр offset
-        # формат input_params {'age': ['34', '57'], 'sex': 1, 'city': 'новосибирск'}
-
+    def get_users(self, input_params):  
+        
         '''Возвращает список пользователей с номером id и их именами'''
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
-        city = input_params['filtr_dict'].get('city')  # формат 'новосибирск'
+        city = input_params['filtr_dict'].get('city') 
         city_id = self.get_city_id(city)
 
         if city_id is None:
-            print("город не найден. уточните название города")
+            print("Город не найден. уточните название города")
             return None
 
         sex = input_params['filtr_dict'].get('sex')
@@ -99,12 +96,12 @@ class RequestsVk:
         for item in result:
             list_user = []
             if item.get('blacklisted') == 0 and item.get('is_closed') is False:
-                list_user.append(item.get('id'))  # формат [488749963]
-                user_name = f"{item.get('first_name')} {item.get('last_name')}"  # формат 'Юлия Волкова'
-                list_user.append(user_name)  # формат [488749963, 'Юлия Волкова']
+                list_user.append(item.get('id'))  
+                user_name = f"{item.get('first_name')} {item.get('last_name')}"  
+                list_user.append(user_name)  
                 bdate = item.get('bdate')
                 list_user.append(bdate)
-                list_users.append(list_user)  # формат [[488749963, 'Юлия Волкова'], ...]
+                list_users.append(list_user)  
 
         return list_users
 
@@ -134,6 +131,7 @@ class RequestsVk:
 
         photos_profile = []
         photos_wall = []
+
         if res_profile.json().get('response').get('items'):
             photos_profile = res_profile.json().get('response').get('items')
         if res_wall.json().get('response').get('items'):
@@ -142,8 +140,6 @@ class RequestsVk:
 
         if photos_info is None:
             return None
-
-        # берем фото из запроса по фото с профиля и по  фото со стены
 
         dict_likes = {'count': [], 'href': [], 'owner_id': ""}
         dict_likes_max = {'href': [], 'owner_id': ""}
@@ -157,8 +153,8 @@ class RequestsVk:
             dict_likes_max['href'].extend(dict_likes.get('href'))
         else:
             while len(dict_likes_max.get("href")) < 3:
-                max_like = max(dict_likes.get('count')) # format 2107
-                index = dict_likes.get('count').index(max_like) # format 30
+                max_like = max(dict_likes.get('count')) 
+                index = dict_likes.get('count').index(max_like) 
 
                 dict_likes.get('count').pop(index)
                 dict_likes_max['href'].append(dict_likes.get('href').pop(index))
@@ -203,7 +199,7 @@ class RequestsVk:
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
         if not res.json().get('response').get('items'):
             return None
-        city_id = res.json().get('response').get('items')[0].get('id')  # формат 99
+        city_id = res.json().get('response').get('items')[0].get('id')  
         return city_id
 
 
