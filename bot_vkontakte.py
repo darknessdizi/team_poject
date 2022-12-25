@@ -7,7 +7,13 @@ from token_vk import token_vk_community, token_vk
 from vk_api.longpoll import VkLongPoll
 
 
-def connection():
+def connection() -> tuple:
+
+    '''Создает объекты для работы с сообщениями в чат боте вконтакте,
+    
+    объект для работы пользователя с Api вконтакте и объект сообщества
+
+    '''
 
     # Авторизуемся как сообщество
     authorize = vk_api.VkApi(token=token_vk_community)
@@ -21,7 +27,8 @@ def connection():
     return longpoll, session, authorize
 
 
-def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tuple:
+def user_support(event: object, 
+    list_of_users: list, list_of_dicts: list) -> tuple:
 
     '''Отслеживает переменные каждого пользователя работающего с ботом'''
 
@@ -49,7 +56,8 @@ def user_support(event: object, list_of_users: list, list_of_dicts: list) -> tup
     return variables, list_of_users, list_of_dicts
 
 
-def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None) -> None:
+def write_msg(object_vk_api: object, 
+    sender_id: str, message: str, keyboard=None) -> None:
 
     '''Отправляет сообщения и добавляет кнопки к сообщениям'''
 
@@ -69,9 +77,14 @@ def write_msg(object_vk_api: object, sender_id: str, message: str, keyboard=None
     object_vk_api.method('messages.send', post)
 
 
-def send_photos(object_vk_api: object, sender_id: str, attachment: list) -> None:
+def send_photos(object_vk_api: object, 
+    sender_id: str, attachment: list) -> None:
 
-    '''Отправляет фотографии пользователю'''
+    '''Отправляет метод и его параметры в Api вконтакте 
+    
+    для отправки сообщений в чат
+    
+    '''
 
     for element in attachment:
         object_vk_api.method('messages.send', {
@@ -102,7 +115,7 @@ def add_photos(object_vk_api: object, list_photos: list) -> list:
 
 def create_buttons(number: int) -> VkKeyboard:
 
-    '''Создает цветные кнопки'''
+    '''Создает объект с параметрами кнопок'''
 
     keyboard = VkKeyboard()
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE,
@@ -125,10 +138,11 @@ def create_buttons(number: int) -> VkKeyboard:
         keyboard.add_button('Отменить', buttons_colors[0])
     return keyboard
 
-def add_data_to_the_dictionary(object_vk_api: object, index: int,
-                                sender_id: str, message_text: str, date: dict) -> dict:
 
-    '''Добавляет данные полученные от пользователя в словарь'''
+def add_data_to_the_dictionary(object_vk_api: object, 
+    index: int, sender_id: str, message_text: str, date: dict) -> tuple:
+
+    '''Добавляет ответы полученные от пользователя в словарь'''
 
     if index - 1 == 0:
         if '-' in message_text:
@@ -143,13 +157,21 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
             if not element.isdigit():
                 index = index - 1
                 keyboard = create_buttons(2)
-                write_msg(object_vk_api, sender_id, "Не правильно указан возраст!!! Повторите ввод.", keyboard)
+                write_msg(
+                    object_vk_api, sender_id, 
+                    "Не правильно указан возраст!!! Повторите ввод.", 
+                    keyboard
+                )
                 return date, index
     elif index - 1 == 1:
         if not message_text.strip() in ('1', '2'):
             index = index - 1
             keyboard = create_buttons(2)
-            write_msg(object_vk_api, sender_id, "Не правильно указан пол человека!!! Повторите ввод.", keyboard)
+            write_msg(
+                object_vk_api, sender_id, 
+                "Не правильно указан пол человека!!! Повторите ввод.", 
+                keyboard
+            )
             return date, index
         else:
             text = message_text.strip()
@@ -159,7 +181,8 @@ def add_data_to_the_dictionary(object_vk_api: object, index: int,
     return date, index
 
 
-def event_handling_start(object_vk_api: object, message_text: str, variables: dict) -> dict:
+def event_handling_start(
+    object_vk_api: object, message_text: str, variables: dict) -> dict:
 
     '''Обработка события СТАРТ. Бот задаёт вопросы и создает словарь'''
 
@@ -168,7 +191,11 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
     if message_text == 'сбросить':
         variables['count'] = 0
         keyboard = create_buttons(2)
-        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
+        write_msg(
+            object_vk_api, sender_id, 
+            bot_questions[variables['count']], 
+            keyboard
+        )
         variables['filtr_dict'] = {}
         variables['count'] = 1
         variables['continue'] = True
@@ -184,11 +211,16 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         return variables
 
     variables['filtr_dict'], variables['count'] = add_data_to_the_dictionary(
-        object_vk_api, variables['count'], sender_id, message_text, variables['filtr_dict']
+        object_vk_api, variables['count'], 
+        sender_id, message_text, variables['filtr_dict']
     )   
     if variables['count'] < len(bot_questions):
         keyboard = create_buttons(2)
-        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
+        write_msg(
+            object_vk_api, sender_id, 
+            bot_questions[variables['count']], 
+            keyboard
+        )
         variables['count'] += 1
         variables['continue'] = True
         return variables
@@ -196,11 +228,16 @@ def event_handling_start(object_vk_api: object, message_text: str, variables: di
         variables['start'] = False
         variables['count'] = 0
         keyboard = create_buttons(4)
-        write_msg(object_vk_api, sender_id, "Подождите. Сейчас загружаю фотографии. \U0001F609", keyboard)
+        write_msg(
+            object_vk_api, sender_id, 
+            "Подождите. Сейчас загружаю фотографии. \U0001F609", 
+            keyboard
+        )
     return variables 
 
 
-def processing_a_simple_message(object_vk_api: object, message_text: str, variables: dict) -> dict:
+def processing_a_simple_message(
+    object_vk_api: object, message_text: str, variables: dict) -> dict:
 
     '''Обработка событий простых сообщений и нажатия кнопок'''
 
@@ -208,7 +245,11 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     variables = variables['fields']
     if message_text == "старт":
         keyboard = create_buttons(2)
-        write_msg(object_vk_api, sender_id, bot_questions[variables['count']], keyboard)
+        write_msg(
+            object_vk_api, sender_id, 
+            bot_questions[variables['count']], 
+            keyboard
+        )
         variables['count'] += 1
         variables['start'] = True
         variables['continue'] = True
@@ -225,11 +266,19 @@ def processing_a_simple_message(object_vk_api: object, message_text: str, variab
     elif message_text in ['привет', 'отменить']:
         pass
     else:
-        write_msg(object_vk_api, sender_id, "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A")
+        write_msg(
+            object_vk_api, sender_id, 
+            "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A"
+        )
     return variables
 
 
-list_button = ['добавить в избранное', 'следующий', 'показать весь список', 'добавить в черный список']
+list_button = [
+    'добавить в избранное', 
+    'следующий', 
+    'показать весь список', 
+    'добавить в черный список'
+]
 
 bot_questions = [
     "Укажите возраст людей по образцу\nПример: 25 или 20-30 \U0001F609",

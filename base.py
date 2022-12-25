@@ -1,6 +1,6 @@
 def get_ask_user_data(cur, user_id):
 
-    '''достаем из базы данные пользователя'''
+    '''Достаем из базы данные пользователя'''
 
     cur.execute('''
         SELECT * FROM users
@@ -69,6 +69,8 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
 
 def checking_the_human_user_connection(cur, user_id, favorites_id):
 
+    '''Проверяет есть ли связь человека с подключенным пользоватеелем'''
+
     cur.execute('''
         SELECT * FROM Users_Favorites
         WHERE users_id = %s AND favorites_id = %s;
@@ -89,7 +91,7 @@ def add_block_list(cur, user_id, favorites_id):
 
 def del_block_list(cur, user_id, favorites_id):
 
-    '''Добавляем к пользователю статус в черном списке'''
+    '''Убираем у пользователя статус в черном списке'''
 
     cur.execute('''
         UPDATE Users_Favorites 
@@ -110,7 +112,10 @@ def get_favourites(cur, users_id, status=False):
     return cur.fetchall()
 
             
-def drop_table(cur):
+def drop_table(cur) -> str:
+
+    '''Удаление всех таблиц'''
+
     cur.execute('''
         DROP TABLE Users_Favorites;
         DROP TABLE Photos;
@@ -120,7 +125,10 @@ def drop_table(cur):
     return 'Таблицы очищены'
 
 
-def create_db(cur):
+def create_db(cur) -> str:
+
+    '''Создание таблиц для базы данных'''
+
     cur.execute('''
         CREATE TABLE IF NOT EXISTS Users (
         id INTEGER UNIQUE PRIMARY KEY,
