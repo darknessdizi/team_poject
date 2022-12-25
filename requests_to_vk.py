@@ -6,6 +6,8 @@
 #   {"city": "", "age": "", "user_name": "", "sex": ""}
 #
 # - получение списка пользователей путем запроса к API ВКонтакте методом users.search.
+#   Метод осуществляет поиск пользователей в количестве 1000. Номер, с которого идет начало поиска
+#   пользователей обозначен переменной offset. При достижении конца списка переменная увеличивается на 1000.
 #   Поиск осуществляется по входным параметрам вида {'age': ['34', '57'], 'sex': 1, 'city': 'новосибирск'},
 #   полученных от пользователя ВК. Метод возвращает список  вида [user_id, user name, bdate]
 #
@@ -16,21 +18,20 @@
 import json
 import requests
 
+import token_vk
+
 
 class RequestsVk:
+    """Класс для осуществления requests запросов в Api вконтакте"""
 
-    '''Класс для осуществления requests запросов в Api вконтакте'''
-    
     def __init__(self, access_token, version='5.131'):
         self.access_token = access_token
         self.version = version
         self.params = {'access_token': self.access_token, 'v': self.version}
 
-
     def get_headers(self):
-        return {'Content-Type': 'application/json', 
+        return {'Content-Type': 'application/json',
                 'Authorization': f'OAuth {self.access_token}'}
-
 
     def get_user(self, user_id: str) -> dict:
 
@@ -63,14 +64,13 @@ class RequestsVk:
         user_info['age'] = age
         return user_info
 
+    def get_users(self, input_params: dict) -> list:
 
-    def get_users(self, input_params: dict) -> list:  
-        
-        '''Возвращает список пользователей с номером id и их именами'''
+        """Возвращает список пользователей с номером id, их именами и датой рождения"""
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
-        city = input_params['filtr_dict'].get('city') 
+        city = input_params['filtr_dict'].get('city')
         city_id = self.get_city_id(city)
 
         if city_id is None:
@@ -84,7 +84,7 @@ class RequestsVk:
         offset = input_params.get('offset')
         params = {'fields': "first_name, bdate, deactivated, is_closed, blacklisted, city, has_photo",
                   'q': '',
-                  'count': 3,
+                  'count': 1000,
                   'offset': offset,
                   'age_from': age_from,
                   'age_to': age_to,
@@ -92,32 +92,29 @@ class RequestsVk:
                   'city_id': city_id
                   }
 
-        res = requests.get(url=url, params={**self.params, **params},headers=headers)
+        res = requests.get(url=url, params={**self.params, **params}, headers=headers)
         result = res.json().get('response').get('items')
-        # with open('data.json', 'w', encoding='utf-8') as file:
-        #     json.dump(res.json(), file, ensure_ascii=False, indent=3)
 
         list_users = []
         for item in result:
             list_user = []
-            if item.get('blacklisted') == 0 and item.get('is_closed') is False:
-                list_user.append(item.get('id'))  
-                user_name = f"{item.get('first_name')} {item.get('last_name')}"  
-                list_user.append(user_name)  
-                bdate = item.get('bdate')
-                list_user.append(bdate)
-                list_users.append(list_user)  
+            if item.get('city'):
+                if item.get('blacklisted') == 0 and item.get('is_closed') is False \
+                        and item.get('city').get('id') == city_id and item.get('has_photo') == 1:
+                    list_user.append(item.get('id'))
+                    user_name = f"{item.get('first_name')} {item.get('last_name')}"
+                    list_user.append(user_name)
+                    bdate = item.get('bdate')
+                    list_user.append(bdate)
+                    list_users.append(list_user)
 
         return list_users
 
-
     def get_users_photo(self, user_id: str) -> dict:
 
-        ''' Возвращает до 3-х фото пользователя с макс. количеством лайков.
+        """ Возвращает до 3-х фото пользователя с макс. количеством лайков.
 
-        Фото берутся со страницы пользователя и стены
-        
-        '''
+        Фото берутся со страницы пользователя и стены"""
 
         url = "https://api.vk.com/method/photos.get"
 
@@ -163,47 +160,19 @@ class RequestsVk:
             dict_likes_max['href'].extend(dict_likes.get('href'))
         else:
             while len(dict_likes_max.get("href")) < 3:
-                max_like = max(dict_likes.get('count')) 
-                index = dict_likes.get('count').index(max_like) 
+                max_like = max(dict_likes.get('count'))
+                index = dict_likes.get('count').index(max_like)
 
                 dict_likes.get('count').pop(index)
                 dict_likes_max['href'].append(dict_likes.get('href').pop(index))
-        
+
         dict_likes_max['owner_id'] = dict_likes['owner_id']
 
         return dict_likes_max
 
-
-    def get_photo_tag(self, user_id: str) -> list:
-
-        ''' Метод возвращает список ссылок на фотографии, где отмечен пользователь'''
-
-        url = "https://api.vk.com/method/newsfeed.get"
-        headers = self.get_headers()
-        start_time = 1
-
-        params = {
-            'filters': 'photo_tag',
-            'source_ids': user_id,
-            'start_time': start_time
-        }
-        params = {**self.params, **params}
-        res = requests.get(url=url, params=params, headers=headers)
-
-        if not res.json().get('response').get('items'):
-            return None
-
-        list_photos = []
-        for item in res.json().get('response').get('items')[0].get('photo_tags').get('items'):
-            link = item.get('sizes')[-1].get('url')
-            list_photos.append(link)
-
-        return list_photos
-
-
     def get_city_id(self, city: str) -> int:
 
-        '''Поиск id города'''
+        """Поиск id города"""
 
         url = "https://api.vk.com/method/database.getCities"
         headers = self.get_headers()
@@ -214,7 +183,7 @@ class RequestsVk:
         res = requests.get(url=url, params={**self.params, **params}, headers=headers)
         if not res.json().get('response').get('items'):
             return None
-        city_id = res.json().get('response').get('items')[0].get('id')  
+        city_id = res.json().get('response').get('items')[0].get('id')
         return city_id
 
 
