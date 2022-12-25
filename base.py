@@ -1,6 +1,22 @@
 # В модуле реализованы функции по прямому обращению к БД для создания/удаления таблиц,
 # создания/записи в список избранных/черный список  пользоватей, проверки статуса пользователя
 
+import psycopg2
+
+
+class PostgreSQL:
+
+    """Класс для подключения к базе данных"""
+
+    def __init__(self, **kwargs):
+        self.connect = psycopg2.connect(
+            dbname=kwargs['dbname'],
+            user=kwargs['user'],
+            password=kwargs['password']
+        )
+        self.connect.autocommit = True
+        
+
 def get_ask_user_data(cur, user_id):
     """Достаем из базы данные пользователя"""
 
@@ -15,8 +31,8 @@ def checking_list_favorites(cur, contact_id):
     """Проверяем список избранных на наличие человека в базе"""
 
     cur.execute('''
-        SELECT f.id FROM Favorites as f 
-	    WHERE f.id = %s;
+        SELECT f.id FROM Favorites as f
+        WHERE f.id = %s;
         ''', (contact_id,))
     return cur.fetchone()
 
