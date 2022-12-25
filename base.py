@@ -17,7 +17,7 @@ class PostgreSQL:
         self.connect.autocommit = True
         
 
-def get_ask_user_data(cur, user_id):
+def get_ask_user_data(cur: object, user_id: str) -> tuple:
 
     '''Достаем из базы данные пользователя.'''
 
@@ -27,7 +27,7 @@ def get_ask_user_data(cur, user_id):
         ''', (user_id,))
     return cur.fetchone()
 
-def checking_list_favorites(cur, contact_id):
+def checking_list_favorites(cur: object, contact_id: str) -> tuple:
 
     '''Проверяем список избранных на наличие человека в базе.'''
 
@@ -37,7 +37,9 @@ def checking_list_favorites(cur, contact_id):
         ''', (contact_id,))
     return cur.fetchone()
 
-def add_favourites(cur, contact_id, contact_name, bdate, sex, city, link):
+def add_favourites(
+    cur: object, contact_id: str, contact_name: str, 
+    bdate: str, sex: str, city: str, link: str) -> int:
 
     '''Добавляем пользователя в список избранных.'''
 
@@ -47,7 +49,8 @@ def add_favourites(cur, contact_id, contact_name, bdate, sex, city, link):
         ''', (contact_id, contact_name, bdate, sex, city, link))
     return cur.fetchone()[0]
 
-def add_a_human_user_relationship(cur, users_id, favorites_id, status):
+def add_a_human_user_relationship(
+    cur: object, users_id: str, favorites_id: str, status: bool) -> None:
 
     '''Создаем связь пользователя и избранного человека.'''
 
@@ -56,7 +59,7 @@ def add_a_human_user_relationship(cur, users_id, favorites_id, status):
                 VALUES (%s, %s, %s);
         ''', (users_id, favorites_id, status))
 
-def add_photos(cur, list_photos, favorites_id):
+def add_photos(cur: object, list_photos: list, favorites_id: str) -> None:
 
     '''Прикрепляем ссылки на фото в список избранных.'''
 
@@ -66,7 +69,9 @@ def add_photos(cur, list_photos, favorites_id):
                 VALUES (%s, %s);''',
                     (link, favorites_id))
 
-def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
+def add_ask_user(
+    cur: object, user_id: str, user_name: str, 
+    user_age: str, user_city: str, user_sex: str) -> tuple:
 
     '''Добавлем данные пользователя в базу данных 
     
@@ -84,7 +89,8 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
         ''', (user_id,))
     return cur.fetchone()
 
-def checking_the_human_user_connection(cur, user_id, favorites_id):
+def checking_the_human_user_connection(
+    cur: object, user_id: str, favorites_id: str) -> tuple:
 
     '''Проверяет есть ли связь человека с подключенным пользоватеелем.'''
 
@@ -94,7 +100,7 @@ def checking_the_human_user_connection(cur, user_id, favorites_id):
         ''', (user_id, favorites_id))
     return cur.fetchall()
 
-def add_block_list(cur, user_id, favorites_id):
+def add_block_list(cur: object, user_id: str, favorites_id: str) -> tuple:
 
     '''Добавляем к пользователю статус в черном списке.'''
 
@@ -104,7 +110,7 @@ def add_block_list(cur, user_id, favorites_id):
         WHERE users_id = %s AND favorites_id = %s;
         ''', (user_id, favorites_id))
 
-def del_block_list(cur, user_id, favorites_id):
+def del_block_list(cur: object, user_id: str, favorites_id: str) -> None:
 
     '''Убираем у пользователя статус в черном списке.'''
 
@@ -114,7 +120,7 @@ def del_block_list(cur, user_id, favorites_id):
         WHERE users_id = %s AND favorites_id = %s;
         ''', (user_id, favorites_id))
 
-def get_favourites(cur, users_id, status=False):
+def get_favourites(cur: object, users_id: str, status=False) -> tuple:
 
     '''Выгружаем из базы данных список избранных.'''
 
@@ -125,7 +131,7 @@ def get_favourites(cur, users_id, status=False):
         ''', (users_id, status))
     return cur.fetchall()
 
-def drop_table(cur) -> str:
+def drop_table(cur: object) -> str:
 
     '''Удаление всех таблиц.'''
 
@@ -137,7 +143,7 @@ def drop_table(cur) -> str:
     ''')
     return 'Таблицы очищены'
 
-def create_db(cur) -> str:
+def create_db(cur: object) -> str:
 
     '''Создание таблиц для базы данных.'''
 
