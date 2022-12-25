@@ -1,6 +1,7 @@
 import vk_api
 import requests
 import os
+import base
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from random import randint
 from token_vk import token_vk_community, token_vk
@@ -271,6 +272,122 @@ def processing_a_simple_message(
             "Не поняла вашего ответа... \U0001F937\U0001F92F\U0001F914\U0001F60A"
         )
     return variables
+
+
+def updates_the_list_of_people(
+    variables: dict, respone: dict, object_vk_api: object, 
+    response: object, cur: object) -> tuple:
+    
+    '''Обновляет список людей для вывода в чат бота'''
+
+    variables['fields']['number'] = 0
+    variables['fields']['offset'] += 1000
+    variables, respone, photos = base.photo_requests_for_users(
+        object_vk_api, response, cur, variables
+    )
+    return variables, respone, photos
+
+
+def cancel_button(object_vk_api: object, variables: dict) -> dict:
+
+    '''Обновление переменных при нажатии кнопки "Отменить"
+    
+    '''
+
+    variables['count'] = 0
+    variables['start'] = False
+    variables['continue'] = False
+    variables['filtr_dict'] = {}
+    variables['fields']['number'] = 0
+    variables['fields']['offset'] = 0
+    write_msg(
+        object_vk_api, variables['id'], 
+        "Желаете найти кого-то другого? \U0001F914 Наберите команду старт. \U0001F920"
+    )
+    return variables
+
+
+def save_to_favorites(cur: object, photos: list, 
+    respone: list, variables: dict) -> str:
+
+    '''Добавляет человека в список избранных'''
+
+    id, name, bdate = respone[variables['fields']['number']] 
+    if not base.checking_list_favorites(cur, id):
+        sex = variables['fields']['filtr_dict'].get('sex')
+        city = variables['fields']['filtr_dict'].get('city')
+        link = f"https://vk.com/id{photos.get('owner_id')}"
+        favorites_id = base.add_favourites(
+            cur, id, name, bdate, sex, city, link
+        )
+        base.add_photos(cur, photos['href'], favorites_id)
+    return id
+
+
+def photo_requests_for_users(
+    object_vk_api: object, response: object, 
+    cur: object, variables: dict) -> tuple:
+
+    '''Осуществляет запросы и поиск пользователей в Api вконтакте. 
+
+    Проверяет их на наличие в базе данных. Выводит фотографии 
+    
+    в чат-бота
+    
+    '''
+
+    respone = response.get_users(variables['fields']) 
+    block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
+    if respone is None:
+        write_msg(
+            object_vk_api, variables['id'], 
+            "Ничего не найдено. Уточните параметры поиска"
+        )
+        variables['fields']['filtr_dict'] = {}
+        photos = None
+        return variables, respone, photos
+    elif len(respone) == 0:
+        write_msg(object_vk_api, variables['id'], "Простите, людей не найдено")
+        variables['fields']['offset'] += 1000 # Здесь надо подумать над реализацией, что делать дальше коду (такое бывает если поставить значение count = 3)
+        variables['fields']['number'] = 0
+        photos = None
+        return variables, respone, photos
+    else:
+        while True:
+            if respone[variables['fields']['number']][0] in block_list:
+                variables['fields']['number'] += 1
+                if len(respone) == variables['fields']['number']:
+                    variables['fields']['number'] = 0
+                    variables['fields']['offset'] += 1000
+                    respone = response.get_users(variables['fields'])
+                    continue
+            else:
+                photos = response.get_users_photo(
+                    str(respone[variables['fields']['number']][0])
+                )
+                                    
+                if photos is None:
+                    keyboard = create_buttons(1)
+                    write_msg(
+                        object_vk_api, variables['id'], 
+                        "\U000026D4 \U0001F6AB У пользователя нет фотографий.\nНажмите следующий. \U0001F914", 
+                        keyboard
+                    )
+                    continue
+
+                text = respone[variables['fields']['number']][1]         
+                message = f"{text}\n https://vk.com/id{photos.get('owner_id')}"
+                write_msg(object_vk_api, variables['id'], message) 
+
+                attachment = add_photos(object_vk_api, photos.get('href')) 
+                send_photos(object_vk_api, variables['id'], attachment)
+                keyboard = create_buttons(4)
+                write_msg(
+                    object_vk_api, variables['id'], 
+                    "Выполнено \U00002705", 
+                    keyboard
+                )
+                return variables, respone, photos
 
 
 list_button = [
