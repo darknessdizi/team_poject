@@ -282,7 +282,7 @@ def updates_the_list_of_people(
 
     variables['fields']['number'] = 0
     variables['fields']['offset'] += 1000
-    variables, respone, photos = base.photo_requests_for_users(
+    variables, respone, photos = photo_requests_for_users(
         object_vk_api, response, cur, variables
     )
     return variables, respone, photos
@@ -346,15 +346,15 @@ def photo_requests_for_users(
         variables['fields']['filtr_dict'] = {}
         photos = None
         return variables, respone, photos
-    elif len(respone) == 0:
-        write_msg(object_vk_api, variables['id'], "Простите, людей не найдено")
-        variables['fields']['offset'] += 1000 # Здесь надо подумать над реализацией, что делать дальше коду (такое бывает если поставить значение count = 3)
-        variables['fields']['number'] = 0
-        photos = None
-        return variables, respone, photos
     else:
         while True:
-            if respone[variables['fields']['number']][0] in block_list:
+            if len(respone) == 0:
+                # write_msg(object_vk_api, variables['id'], "Простите, людей не найдено")
+                variables['fields']['offset'] += 1000 
+                variables['fields']['number'] = 0
+                respone = response.get_users(variables['fields'])
+                continue
+            elif respone[variables['fields']['number']][0] in block_list:
                 variables['fields']['number'] += 1
                 if len(respone) == variables['fields']['number']:
                     variables['fields']['number'] = 0
