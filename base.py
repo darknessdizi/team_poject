@@ -1,3 +1,19 @@
+import psycopg2
+
+
+class PostgreSQL:
+
+    '''Класс для подключения к базе данных'''
+
+    def __init__(self, **kwargs):
+        self.connect = psycopg2.connect(
+            dbname=kwargs['dbname'],
+            user=kwargs['user'],
+            password=kwargs['password']
+        )
+        self.connect.autocommit = True
+        
+        
 def get_ask_user_data(cur, user_id):
 
     '''Достаем из базы данные пользователя'''

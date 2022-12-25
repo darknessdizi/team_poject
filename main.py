@@ -3,7 +3,6 @@ import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
-from VKinder import VKinder, PostgreSQL
 
 
 def main():
@@ -13,13 +12,13 @@ def main():
     list_of_dicts = []
 
     # Создание объекта для подключения к базе данных
-    sql_cursor = PostgreSQL(**sql_authorization)
+    sql_cursor = base.PostgreSQL(**sql_authorization)
     cur = sql_cursor.connect.cursor()
 
     # Создание объекта для осуществления request запросов
     response = RequestsVk(token_vk)
     longpoll, session, community = bot.connection()
-    object_vkinder = VKinder(longpoll, session)
+    object_vkinder = bot.BotVkontakte(longpoll, session)
 
     # print(base.drop_table(cur)) #если нужно сбросить БД
     print(base.create_db(cur))
