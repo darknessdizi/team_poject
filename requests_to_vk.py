@@ -15,14 +15,12 @@
 #   user id. Фото выбираются у пользователя в максим. разрешении со страницы и стены, в количестве
 #   до трех штук с максимальным количеством лайков.
 
-import json
 import requests
-
-import token_vk
 
 
 class RequestsVk:
-    """Класс для осуществления requests запросов в Api вконтакте"""
+
+    '''Класс для осуществления requests запросов в Api вконтакте.'''
 
     def __init__(self, access_token, version='5.131'):
         self.access_token = access_token
@@ -35,13 +33,15 @@ class RequestsVk:
 
     def get_user(self, user_id: str) -> dict:
 
-        '''Возвращает информацию о пользователе'''
+        '''Возвращает информацию о пользователе.'''
 
         url = "https://api.vk.com/method/users.get"
         headers = self.get_headers()
         params = {"user_ids": user_id,
                   "fields": "city, sex, bdate"}
-        res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        res = requests.get(
+            url=url, params={**self.params, **params}, headers=headers
+        )
         user_info = {"city": "", "age": "", "user_name": "", "sex": ""}
         first_name = res.json().get('response')[0].get("first_name")
         last_name = res.json().get('response')[0].get("last_name")
@@ -66,7 +66,11 @@ class RequestsVk:
 
     def get_users(self, input_params: dict) -> list:
 
-        """Возвращает список пользователей с номером id, их именами и датой рождения"""
+        '''Возвращает список пользователей с номером id, 
+        
+        их именами и датой рождения.
+        
+        '''
 
         url = "https://api.vk.com/method/users.search"
         headers = self.get_headers()
@@ -92,15 +96,21 @@ class RequestsVk:
                   'city_id': city_id
                   }
 
-        res = requests.get(url=url, params={**self.params, **params}, headers=headers)
+        res = requests.get(
+            url=url, params={**self.params, **params}, headers=headers
+        )
         result = res.json().get('response').get('items')
 
         list_users = []
         for item in result:
             list_user = []
             if item.get('city'):
-                if item.get('blacklisted') == 0 and item.get('is_closed') is False \
-                        and item.get('city').get('id') == city_id and item.get('has_photo') == 1:
+                if (
+                    item.get('blacklisted') == 0 and 
+                    item.get('is_closed') is False and 
+                    item.get('city').get('id') == city_id and 
+                    item.get('has_photo') == 1
+                ):
                     list_user.append(item.get('id'))
                     user_name = f"{item.get('first_name')} {item.get('last_name')}"
                     list_user.append(user_name)
@@ -112,9 +122,11 @@ class RequestsVk:
 
     def get_users_photo(self, user_id: str) -> dict:
 
-        """ Возвращает до 3-х фото пользователя с макс. количеством лайков.
+        ''' Возвращает до 3-х фото пользователя с макс. количеством лайков.
 
-        Фото берутся со страницы пользователя и стены"""
+        Фото берутся со страницы пользователя и стены.
+        
+        '''
 
         url = "https://api.vk.com/method/photos.get"
 
@@ -133,8 +145,12 @@ class RequestsVk:
             'has_photo': 1
         }
         headers = self.get_headers()
-        res_profile = requests.get(url=url, params={**self.params, **params_profile}, headers=headers)
-        res_wall = requests.get(url=url, params={**self.params, **params_wall}, headers=headers)
+        res_profile = requests.get(
+            url=url, params={**self.params, **params_profile}, headers=headers
+        )
+        res_wall = requests.get(
+            url=url, params={**self.params, **params_wall}, headers=headers
+        )
 
         photos_profile = []
         photos_wall = []
@@ -172,7 +188,7 @@ class RequestsVk:
 
     def get_city_id(self, city: str) -> int:
 
-        """Поиск id города"""
+        '''Поиск id города.'''
 
         url = "https://api.vk.com/method/database.getCities"
         headers = self.get_headers()

@@ -1,5 +1,5 @@
-# В модуле реализованы  функции по созданию объекта сообщества и объекта пользователя
-# для взаимодействия с сообщениями от пользователей
+# В модуле реализованы  функции по созданию объекта сообщества 
+# и объекта пользователя для взаимодействия с сообщениями от пользователей
 
 import vk_api
 import requests
@@ -13,7 +13,8 @@ from datetime import date
 
 
 class BotVkontakte:
-    """Класс для работы пользователя с Api вконтакте"""
+
+    '''Класс для работы пользователя с Api вконтакте.'''
 
     def __init__(self, longpoll, session):
         self.longpoll = longpoll
@@ -21,7 +22,7 @@ class BotVkontakte:
 
     def calculate_age(self, born: str) -> int:
 
-        """Вычисляет возраст от даты рождения"""
+        '''Вычисляет возраст от даты рождения.'''
 
         born = born.split(".")
         today = date.today()
@@ -30,14 +31,14 @@ class BotVkontakte:
         )
         return age
 
-    def checking_the_user_in_the_database(self,
-                                          cur: object, sender_id: str, response: object) -> None:
+    def checking_the_user_in_the_database(
+        self, cur: object, sender_id: str, response: object) -> None:
 
-        """Проверят подключившегося пользователя по базе данных,
+        '''Проверят подключившегося пользователя по базе данных,
 
-        если не находит, то добавляет в базу данных пользователя
+        если не находит, то добавляет в базу данных пользователя.
 
-        """
+        '''
 
         if not base.get_ask_user_data(cur, sender_id):
             print('В базе отсутствует')
@@ -56,10 +57,10 @@ class BotVkontakte:
             else:
                 print('Пользователь НЕ добавлен в базу')
 
-    def the_command_to_greet(self,
-                             cur: object, sender_id: str, object_vk_api: object) -> str:
+    def the_command_to_greet(
+        self, cur: object, sender_id: str, object_vk_api: object) -> str:
 
-        """Функция отвечает на приветствие пользователя"""
+        '''Функция отвечает на приветствие пользователя.'''
 
         ask_user = base.get_ask_user_data(cur, sender_id)
         write_msg(
@@ -71,10 +72,10 @@ class BotVkontakte:
         )
         return ask_user
 
-    def checking_the_favorites_list(self,
-                                    cur: object, sender_id: str, object_vk_api: object) -> bool:
+    def checking_the_favorites_list(
+        self, cur: object, sender_id: str, object_vk_api: object) -> bool:
 
-        """Выводит в чат список избранных для указанного пользователя"""
+        '''Выводит в чат список избранных для указанного пользователя.'''
 
         db_source = base.get_favourites(cur, sender_id)
         if db_source:
@@ -90,9 +91,12 @@ class BotVkontakte:
 
 
 def connection() -> tuple:
-    """Создает объекты для работы с сообщениями в чат боте вконтакте,
 
-    объект для работы пользователя с Api вконтакте и объект сообщества"""
+    '''Создает объекты для работы с сообщениями в чат боте вконтакте,
+
+    объект для работы пользователя с Api вконтакте и объект сообщества.
+    
+    '''
 
     # Авторизуемся как сообщество
     authorize = vk_api.VkApi(token=token_vk_community)
@@ -105,10 +109,10 @@ def connection() -> tuple:
 
     return longpoll, session, authorize
 
+def user_support(
+    event: object, list_of_users: list, list_of_dicts: list) -> tuple:
 
-def user_support(event: object,
-                 list_of_users: list, list_of_dicts: list) -> tuple:
-    """Отслеживает переменные каждого пользователя работающего с ботом"""
+    '''Отслеживает переменные каждого пользователя работающего с ботом.'''
 
     if event.user_id in list_of_users:
         for user in list_of_dicts:
@@ -131,10 +135,10 @@ def user_support(event: object,
 
     return variables, list_of_users, list_of_dicts
 
-
 def write_msg(object_vk_api: object,
               sender_id: str, message: str, keyboard=None) -> None:
-    """Отправляет сообщения и добавляет кнопки к сообщениям"""
+
+    '''Отправляет сообщения и добавляет кнопки к сообщениям.'''
 
     post = {
         'user_id': sender_id,
@@ -151,12 +155,14 @@ def write_msg(object_vk_api: object,
 
     object_vk_api.method('messages.send', post)
 
-
 def send_photos(object_vk_api: object,
                 sender_id: str, attachment: list) -> None:
-    """Отправляет метод и его параметры в Api вконтакте
 
-    для отправки сообщений в чат"""
+    '''Отправляет метод и его параметры в Api вконтакте
+
+    для отправки сообщений в чат.
+
+    '''
 
     for element in attachment:
         object_vk_api.method('messages.send', {
@@ -165,9 +171,13 @@ def send_photos(object_vk_api: object,
             'random_id': randint(0, 10 ** 7)
         })
 
-
 def add_photos(object_vk_api: object, list_photos: list) -> list:
-    """Загружает и добавляет фотографии в список на обновление сообщения"""
+
+    '''Загружает и добавляет фотографии в список на обновление 
+    
+    сообщения.
+    
+    '''
 
     attachment_list = []
     uploader = vk_api.VkUpload(object_vk_api)
@@ -183,9 +193,9 @@ def add_photos(object_vk_api: object, list_photos: list) -> list:
         os.remove(f'{name}')
     return attachment_list
 
-
 def create_buttons(number: int) -> VkKeyboard:
-    """Создает объект с параметрами кнопок"""
+
+    '''Создает объект с параметрами кнопок.'''
 
     keyboard = VkKeyboard()
     buttons_colors = [VkKeyboardColor.PRIMARY, VkKeyboardColor.POSITIVE,
@@ -208,10 +218,10 @@ def create_buttons(number: int) -> VkKeyboard:
         keyboard.add_button('Отменить', buttons_colors[0])
     return keyboard
 
-
 def add_data_to_the_dictionary(object_vk_api: object,
-                               index: int, sender_id: str, message_text: str, date: dict) -> tuple:
-    """Добавляет ответы полученные от пользователя в словарь"""
+    index: int, sender_id: str, message_text: str, date: dict) -> tuple:
+
+    '''Добавляет ответы полученные от пользователя в словарь.'''
 
     if index - 1 == 0:
         if '-' in message_text:
@@ -247,10 +257,10 @@ def add_data_to_the_dictionary(object_vk_api: object,
     date.setdefault(categories_of_questions[index - 1], text)
     return date, index
 
-
 def event_handling_start(
-        object_vk_api: object, message_text: str, variables: dict) -> dict:
-    """Обработка события СТАРТ. Бот задаёт вопросы и создает словарь"""
+    object_vk_api: object, message_text: str, variables: dict) -> dict:
+
+    '''Обработка события СТАРТ. Бот задаёт вопросы и создает словарь.'''
 
     sender_id = variables['id']
     variables = variables['fields']
@@ -301,10 +311,10 @@ def event_handling_start(
         )
     return variables
 
-
 def processing_a_simple_message(
-        object_vk_api: object, message_text: str, variables: dict) -> dict:
-    """Обработка событий простых сообщений и нажатия кнопок"""
+    object_vk_api: object, message_text: str, variables: dict) -> dict:
+
+    '''Обработка событий простых сообщений и нажатия кнопок.'''
 
     sender_id = variables['id']
     variables = variables['fields']
@@ -327,7 +337,11 @@ def processing_a_simple_message(
             variables['end_list'] = False
         else:
             keyboard = create_buttons(4)
-            write_msg(object_vk_api, sender_id, "Выполнено \U00002705", keyboard)
+            write_msg(
+                object_vk_api, sender_id, 
+                "Выполнено \U00002705", 
+                keyboard
+            )
     elif message_text in ['привет', 'отменить']:
         pass
     else:
@@ -337,11 +351,11 @@ def processing_a_simple_message(
         )
     return variables
 
-
 def updates_the_list_of_people(
-        variables: dict, respone: dict, object_vk_api: object,
-        response: object, cur: object) -> tuple:
-    """Обновляет список людей для вывода в чат бота"""
+    variables: dict, respone: dict, object_vk_api: object,
+    response: object, cur: object) -> tuple:
+
+    '''Обновляет список людей для вывода в чат бота.'''
 
     variables['fields']['number'] = 0
     variables['fields']['offset'] += 1000
@@ -350,9 +364,11 @@ def updates_the_list_of_people(
     )
     return variables, respone, photos
 
-
 def cancel_button(object_vk_api: object, variables: dict) -> dict:
-    """Обновление переменных при нажатии кнопки "Отменить"""
+
+    '''Обновление переменных при нажатии кнопки "Отменить".
+    
+    '''
 
     variables['count'] = 0
     variables['start'] = False
@@ -367,9 +383,10 @@ def cancel_button(object_vk_api: object, variables: dict) -> dict:
     return variables
 
 
-def save_to_favorites(cur: object, photos: list,
-                      respone: list, variables: dict) -> str:
-    """Добавляет человека в список избранных"""
+def save_to_favorites(
+    cur: object, photos: list, respone: list, variables: dict) -> str:
+
+    '''Добавляет человека в список избранных.'''
 
     id, name, bdate = respone[variables['fields']['number']]
     if not base.checking_list_favorites(cur, id):
@@ -382,18 +399,21 @@ def save_to_favorites(cur: object, photos: list,
         base.add_photos(cur, photos['href'], favorites_id)
     return id
 
+def photo_requests_for_users(object_vk_api: object, 
+    response: object, cur: object, variables: dict) -> tuple:
 
-def photo_requests_for_users(
-        object_vk_api: object, response: object,
-        cur: object, variables: dict) -> tuple:
-    """Осуществляет запросы и поиск пользователей в Api вконтакте.
+    '''Осуществляет запросы и поиск пользователей в Api вконтакте.
 
     Проверяет их на наличие в базе данных. Выводит фотографии
 
-    в чат-бота"""
+    в чат-бота.
+    
+    '''
 
     respone = response.get_users(variables['fields'])
-    block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
+    block_list = [i[4] for i in base.get_favourites(
+        cur, variables['id'], True)
+    ]
     if respone is None:
         write_msg(
             object_vk_api, variables['id'],
@@ -405,7 +425,6 @@ def photo_requests_for_users(
     else:
         while True:
             if len(respone) == 0:
-                # write_msg(object_vk_api, variables['id'], "Простите, людей не найдено")
                 variables['fields']['offset'] += 1000
                 variables['fields']['number'] = 0
                 respone = response.get_users(variables['fields'])

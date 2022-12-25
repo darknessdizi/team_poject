@@ -6,7 +6,7 @@ import psycopg2
 
 class PostgreSQL:
 
-    """Класс для подключения к базе данных"""
+    '''Класс для подключения к базе данных.'''
 
     def __init__(self, **kwargs):
         self.connect = psycopg2.connect(
@@ -18,7 +18,8 @@ class PostgreSQL:
         
 
 def get_ask_user_data(cur, user_id):
-    """Достаем из базы данные пользователя"""
+
+    '''Достаем из базы данные пользователя.'''
 
     cur.execute('''
         SELECT * FROM users
@@ -26,9 +27,9 @@ def get_ask_user_data(cur, user_id):
         ''', (user_id,))
     return cur.fetchone()
 
-
 def checking_list_favorites(cur, contact_id):
-    """Проверяем список избранных на наличие человека в базе"""
+
+    '''Проверяем список избранных на наличие человека в базе.'''
 
     cur.execute('''
         SELECT f.id FROM Favorites as f
@@ -36,9 +37,9 @@ def checking_list_favorites(cur, contact_id):
         ''', (contact_id,))
     return cur.fetchone()
 
-
 def add_favourites(cur, contact_id, contact_name, bdate, sex, city, link):
-    """Добавляем пользователя в список избранных"""
+
+    '''Добавляем пользователя в список избранных.'''
 
     cur.execute('''
         INSERT INTO Favorites (id, name, bdate, sex, city, link)
@@ -46,18 +47,18 @@ def add_favourites(cur, contact_id, contact_name, bdate, sex, city, link):
         ''', (contact_id, contact_name, bdate, sex, city, link))
     return cur.fetchone()[0]
 
-
 def add_a_human_user_relationship(cur, users_id, favorites_id, status):
-    """Создаем связь пользователя и избранного человека"""
+
+    '''Создаем связь пользователя и избранного человека.'''
 
     cur.execute('''
         INSERT INTO Users_Favorites (users_id, favorites_id, block_status)
                 VALUES (%s, %s, %s);
         ''', (users_id, favorites_id, status))
 
-
 def add_photos(cur, list_photos, favorites_id):
-    """Прикрепляем ссылки на фото в список избранных"""
+
+    '''Прикрепляем ссылки на фото в список избранных.'''
 
     for link in list_photos:
         cur.execute('''
@@ -65,9 +66,13 @@ def add_photos(cur, list_photos, favorites_id):
                 VALUES (%s, %s);''',
                     (link, favorites_id))
 
-
 def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
-    """добавлем данные пользователя в базу данных (запрашивающий пользователь)"""
+
+    '''Добавлем данные пользователя в базу данных 
+    
+    (запрашивающий пользователь).
+    
+    '''
 
     cur.execute("""
         INSERT INTO users(id, user_name, user_age, user_city, user_sex)
@@ -79,9 +84,9 @@ def add_ask_user(cur, user_id, user_name, user_age, user_city, user_sex):
         ''', (user_id,))
     return cur.fetchone()
 
-
 def checking_the_human_user_connection(cur, user_id, favorites_id):
-    """Проверяет есть ли связь человека с подключенным пользоватеелем"""
+
+    '''Проверяет есть ли связь человека с подключенным пользоватеелем.'''
 
     cur.execute('''
         SELECT * FROM Users_Favorites
@@ -89,9 +94,9 @@ def checking_the_human_user_connection(cur, user_id, favorites_id):
         ''', (user_id, favorites_id))
     return cur.fetchall()
 
-
 def add_block_list(cur, user_id, favorites_id):
-    """Добавляем к пользователю статус в черном списке"""
+
+    '''Добавляем к пользователю статус в черном списке.'''
 
     cur.execute('''
         UPDATE Users_Favorites 
@@ -99,9 +104,9 @@ def add_block_list(cur, user_id, favorites_id):
         WHERE users_id = %s AND favorites_id = %s;
         ''', (user_id, favorites_id))
 
-
 def del_block_list(cur, user_id, favorites_id):
-    """Убираем у пользователя статус в черном списке"""
+
+    '''Убираем у пользователя статус в черном списке.'''
 
     cur.execute('''
         UPDATE Users_Favorites 
@@ -109,9 +114,9 @@ def del_block_list(cur, user_id, favorites_id):
         WHERE users_id = %s AND favorites_id = %s;
         ''', (user_id, favorites_id))
 
-
 def get_favourites(cur, users_id, status=False):
-    """Выгружаем из базы данных список избранных"""
+
+    '''Выгружаем из базы данных список избранных.'''
 
     cur.execute('''
         SELECT f.name, f.bdate, f.city, f.link, f.id FROM users_favorites AS uf
@@ -120,9 +125,9 @@ def get_favourites(cur, users_id, status=False):
         ''', (users_id, status))
     return cur.fetchall()
 
-
 def drop_table(cur) -> str:
-    """Удаление всех таблиц"""
+
+    '''Удаление всех таблиц.'''
 
     cur.execute('''
         DROP TABLE Users_Favorites;
@@ -132,9 +137,9 @@ def drop_table(cur) -> str:
     ''')
     return 'Таблицы очищены'
 
-
 def create_db(cur) -> str:
-    """Создание таблиц для базы данных"""
+
+    '''Создание таблиц для базы данных.'''
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS Users (

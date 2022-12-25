@@ -5,7 +5,6 @@ from vk_api.longpoll import VkEventType
 from requests_to_vk import RequestsVk
 
 
-
 def main():
     # Основной цикл
     list_of_users = []
