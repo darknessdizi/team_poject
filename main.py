@@ -1,4 +1,4 @@
-import base
+from base import *
 import bot_vkontakte as bot
 from token_vk import token_vk, sql_authorization
 from vk_api.longpoll import VkEventType
@@ -19,7 +19,7 @@ def photo_requests_for_users(
     '''
 
     respone = response.get_users(variables['fields']) 
-    block_list = [i[4] for i in base.get_favourites(cur, variables['id'], True)]
+    block_list = [i[4] for i in get_favourites(cur, variables['id'], True)]
     if respone is None:
         bot.write_msg(
             object_vk_api, variables['id'], 
@@ -123,14 +123,14 @@ def save_to_favorites(cur: object, photos: list,
     respone: list, variables: dict) -> str:
 
     id, name, bdate = respone[variables['fields']['number']] 
-    if not base.checking_list_favorites(cur, id):
+    if not checking_list_favorites(cur, id):
         sex = variables['fields']['filtr_dict'].get('sex')
         city = variables['fields']['filtr_dict'].get('city')
         link = f"https://vk.com/id{photos.get('owner_id')}"
-        favorites_id = base.add_favourites(
+        favorites_id = add_favourites(
             cur, id, name, bdate, sex, city, link
         )
-        base.add_photos(cur, photos['href'], favorites_id)
+        add_photos(cur, photos['href'], favorites_id)
     return id
 
 
@@ -150,7 +150,7 @@ def main():
     object_vkinder = VKinder(longpoll, session)
 
     # print(base.drop_table(cur)) #если нужно сбросить БД
-    print(base.create_db(cur))
+    print(create_db(cur))
 
     for event in longpoll.listen():
 
@@ -209,7 +209,7 @@ def main():
                             )
                             continue
                         else:                           
-                            block_list = [i[4] for i in base.get_favourites(
+                            block_list = [i[4] for i in get_favourites(
                                 cur, variables['id'], True
                                 )
                             ]
@@ -243,17 +243,17 @@ def main():
 
                     elif message_text in ['добавить в избранное']:
                         id = save_to_favorites(cur, photos, respone, variables)  
-                        if not base.checking_the_human_user_connection(
+                        if not checking_the_human_user_connection(
                             cur, variables['id'], id
                         ):
-                            base.add_a_human_user_relationship(
+                            add_a_human_user_relationship(
                                 cur, variables['id'], id, False
                             ) 
                         else:
-                            if base.checking_the_human_user_connection(
+                            if checking_the_human_user_connection(
                                 cur, variables['id'], id
                             )[0][-1] == True: 
-                                base.del_block_list(cur, variables['id'], id)
+                                del_block_list(cur, variables['id'], id)
                             else:
                                 keyboard = bot.create_buttons(4)
                                 bot.write_msg(
@@ -264,17 +264,17 @@ def main():
 
                     elif message_text in ['добавить в черный список']:
                         id = save_to_favorites(cur, photos, respone, variables)
-                        if not base.checking_the_human_user_connection(
+                        if not checking_the_human_user_connection(
                             cur, variables['id'], id
                         ):
-                            base.add_a_human_user_relationship(
+                            add_a_human_user_relationship(
                                 cur, variables['id'], id, True
                             ) 
                         else:
-                            if base.checking_the_human_user_connection(
+                            if checking_the_human_user_connection(
                                 cur, variables['id'], id
                             )[0][-1] == False:
-                                base.add_block_list(cur, variables['id'], id)
+                                add_block_list(cur, variables['id'], id)
                             else:
                                 keyboard = bot.create_buttons(4)
                                 bot.write_msg(
